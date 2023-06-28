@@ -19,8 +19,8 @@
  * along with lsp-plugins-para-equalizer. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PRIVATE_PLUGINS_PARA_EQUALIZER_H_
-#define PRIVATE_PLUGINS_PARA_EQUALIZER_H_
+#ifndef PRIVATE_PLUGINS_FILTER_H_
+#define PRIVATE_PLUGINS_FILTER_H_
 
 #include <lsp-plug.in/plug-fw/plug.h>
 #include <lsp-plug.in/plug-fw/core/IDBuffer.h>
@@ -38,7 +38,7 @@ namespace lsp
         /**
          * Parametric equalizer plugin
          */
-        class para_equalizer: public plug::Module
+        class filter: public plug::Module
         {
             public:
                 enum eq_mode_t
@@ -125,7 +125,7 @@ namespace lsp
                 uint32_t           *vIndexes;               // FFT indexes
                 float               fGainIn;                // Input gain
                 float               fZoom;                  // Zoom gain
-                bool                bListen;                // Listen mode (only for MS para_equalizer)
+                bool                bListen;                // Listen mode (only for MS filter)
                 bool                bSmoothMode;            // Smooth mode for the equalizer
                 fft_position_t      nFftPosition;           // FFT position
                 core::IDBuffer     *pIDisplay;              // Inline display buffer
@@ -159,8 +159,8 @@ namespace lsp
                 bool                filter_inspect_can_be_enabled(eq_channel_t *c, eq_filter_t *f);
 
             public:
-                explicit para_equalizer(const meta::plugin_t *metadata, size_t filters, size_t mode);
-                virtual ~para_equalizer() override;
+                explicit filter(const meta::plugin_t *metadata, size_t filters, size_t mode);
+                virtual ~filter() override;
 
             public:
                 virtual void        init(plug::IWrapper *wrapper, plug::IPort **ports) override;
@@ -181,4 +181,4 @@ namespace lsp
 } // namespace lsp
 
 
-#endif /* PRIVATE_PLUGINS_PARA_EQUALIZER_H_ */
+#endif /* PRIVATE_PLUGINS_FILTER_H_ */

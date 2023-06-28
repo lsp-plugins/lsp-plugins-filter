@@ -19,8 +19,8 @@
  * along with lsp-plugins-para-equalizer. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PRIVATE_META_PARA_EQUALIZER_H_
-#define PRIVATE_META_PARA_EQUALIZER_H_
+#ifndef PRIVATE_META_FILTER_H_
+#define PRIVATE_META_FILTER_H_
 
 #include <lsp-plug.in/plug-fw/meta/types.h>
 #include <lsp-plug.in/plug-fw/const.h>
@@ -33,7 +33,7 @@ namespace lsp
     // Parametric equalizer metadata
     namespace meta
     {
-        struct para_equalizer_metadata
+        struct filter_metadata
         {
             static constexpr float          FREQ_MIN            = SPEC_FREQ_MIN;
             static constexpr float          FREQ_MAX            = SPEC_FREQ_MAX;
@@ -115,16 +115,16 @@ namespace lsp
             };
         };
 
-        extern const meta::plugin_t para_equalizer_x16_mono;
-        extern const meta::plugin_t para_equalizer_x16_stereo;
-        extern const meta::plugin_t para_equalizer_x16_lr;
-        extern const meta::plugin_t para_equalizer_x16_ms;
-        extern const meta::plugin_t para_equalizer_x32_mono;
-        extern const meta::plugin_t para_equalizer_x32_stereo;
-        extern const meta::plugin_t para_equalizer_x32_lr;
-        extern const meta::plugin_t para_equalizer_x32_ms;
+        extern const meta::plugin_t filter_x16_mono;
+        extern const meta::plugin_t filter_x16_stereo;
+        extern const meta::plugin_t filter_x16_lr;
+        extern const meta::plugin_t filter_x16_ms;
+        extern const meta::plugin_t filter_x32_mono;
+        extern const meta::plugin_t filter_x32_stereo;
+        extern const meta::plugin_t filter_x32_lr;
+        extern const meta::plugin_t filter_x32_ms;
 
     } // namespace meta
 } // namespace lsp
 
-#endif /* PRIVATE_META_PARA_EQUALIZER_H_ */
+#endif /* PRIVATE_META_FILTER_H_ */

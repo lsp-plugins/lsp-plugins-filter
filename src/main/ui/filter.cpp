@@ -37,19 +37,19 @@ namespace lsp
         // Plugin UI factory
         static const meta::plugin_t *plugin_uis[] =
         {
-            &meta::para_equalizer_x16_mono,
-            &meta::para_equalizer_x16_stereo,
-            &meta::para_equalizer_x16_lr,
-            &meta::para_equalizer_x16_ms,
-            &meta::para_equalizer_x32_mono,
-            &meta::para_equalizer_x32_stereo,
-            &meta::para_equalizer_x32_lr,
-            &meta::para_equalizer_x32_ms
+            &meta::filter_x16_mono,
+            &meta::filter_x16_stereo,
+            &meta::filter_x16_lr,
+            &meta::filter_x16_ms,
+            &meta::filter_x32_mono,
+            &meta::filter_x32_stereo,
+            &meta::filter_x32_lr,
+            &meta::filter_x32_ms
         };
 
         static ui::Module *ui_factory(const meta::plugin_t *meta)
         {
-            return new para_equalizer_ui(meta);
+            return new filter_ui(meta);
         }
 
         static ui::Factory factory(ui_factory, plugin_uis, 8);
@@ -89,14 +89,14 @@ namespace lsp
         };
 
         template <class T>
-        T *para_equalizer_ui::find_filter_widget(const char *fmt, const char *base, size_t id)
+        T *filter_ui::find_filter_widget(const char *fmt, const char *base, size_t id)
         {
             char widget_id[64];
             ::snprintf(widget_id, sizeof(widget_id)/sizeof(char), fmt, base, int(id));
             return pWrapper->controller()->widgets()->get<T>(widget_id);
         }
 
-        para_equalizer_ui::para_equalizer_ui(const meta::plugin_t *meta): ui::Module(meta)
+        filter_ui::filter_ui(const meta::plugin_t *meta): ui::Module(meta)
         {
             pRewPath        = NULL;
             pInspect        = NULL;
@@ -118,35 +118,35 @@ namespace lsp
             wFilterMute     = NULL;
             wFilterSwitch   = NULL;
 
-            if ((!strcmp(meta->uid, meta::para_equalizer_x16_lr.uid)) ||
-                (!strcmp(meta->uid, meta::para_equalizer_x32_lr.uid)))
+            if ((!strcmp(meta->uid, meta::filter_x16_lr.uid)) ||
+                (!strcmp(meta->uid, meta::filter_x32_lr.uid)))
             {
                 fmtStrings      = fmt_strings_lr;
                 nSplitChannels  = 2;
             }
-            else if ((!strcmp(meta->uid, meta::para_equalizer_x16_ms.uid)) ||
-                 (!strcmp(meta->uid, meta::para_equalizer_x32_ms.uid)))
+            else if ((!strcmp(meta->uid, meta::filter_x16_ms.uid)) ||
+                 (!strcmp(meta->uid, meta::filter_x32_ms.uid)))
             {
                 fmtStrings      = fmt_strings_ms;
                 nSplitChannels  = 2;
             }
 
             nFilters        = 16;
-            if ((!strcmp(meta->uid, meta::para_equalizer_x32_lr.uid)) ||
-                (!strcmp(meta->uid, meta::para_equalizer_x32_mono.uid)) ||
-                (!strcmp(meta->uid, meta::para_equalizer_x32_ms.uid)) ||
-                (!strcmp(meta->uid, meta::para_equalizer_x32_stereo.uid)))
+            if ((!strcmp(meta->uid, meta::filter_x32_lr.uid)) ||
+                (!strcmp(meta->uid, meta::filter_x32_mono.uid)) ||
+                (!strcmp(meta->uid, meta::filter_x32_ms.uid)) ||
+                (!strcmp(meta->uid, meta::filter_x32_stereo.uid)))
                 nFilters       = 32;
         }
 
-        para_equalizer_ui::~para_equalizer_ui()
+        filter_ui::~filter_ui()
         {
             pRewImport = NULL;      // Will be automatically destroyed from list of widgets
         }
 
-        status_t para_equalizer_ui::slot_start_import_rew_file(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_start_import_rew_file(tk::Widget *sender, void *ptr, void *data)
         {
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
 
             ctl::Window *wnd    = _this->wrapper()->controller();
             tk::FileDialog *dlg = _this->pRewImport;
@@ -203,9 +203,9 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_call_import_rew_file(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_call_import_rew_file(tk::Widget *sender, void *ptr, void *data)
         {
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             LSPString path;
             status_t res = _this->pRewImport->selected_file()->format(&path);
             if (res == STATUS_OK)
@@ -213,9 +213,9 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_fetch_rew_path(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_fetch_rew_path(tk::Widget *sender, void *ptr, void *data)
         {
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if ((_this == NULL) || (_this->pRewPath == NULL))
                 return STATUS_BAD_STATE;
 
@@ -223,9 +223,9 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_commit_rew_path(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_commit_rew_path(tk::Widget *sender, void *ptr, void *data)
         {
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if ((_this == NULL) || (_this->pRewPath == NULL))
                 return STATUS_BAD_STATE;
 
@@ -240,9 +240,9 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_graph_dbl_click(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_graph_dbl_click(tk::Widget *sender, void *ptr, void *data)
         {
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if (_this == NULL)
                 return STATUS_BAD_STATE;
 
@@ -252,9 +252,9 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_filter_menu_submit(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_filter_menu_submit(tk::Widget *sender, void *ptr, void *data)
         {
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if ((_this == NULL) || (_this->pCurrDot == NULL))
                 return STATUS_BAD_STATE;
             tk::MenuItem *mi = tk::widget_cast<tk::MenuItem>(sender);
@@ -266,10 +266,10 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_filter_edit_timer(ws::timestamp_t sched, ws::timestamp_t time, void *arg)
+        status_t filter_ui::slot_filter_edit_timer(ws::timestamp_t sched, ws::timestamp_t time, void *arg)
         {
             // Fetch paramters
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(arg);
+            filter_ui *_this = static_cast<filter_ui *>(arg);
             if (_this == NULL)
                 return STATUS_BAD_STATE;
 
@@ -279,7 +279,7 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_filter_dot_click(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_filter_dot_click(tk::Widget *sender, void *ptr, void *data)
         {
             // Process the right mouse click
             ws::event_t *ev = static_cast<ws::event_t *>(data);
@@ -287,7 +287,7 @@ namespace lsp
                 return STATUS_OK;
 
             // Fetch paramters
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if (_this == NULL)
                 return STATUS_BAD_STATE;
 
@@ -297,10 +297,10 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_filter_inspect_submit(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_filter_inspect_submit(tk::Widget *sender, void *ptr, void *data)
         {
             // Fetch parameters
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if (_this == NULL)
                 return STATUS_BAD_STATE;
 
@@ -310,10 +310,10 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_filter_begin_edit(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_filter_begin_edit(tk::Widget *sender, void *ptr, void *data)
         {
             // Fetch parameters
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if (_this == NULL)
                 return STATUS_BAD_STATE;
 
@@ -322,10 +322,10 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_filter_change(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_filter_change(tk::Widget *sender, void *ptr, void *data)
         {
             // Fetch parameters
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if (_this == NULL)
                 return STATUS_BAD_STATE;
 
@@ -334,10 +334,10 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_filter_end_edit(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_filter_end_edit(tk::Widget *sender, void *ptr, void *data)
         {
             // Fetch parameters
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if (_this == NULL)
                 return STATUS_BAD_STATE;
 
@@ -346,7 +346,7 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_filter_mouse_in(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_filter_mouse_in(tk::Widget *sender, void *ptr, void *data)
         {
             // Fetch parameters
             filter_t *f = static_cast<filter_t *>(ptr);
@@ -358,7 +358,7 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_filter_mouse_out(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_filter_mouse_out(tk::Widget *sender, void *ptr, void *data)
         {
             // Fetch parameters
             filter_t *f = static_cast<filter_t *>(ptr);
@@ -370,10 +370,10 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_main_grid_realized(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_main_grid_realized(tk::Widget *sender, void *ptr, void *data)
         {
             // Fetch parameters
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if (_this == NULL)
                 return STATUS_BAD_STATE;
 
@@ -382,10 +382,10 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_main_grid_mouse_in(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_main_grid_mouse_in(tk::Widget *sender, void *ptr, void *data)
         {
             // Fetch parameters
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if (_this == NULL)
                 return STATUS_BAD_STATE;
             ws::event_t *ev = static_cast<ws::event_t *>(data);
@@ -397,10 +397,10 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_main_grid_mouse_out(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_main_grid_mouse_out(tk::Widget *sender, void *ptr, void *data)
         {
             // Fetch parameters
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if (_this == NULL)
                 return STATUS_BAD_STATE;
             ws::event_t *ev = static_cast<ws::event_t *>(data);
@@ -412,10 +412,10 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::slot_main_grid_mouse_move(tk::Widget *sender, void *ptr, void *data)
+        status_t filter_ui::slot_main_grid_mouse_move(tk::Widget *sender, void *ptr, void *data)
         {
             // Fetch parameters
-            para_equalizer_ui *_this = static_cast<para_equalizer_ui *>(ptr);
+            filter_ui *_this = static_cast<filter_ui *>(ptr);
             if (_this == NULL)
                 return STATUS_BAD_STATE;
             ws::event_t *ev = static_cast<ws::event_t *>(data);
@@ -427,7 +427,7 @@ namespace lsp
             return STATUS_OK;
         }
 
-        para_equalizer_ui::filter_t *para_equalizer_ui::find_filter_by_widget(tk::Widget *widget)
+        filter_ui::filter_t *filter_ui::find_filter_by_widget(tk::Widget *widget)
         {
             for (size_t i=0, n=vFilters.size(); i<n; ++i)
             {
@@ -448,7 +448,7 @@ namespace lsp
             return NULL;
         }
 
-        para_equalizer_ui::filter_t *para_equalizer_ui::find_filter_by_rect(tk::Widget *grid, ssize_t x, ssize_t y)
+        filter_ui::filter_t *filter_ui::find_filter_by_rect(tk::Widget *grid, ssize_t x, ssize_t y)
         {
             for (size_t i=0, n=vFilters.size(); i<n; ++i)
             {
@@ -461,7 +461,7 @@ namespace lsp
             return NULL;
         }
 
-        void para_equalizer_ui::on_begin_filter_edit(tk::Widget *w)
+        void filter_ui::on_begin_filter_edit(tk::Widget *w)
         {
             if (pInspect == NULL)
                 return;
@@ -484,14 +484,14 @@ namespace lsp
             sEditTimer.launch(1, 0, 200);
         }
 
-        void para_equalizer_ui::on_filter_edit_timer()
+        void filter_ui::on_filter_edit_timer()
         {
             if ((pInspect == NULL) || (pCurrDot == NULL))
                 return;
             select_inspected_filter(pCurrDot, true);
         }
 
-        void para_equalizer_ui::on_filter_change(tk::Widget *w)
+        void filter_ui::on_filter_change(tk::Widget *w)
         {
             if ((pCurrDot == NULL) || (pInspect == NULL))
                 return;
@@ -505,7 +505,7 @@ namespace lsp
             select_inspected_filter(pCurrDot, true);
         }
 
-        void para_equalizer_ui::on_end_filter_edit(tk::Widget *w)
+        void filter_ui::on_end_filter_edit(tk::Widget *w)
         {
             // Cancel the timer
             sEditTimer.cancel();
@@ -519,14 +519,14 @@ namespace lsp
             select_inspected_filter(NULL, true);
         }
 
-        void para_equalizer_ui::on_filter_mouse_in(filter_t *f)
+        void filter_ui::on_filter_mouse_in(filter_t *f)
         {
             pCurrNote   = (f->pMute->value() >= 0.5) ? NULL : f;
             f->bMouseIn = true;
             update_filter_note_text();
         }
 
-        void para_equalizer_ui::on_filter_mouse_out()
+        void filter_ui::on_filter_mouse_out()
         {
             pCurrNote = NULL;
             for (size_t i=0, n=vFilters.size(); i<n; ++i)
@@ -538,7 +538,7 @@ namespace lsp
             update_filter_note_text();
         }
 
-        void para_equalizer_ui::update_filter_note_text()
+        void filter_ui::update_filter_note_text()
         {
             // Determine which frequency/note to show: of inspected filter or of selected filter
             ssize_t inspect = (pInspect != NULL) ? ssize_t(pInspect->value()) : -1;
@@ -567,8 +567,8 @@ namespace lsp
             }
 
             // Check that filter is enabled
-            ssize_t type = (f->pType != NULL) ? ssize_t(f->pType->value()) : meta::para_equalizer_metadata::EQF_OFF;
-            if (type == meta::para_equalizer_metadata::EQF_OFF)
+            ssize_t type = (f->pType != NULL) ? ssize_t(f->pType->value()) : meta::filter_metadata::EQF_OFF;
+            if (type == meta::filter_metadata::EQF_OFF)
             {
                 f->wNote->visibility()->set(false);
                 return;
@@ -643,7 +643,7 @@ namespace lsp
             }
         }
 
-        void para_equalizer_ui::bind_filter_edit(tk::Widget *w)
+        void filter_ui::bind_filter_edit(tk::Widget *w)
         {
             if (w == NULL)
                 return;
@@ -653,7 +653,7 @@ namespace lsp
             w->slots()->bind(tk::SLOT_END_EDIT, slot_filter_end_edit, this);
         }
 
-        tk::Widget *para_equalizer_ui::find_filter_grid(filter_t *f)
+        tk::Widget *filter_ui::find_filter_grid(filter_t *f)
         {
             tk::Widget *list[] =
             {
@@ -683,7 +683,7 @@ namespace lsp
             return NULL;
         }
 
-        void para_equalizer_ui::add_filters()
+        void filter_ui::add_filters()
         {
             for (const char **fmt = fmtStrings; *fmt != NULL; ++fmt)
             {
@@ -785,7 +785,7 @@ namespace lsp
             }
         }
 
-        tk::Menu *para_equalizer_ui::create_menu()
+        tk::Menu *filter_ui::create_menu()
         {
             tk::Menu *menu = new tk::Menu(pWrapper->display());
             if (menu == NULL)
@@ -800,7 +800,7 @@ namespace lsp
             return menu;
         }
 
-        tk::MenuItem *para_equalizer_ui::create_menu_item(tk::Menu *parent, const char *text)
+        tk::MenuItem *filter_ui::create_menu_item(tk::Menu *parent, const char *text)
         {
             tk::MenuItem *mi = new tk::MenuItem(pWrapper->display());
             if (mi == NULL)
@@ -822,7 +822,7 @@ namespace lsp
             return mi;
         }
 
-        tk::Menu *para_equalizer_ui::create_submenu(tk::Menu *parent, const char *lc_key,
+        tk::Menu *filter_ui::create_submenu(tk::Menu *parent, const char *lc_key,
             lltl::parray<tk::MenuItem> *items, const meta::port_t *port)
         {
             if (port->items == NULL)
@@ -860,7 +860,7 @@ namespace lsp
             return menu;
         }
 
-        void para_equalizer_ui::create_filter_menu()
+        void filter_ui::create_filter_menu()
         {
             filter_t *dot = vFilters.get(0);
             if (dot == NULL)
@@ -901,7 +901,7 @@ namespace lsp
             wFilterMenu    = root;
         }
 
-        status_t para_equalizer_ui::post_init()
+        status_t filter_ui::post_init()
         {
             status_t res = ui::Module::post_init();
             if (res != STATUS_OK)
@@ -972,7 +972,7 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t para_equalizer_ui::pre_destroy()
+        status_t filter_ui::pre_destroy()
         {
             // Cancel the edit timer
             sEditTimer.cancel();
@@ -987,7 +987,7 @@ namespace lsp
             return ui::Module::pre_destroy();
         }
 
-        void para_equalizer_ui::set_menu_items_checked(lltl::parray<tk::MenuItem> *list, ui::IPort *port)
+        void filter_ui::set_menu_items_checked(lltl::parray<tk::MenuItem> *list, ui::IPort *port)
         {
             if (port == NULL)
                 return;
@@ -1004,7 +1004,7 @@ namespace lsp
             }
         }
 
-        void para_equalizer_ui::on_filter_menu_item_selected(lltl::parray<tk::MenuItem> *list, ui::IPort *port, tk::MenuItem *mi)
+        void filter_ui::on_filter_menu_item_selected(lltl::parray<tk::MenuItem> *list, ui::IPort *port, tk::MenuItem *mi)
         {
             if (port == NULL)
                 return;
@@ -1021,7 +1021,7 @@ namespace lsp
             port->notify_all();
         }
 
-        void para_equalizer_ui::transfer_port_value(ui::IPort *dst, ui::IPort *src)
+        void filter_ui::transfer_port_value(ui::IPort *dst, ui::IPort *src)
         {
             if ((src == NULL) || (dst == NULL))
                 return;
@@ -1033,7 +1033,7 @@ namespace lsp
             src->notify_all();
         }
 
-        void para_equalizer_ui::on_filter_menu_item_submit(tk::MenuItem *mi)
+        void filter_ui::on_filter_menu_item_submit(tk::MenuItem *mi)
         {
             if (pCurrDot == NULL)
                 return;
@@ -1083,7 +1083,7 @@ namespace lsp
                 toggle_inspected_filter(pCurrDot, true);
         }
 
-        para_equalizer_ui::filter_t *para_equalizer_ui::find_switchable_filter(filter_t *filter)
+        filter_ui::filter_t *filter_ui::find_switchable_filter(filter_t *filter)
         {
             // We can switch filter between Left/Right and Left/Side only when it is possible
             if (nSplitChannels < 2)
@@ -1104,14 +1104,14 @@ namespace lsp
                 if ((alt_f == NULL) || (alt_f->pType == NULL))
                     continue;
 
-                if (ssize_t(alt_f->pType->value()) == meta::para_equalizer_metadata::EQF_OFF)
+                if (ssize_t(alt_f->pType->value()) == meta::filter_metadata::EQF_OFF)
                     return alt_f;
             }
 
             return NULL;
         }
 
-        void para_equalizer_ui::on_filter_dot_right_click(tk::Widget *dot, ssize_t x, ssize_t y)
+        void filter_ui::on_filter_dot_right_click(tk::Widget *dot, ssize_t x, ssize_t y)
         {
             // Is filter dot menu present?
             if (wFilterMenu == NULL)
@@ -1178,7 +1178,7 @@ namespace lsp
             wFilterMenu->show(pCurrDot->wDot->graph(), &r);
         }
 
-        void para_equalizer_ui::on_graph_dbl_click(ssize_t x, ssize_t y)
+        void filter_ui::on_graph_dbl_click(ssize_t x, ssize_t y)
         {
             if ((wGraph == NULL) || (nXAxisIndex < 0) || (nYAxisIndex < 0))
                 return;
@@ -1205,7 +1205,7 @@ namespace lsp
             for (size_t i=0; i<32; ++i)
             {
                 ssize_t type = get_filter_type(i, channel);
-                if (type == meta::para_equalizer_metadata::EQF_OFF)
+                if (type == meta::filter_metadata::EQF_OFF)
                 {
                     fid             = i;
                     break;
@@ -1225,16 +1225,16 @@ namespace lsp
 
             // Set-up parameters
             size_t filter_type =
-                (freq <= 100.0f)    ? meta::para_equalizer_metadata::EQF_HIPASS     :
-                (freq <= 300.0f)    ? meta::para_equalizer_metadata::EQF_LOSHELF    :
-                (freq <= 7000.0f)   ? meta::para_equalizer_metadata::EQF_BELL       :
-                (freq <= 15000.0f)  ? meta::para_equalizer_metadata::EQF_HISHELF    :
-                                      meta::para_equalizer_metadata::EQF_LOPASS;
+                (freq <= 100.0f)    ? meta::filter_metadata::EQF_HIPASS     :
+                (freq <= 300.0f)    ? meta::filter_metadata::EQF_LOSHELF    :
+                (freq <= 7000.0f)   ? meta::filter_metadata::EQF_BELL       :
+                (freq <= 15000.0f)  ? meta::filter_metadata::EQF_HISHELF    :
+                                      meta::filter_metadata::EQF_LOPASS;
 
-            float filter_quality = (filter_type == meta::para_equalizer_metadata::EQF_BELL) ? 2.0f : 0.5f;
+            float filter_quality = (filter_type == meta::filter_metadata::EQF_BELL) ? 2.0f : 0.5f;
 
             // Set-up filter type
-            set_filter_mode(fid, mask, meta::para_equalizer_metadata::EFM_RLC_BT);
+            set_filter_mode(fid, mask, meta::filter_metadata::EFM_RLC_BT);
             set_filter_type(fid, mask, filter_type);
             set_filter_frequency(fid, mask, freq);
             set_filter_slope(fid, mask, 1);
@@ -1244,7 +1244,7 @@ namespace lsp
             set_filter_solo(fid, mask, false);
         }
 
-        bool para_equalizer_ui::filter_inspect_can_be_enabled(filter_t *f)
+        bool filter_ui::filter_inspect_can_be_enabled(filter_t *f)
         {
             if (f == NULL)
                 return false;
@@ -1267,11 +1267,11 @@ namespace lsp
                 return false;
 
             // The filter should be enabled
-            size_t type     = (f->pType != NULL) ? size_t(f->pType->value()) : meta::para_equalizer_metadata::EQF_OFF;
-            return type != meta::para_equalizer_metadata::EQF_OFF;
+            size_t type     = (f->pType != NULL) ? size_t(f->pType->value()) : meta::filter_metadata::EQF_OFF;
+            return type != meta::filter_metadata::EQF_OFF;
         }
 
-        void para_equalizer_ui::sync_filter_inspect_state()
+        void filter_ui::sync_filter_inspect_state()
         {
             if (pInspect == NULL)
                 return;
@@ -1281,7 +1281,7 @@ namespace lsp
             select_inspected_filter(f, false);
         }
 
-        void para_equalizer_ui::select_inspected_filter(filter_t *f, bool commit)
+        void filter_ui::select_inspected_filter(filter_t *f, bool commit)
         {
             bool auto_inspect = (pAutoInspect != NULL) && (pAutoInspect->value() >= 0.5f);
 
@@ -1313,7 +1313,7 @@ namespace lsp
             update_filter_note_text();
         }
 
-        void para_equalizer_ui::toggle_inspected_filter(filter_t *f, bool commit)
+        void filter_ui::toggle_inspected_filter(filter_t *f, bool commit)
         {
             if (pInspect == NULL)
             {
@@ -1330,7 +1330,7 @@ namespace lsp
                 select_inspected_filter(f, true);
         }
 
-        void para_equalizer_ui::on_filter_inspect_submit(tk::Widget *button)
+        void filter_ui::on_filter_inspect_submit(tk::Widget *button)
         {
             if (pInspect == NULL)
                 return;
@@ -1350,7 +1350,7 @@ namespace lsp
                 select_inspected_filter(NULL, true);
         }
 
-        ssize_t para_equalizer_ui::find_axis(const char *id)
+        ssize_t filter_ui::find_axis(const char *id)
         {
             if (wGraph == NULL)
                 return -1;
@@ -1372,14 +1372,14 @@ namespace lsp
             return -1;
         }
 
-        ui::IPort *para_equalizer_ui::find_port(const char *fmt, const char *base, size_t id)
+        ui::IPort *filter_ui::find_port(const char *fmt, const char *base, size_t id)
         {
             char port_id[32];
             ::snprintf(port_id, sizeof(port_id)/sizeof(char), fmt, base, int(id));
             return pWrapper->port(port_id);
         }
 
-        void para_equalizer_ui::set_port_value(const char *base, size_t mask, size_t id, float value)
+        void filter_ui::set_port_value(const char *base, size_t mask, size_t id, float value)
         {
             char port_id[32];
             size_t pattern = 1 << 0;
@@ -1399,17 +1399,17 @@ namespace lsp
             }
         }
 
-        void para_equalizer_ui::set_filter_mode(size_t id, size_t mask, size_t value)
+        void filter_ui::set_filter_mode(size_t id, size_t mask, size_t value)
         {
             set_port_value("fm", mask, id, value);
         }
 
-        void para_equalizer_ui::set_filter_type(size_t id, size_t mask, size_t value)
+        void filter_ui::set_filter_type(size_t id, size_t mask, size_t value)
         {
             set_port_value("ft", mask, id, value);
         }
 
-        ssize_t para_equalizer_ui::get_filter_type(size_t id, size_t channel)
+        ssize_t filter_ui::get_filter_type(size_t id, size_t channel)
         {
             char port_id[32];
             size_t index = 0;
@@ -1430,37 +1430,37 @@ namespace lsp
             return -STATUS_NOT_FOUND;
         }
 
-        void para_equalizer_ui::set_filter_frequency(size_t id, size_t mask, float value)
+        void filter_ui::set_filter_frequency(size_t id, size_t mask, float value)
         {
             set_port_value("f", mask, id, value);
         }
 
-        void para_equalizer_ui::set_filter_quality(size_t id, size_t mask, float value)
+        void filter_ui::set_filter_quality(size_t id, size_t mask, float value)
         {
             set_port_value("q", mask, id, value);
         }
 
-        void para_equalizer_ui::set_filter_gain(size_t id, size_t mask, float value)
+        void filter_ui::set_filter_gain(size_t id, size_t mask, float value)
         {
             set_port_value("g", mask, id, value);
         }
 
-        void para_equalizer_ui::set_filter_slope(size_t id, size_t mask, size_t slope)
+        void filter_ui::set_filter_slope(size_t id, size_t mask, size_t slope)
         {
             set_port_value("s", mask, id, slope - 1);
         }
 
-        void para_equalizer_ui::set_filter_enabled(size_t id, size_t mask, bool enabled)
+        void filter_ui::set_filter_enabled(size_t id, size_t mask, bool enabled)
         {
             set_port_value("xm", mask, id, (enabled) ? 0.0f : 1.0f);
         }
 
-        void para_equalizer_ui::set_filter_solo(size_t id, size_t mask, bool solo)
+        void filter_ui::set_filter_solo(size_t id, size_t mask, bool solo)
         {
             set_port_value("xs", mask, id, (solo) ? 1.0f : 0.0f);
         }
 
-        status_t para_equalizer_ui::import_rew_file(const LSPString *path)
+        status_t filter_ui::import_rew_file(const LSPString *path)
         {
             // Load settings
             room_ew::config_t *cfg = NULL;
@@ -1475,7 +1475,7 @@ namespace lsp
                 const room_ew::filter_t *f = &cfg->vFilters[i];
 
                 // Perform parameter translation
-                size_t mode     = meta::para_equalizer_metadata::EFM_APO_DR;
+                size_t mode     = meta::filter_metadata::EFM_APO_DR;
                 ssize_t type    = -1;
                 double gain     = 0.0;
                 double quality  = M_SQRT1_2;
@@ -1484,62 +1484,62 @@ namespace lsp
                 switch (f->filterType)
                 {
                     case room_ew::PK:
-                        type    = meta::para_equalizer_metadata::EQF_BELL;
+                        type    = meta::filter_metadata::EQF_BELL;
                         gain    = f->gain;
                         quality = f->Q;
                         break;
                     case room_ew::LS:
-                        type    = meta::para_equalizer_metadata::EQF_LOSHELF;
+                        type    = meta::filter_metadata::EQF_LOSHELF;
                         gain    = f->gain;
                         quality = 2.0/3.0;
                         break;
                     case room_ew::HS:
-                        type    = meta::para_equalizer_metadata::EQF_HISHELF;
+                        type    = meta::filter_metadata::EQF_HISHELF;
                         gain    = f->gain;
                         quality = 2.0/3.0;
                         break;
                     case room_ew::LP:
-                        type    = meta::para_equalizer_metadata::EQF_LOPASS;
+                        type    = meta::filter_metadata::EQF_LOPASS;
                         break;
                     case room_ew::HP:
-                        type    = meta::para_equalizer_metadata::EQF_HIPASS;
+                        type    = meta::filter_metadata::EQF_HIPASS;
                         break;
                     case room_ew::LPQ:
-                        type    = meta::para_equalizer_metadata::EQF_LOPASS;
+                        type    = meta::filter_metadata::EQF_LOPASS;
                         quality = f->Q;
                         break;
                     case room_ew::HPQ:
-                        type    = meta::para_equalizer_metadata::EQF_HIPASS;
+                        type    = meta::filter_metadata::EQF_HIPASS;
                         quality = f->Q;
                         break;
                     case room_ew::LS6:
-                        type    = meta::para_equalizer_metadata::EQF_LOSHELF;
+                        type    = meta::filter_metadata::EQF_LOSHELF;
                         gain    = f->gain;
                         quality = M_SQRT2 / 3.0;
                         freq    = freq * 2.0 / 3.0;
                         break;
                     case room_ew::HS6:
-                        type    = meta::para_equalizer_metadata::EQF_HISHELF;
+                        type    = meta::filter_metadata::EQF_HISHELF;
                         gain    = f->gain;
                         quality = M_SQRT2 / 3.0;
                         freq    = freq / M_SQRT1_2;
                         break;
                     case room_ew::LS12:
-                        type    = meta::para_equalizer_metadata::EQF_LOSHELF;
+                        type    = meta::filter_metadata::EQF_LOSHELF;
                         gain    = f->gain;
                         freq    = freq * 3.0 / 2.0;
                         break;
                     case room_ew::HS12:
-                        type    = meta::para_equalizer_metadata::EQF_HISHELF;
+                        type    = meta::filter_metadata::EQF_HISHELF;
                         gain    = f->gain;
                         freq    = freq * M_SQRT1_2;
                         break;
                     case room_ew::NO:
-                        type    = meta::para_equalizer_metadata::EQF_NOTCH;
+                        type    = meta::filter_metadata::EQF_NOTCH;
                         quality = 100.0 / 3.0;
                         break;
                     case room_ew::AP:
-                        type    = meta::para_equalizer_metadata::EQF_ALLPASS;
+                        type    = meta::filter_metadata::EQF_ALLPASS;
                         quality = 0.0;
                         break;
                     default: // Skip other filter types
@@ -1566,7 +1566,7 @@ namespace lsp
             // Reset state of all other filters
             for (; fid < 32; ++fid)
             {
-                set_filter_type(fid, 0x03, meta::para_equalizer_metadata::EQF_OFF);
+                set_filter_type(fid, 0x03, meta::filter_metadata::EQF_OFF);
                 set_filter_slope(fid, 0x03, 1);
                 set_filter_gain(fid, 0x03, 1.0f);
                 set_filter_quality(fid, 0x03, 0.0f);
@@ -1577,7 +1577,7 @@ namespace lsp
             return STATUS_OK;
         }
 
-        void para_equalizer_ui::notify(ui::IPort *port)
+        void filter_ui::notify(ui::IPort *port)
         {
             if (is_filter_inspect_port(port))
             {
@@ -1614,7 +1614,7 @@ namespace lsp
             }
         }
 
-        bool para_equalizer_ui::is_filter_inspect_port(ui::IPort *port)
+        bool filter_ui::is_filter_inspect_port(ui::IPort *port)
         {
             if (pInspect == NULL)
                 return false;
@@ -1635,7 +1635,7 @@ namespace lsp
                 (f->pMute == port);
         }
 
-        para_equalizer_ui::filter_t *para_equalizer_ui::find_filter_by_mute(ui::IPort *port)
+        filter_ui::filter_t *filter_ui::find_filter_by_mute(ui::IPort *port)
         {
             for (size_t i = 0, n = vFilters.size(); i < n; ++i)
             {
@@ -1648,7 +1648,7 @@ namespace lsp
             return NULL;
         }
 
-        void para_equalizer_ui::on_main_grid_realized(tk::Widget *w)
+        void filter_ui::on_main_grid_realized(tk::Widget *w)
         {
             // Bind events
             size_t index = 0;
@@ -1703,7 +1703,7 @@ namespace lsp
             }
         }
 
-        void para_equalizer_ui::on_main_grid_mouse_in(tk::Widget *w, ssize_t x, ssize_t y)
+        void filter_ui::on_main_grid_mouse_in(tk::Widget *w, ssize_t x, ssize_t y)
         {
             filter_t *f = find_filter_by_rect(w, x, y);
             if (f != NULL)
@@ -1712,12 +1712,12 @@ namespace lsp
                 on_filter_mouse_out();
         }
 
-        void para_equalizer_ui::on_main_grid_mouse_out(tk::Widget *w, ssize_t x, ssize_t y)
+        void filter_ui::on_main_grid_mouse_out(tk::Widget *w, ssize_t x, ssize_t y)
         {
             on_filter_mouse_out();
         }
 
-        void para_equalizer_ui::on_main_grid_mouse_move(tk::Widget *w, ssize_t x, ssize_t y)
+        void filter_ui::on_main_grid_mouse_move(tk::Widget *w, ssize_t x, ssize_t y)
         {
             filter_t *f = find_filter_by_rect(w, x, y);
             if (f != NULL)
@@ -1728,5 +1728,3 @@ namespace lsp
 
     } /* namespace plugins */
 } /* namespace lsp */
-
-

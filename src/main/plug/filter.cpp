@@ -52,26 +52,26 @@ namespace lsp
 
         static const meta::plugin_t *plugins[] =
         {
-            &meta::para_equalizer_x16_mono,
-            &meta::para_equalizer_x16_stereo,
-            &meta::para_equalizer_x16_lr,
-            &meta::para_equalizer_x16_ms,
-            &meta::para_equalizer_x32_mono,
-            &meta::para_equalizer_x32_stereo,
-            &meta::para_equalizer_x32_lr,
-            &meta::para_equalizer_x32_ms
+            &meta::filter_x16_mono,
+            &meta::filter_x16_stereo,
+            &meta::filter_x16_lr,
+            &meta::filter_x16_ms,
+            &meta::filter_x32_mono,
+            &meta::filter_x32_stereo,
+            &meta::filter_x32_lr,
+            &meta::filter_x32_ms
         };
 
         static const plugin_settings_t plugin_settings[] =
         {
-            { &meta::para_equalizer_x16_mono,   16, para_equalizer::EQ_MONO         },
-            { &meta::para_equalizer_x16_stereo, 16, para_equalizer::EQ_STEREO       },
-            { &meta::para_equalizer_x16_lr,     16, para_equalizer::EQ_LEFT_RIGHT   },
-            { &meta::para_equalizer_x16_ms,     16, para_equalizer::EQ_MID_SIDE     },
-            { &meta::para_equalizer_x32_mono,   32, para_equalizer::EQ_MONO         },
-            { &meta::para_equalizer_x32_stereo, 32, para_equalizer::EQ_STEREO       },
-            { &meta::para_equalizer_x32_lr,     32, para_equalizer::EQ_LEFT_RIGHT   },
-            { &meta::para_equalizer_x32_ms,     32, para_equalizer::EQ_MID_SIDE     },
+            { &meta::filter_x16_mono,   16, filter::EQ_MONO         },
+            { &meta::filter_x16_stereo, 16, filter::EQ_STEREO       },
+            { &meta::filter_x16_lr,     16, filter::EQ_LEFT_RIGHT   },
+            { &meta::filter_x16_ms,     16, filter::EQ_MID_SIDE     },
+            { &meta::filter_x32_mono,   32, filter::EQ_MONO         },
+            { &meta::filter_x32_stereo, 32, filter::EQ_STEREO       },
+            { &meta::filter_x32_lr,     32, filter::EQ_LEFT_RIGHT   },
+            { &meta::filter_x32_ms,     32, filter::EQ_MID_SIDE     },
 
             { NULL, 0, false }
         };
@@ -80,14 +80,14 @@ namespace lsp
         {
             for (const plugin_settings_t *s = plugin_settings; s->metadata != NULL; ++s)
                 if (s->metadata == meta)
-                    return new para_equalizer(s->metadata, s->channels, s->mode);
+                    return new filter(s->metadata, s->channels, s->mode);
             return NULL;
         }
 
         static plug::Factory factory(plugin_factory, plugins, 8);
 
         //-------------------------------------------------------------------------
-        para_equalizer::para_equalizer(const meta::plugin_t *metadata, size_t filters, size_t mode): plug::Module(metadata)
+        filter::filter(const meta::plugin_t *metadata, size_t filters, size_t mode): plug::Module(metadata)
         {
             nFilters        = filters;
             nMode           = mode;
@@ -115,15 +115,15 @@ namespace lsp
             pInspectRange   = NULL;
         }
 
-        para_equalizer::~para_equalizer()
+        filter::~filter()
         {
             destroy_state();
         }
 
-        inline void para_equalizer::decode_filter(size_t *ftype, size_t *slope, size_t mode)
+        inline void filter::decode_filter(size_t *ftype, size_t *slope, size_t mode)
         {
-            #define EQF(x) meta::para_equalizer_metadata::EQF_ ## x
-            #define EQS(k, t, ks) case meta::para_equalizer_metadata::EFM_ ## k:    \
+            #define EQF(x) meta::filter_metadata::EQF_ ## x
+            #define EQS(k, t, ks) case meta::filter_metadata::EFM_ ## k:    \
                     *ftype = dspu::t; \
                     *slope = ks * *slope; \
                     return;
@@ -368,7 +368,7 @@ namespace lsp
             #undef EQF
         }
 
-        inline bool para_equalizer::adjust_gain(size_t filter_type)
+        inline bool filter::adjust_gain(size_t filter_type)
         {
             switch (filter_type)
             {
@@ -412,21 +412,21 @@ namespace lsp
             return true;
         }
 
-        inline dspu::equalizer_mode_t para_equalizer::get_eq_mode(ssize_t mode)
+        inline dspu::equalizer_mode_t filter::get_eq_mode(ssize_t mode)
         {
             switch (mode)
             {
-                case meta::para_equalizer_metadata::PEM_IIR: return dspu::EQM_IIR;
-                case meta::para_equalizer_metadata::PEM_FIR: return dspu::EQM_FIR;
-                case meta::para_equalizer_metadata::PEM_FFT: return dspu::EQM_FFT;
-                case meta::para_equalizer_metadata::PEM_SPM: return dspu::EQM_SPM;
+                case meta::filter_metadata::PEM_IIR: return dspu::EQM_IIR;
+                case meta::filter_metadata::PEM_FIR: return dspu::EQM_FIR;
+                case meta::filter_metadata::PEM_FFT: return dspu::EQM_FFT;
+                case meta::filter_metadata::PEM_SPM: return dspu::EQM_SPM;
                 default:
                     break;
             }
             return dspu::EQM_BYPASS;
         }
 
-        void para_equalizer::init(plug::IWrapper *wrapper, plug::IPort **ports)
+        void filter::init(plug::IWrapper *wrapper, plug::IPort **ports)
         {
             // Pass wrapper
             plug::Module::init(wrapper, ports);
@@ -436,15 +436,15 @@ namespace lsp
             size_t max_latency  = 0;
 
             // Initialize analyzer
-            if (!sAnalyzer.init(channels, meta::para_equalizer_metadata::FFT_RANK,
-                                MAX_SAMPLE_RATE, meta::para_equalizer_metadata::REFRESH_RATE))
+            if (!sAnalyzer.init(channels, meta::filter_metadata::FFT_RANK,
+                                MAX_SAMPLE_RATE, meta::filter_metadata::REFRESH_RATE))
                 return;
 
-            sAnalyzer.set_rank(meta::para_equalizer_metadata::FFT_RANK);
+            sAnalyzer.set_rank(meta::filter_metadata::FFT_RANK);
             sAnalyzer.set_activity(false);
-            sAnalyzer.set_envelope(meta::para_equalizer_metadata::FFT_ENVELOPE);
-            sAnalyzer.set_window(meta::para_equalizer_metadata::FFT_WINDOW);
-            sAnalyzer.set_rate(meta::para_equalizer_metadata::REFRESH_RATE);
+            sAnalyzer.set_envelope(meta::filter_metadata::FFT_ENVELOPE);
+            sAnalyzer.set_window(meta::filter_metadata::FFT_WINDOW);
+            sAnalyzer.set_rate(meta::filter_metadata::REFRESH_RATE);
 
             // Allocate channels
             vChannels           = new eq_channel_t[channels];
@@ -457,13 +457,13 @@ namespace lsp
             nFftPosition        = FFTP_NONE;
 
             // Allocate indexes
-            vIndexes            = new uint32_t[meta::para_equalizer_metadata::MESH_POINTS];
+            vIndexes            = new uint32_t[meta::filter_metadata::MESH_POINTS];
             if (vIndexes == NULL)
                 return;
 
             // Calculate amount of bulk data to allocate
-            size_t allocate     = (2 * meta::para_equalizer_metadata::MESH_POINTS * (nFilters + 2) + EQ_BUFFER_SIZE * 2) * channels +
-                                  meta::para_equalizer_metadata::MESH_POINTS;
+            size_t allocate     = (2 * meta::filter_metadata::MESH_POINTS * (nFilters + 2) + EQ_BUFFER_SIZE * 2) * channels +
+                                  meta::filter_metadata::MESH_POINTS;
             float *abuf         = new float[allocate];
             if (abuf == NULL)
                 return;
@@ -473,7 +473,7 @@ namespace lsp
 
             // Frequency list buffer
             vFreqs              = abuf;
-            abuf               += meta::para_equalizer_metadata::MESH_POINTS;
+            abuf               += meta::filter_metadata::MESH_POINTS;
 
             // Initialize each channel
             for (size_t i=0; i<channels; ++i)
@@ -490,9 +490,9 @@ namespace lsp
                 c->vBuffer          = abuf;
                 abuf               += EQ_BUFFER_SIZE;
                 c->vTrRe            = abuf;
-                abuf               += meta::para_equalizer_metadata::MESH_POINTS;
+                abuf               += meta::filter_metadata::MESH_POINTS;
                 c->vTrIm            = abuf;
-                abuf               += meta::para_equalizer_metadata::MESH_POINTS;
+                abuf               += meta::filter_metadata::MESH_POINTS;
 
                 // Input and output ports
                 c->vIn              = NULL;
@@ -532,9 +532,9 @@ namespace lsp
 
                     // Filter characteristics
                     f->vTrRe            = abuf;
-                    abuf               += meta::para_equalizer_metadata::MESH_POINTS;
+                    abuf               += meta::filter_metadata::MESH_POINTS;
                     f->vTrIm            = abuf;
-                    abuf               += meta::para_equalizer_metadata::MESH_POINTS;
+                    abuf               += meta::filter_metadata::MESH_POINTS;
                     f->nSync            = CS_UPDATE;
                     f->bSolo            = false;
 
@@ -675,7 +675,7 @@ namespace lsp
             }
         }
 
-        void para_equalizer::ui_activated()
+        void filter::ui_activated()
         {
             size_t channels     = ((nMode == EQ_MONO) || (nMode == EQ_STEREO)) ? 1 : 2;
             for (size_t i=0; i<channels; ++i)
@@ -687,17 +687,17 @@ namespace lsp
             pWrapper->request_settings_update();
         }
 
-        void para_equalizer::ui_deactivated()
+        void filter::ui_deactivated()
         {
             pWrapper->request_settings_update();
         }
 
-        void para_equalizer::destroy()
+        void filter::destroy()
         {
             destroy_state();
         }
 
-        void para_equalizer::destroy_state()
+        void filter::destroy_state()
         {
             size_t channels     = (nMode == EQ_MONO) ? 1 : 2;
 
@@ -741,7 +741,7 @@ namespace lsp
             sAnalyzer.destroy();
         }
 
-        bool para_equalizer::filter_inspect_can_be_enabled(eq_channel_t *c, eq_filter_t *f)
+        bool filter::filter_inspect_can_be_enabled(eq_channel_t *c, eq_filter_t *f)
         {
             if (f == NULL)
                 return false;
@@ -751,10 +751,10 @@ namespace lsp
                 return false;
 
             // The filter should be enabled
-            return size_t(f->pType->value()) != meta::para_equalizer_metadata::EQF_OFF;
+            return size_t(f->pType->value()) != meta::filter_metadata::EQF_OFF;
         }
 
-        void para_equalizer::update_settings()
+        void filter::update_settings()
         {
             // Check sample rate
             if (fSampleRate <= 0)
@@ -963,9 +963,9 @@ namespace lsp
 
                         switch (ssize_t(sf->pType->value()))
                         {
-                            case meta::para_equalizer_metadata::EQF_BELL:
-                            case meta::para_equalizer_metadata::EQF_RESONANCE:
-                            case meta::para_equalizer_metadata::EQF_NOTCH:
+                            case meta::filter_metadata::EQF_BELL:
+                            case meta::filter_metadata::EQF_RESONANCE:
+                            case meta::filter_metadata::EQF_NOTCH:
                                 fp->nType       = dspu::FLT_BT_BWC_BANDPASS;
                                 fp->fFreq       = f1;
                                 fp->fFreq2      = f2;
@@ -973,7 +973,7 @@ namespace lsp
                                 fp->fQuality    = 0.707f;
                                 break;
 
-                            case meta::para_equalizer_metadata::EQF_HISHELF:
+                            case meta::filter_metadata::EQF_HISHELF:
                                 fp->nType       = dspu::FLT_BT_BWC_HIPASS;
                                 fp->fFreq       = f1;
                                 fp->fFreq2      = f1;
@@ -981,7 +981,7 @@ namespace lsp
                                 fp->fQuality    = 0.707f;
                                 break;
 
-                            case meta::para_equalizer_metadata::EQF_LOSHELF:
+                            case meta::filter_metadata::EQF_LOSHELF:
                                 fp->nType       = dspu::FLT_BT_BWC_LOPASS;
                                 fp->fFreq       = f2;
                                 fp->fFreq2      = f2;
@@ -1041,7 +1041,7 @@ namespace lsp
             if (sAnalyzer.needs_reconfiguration())
             {
                 sAnalyzer.reconfigure();
-                sAnalyzer.get_frequencies(vFreqs, vIndexes, SPEC_FREQ_MIN, SPEC_FREQ_MAX, meta::para_equalizer_metadata::MESH_POINTS);
+                sAnalyzer.get_frequencies(vFreqs, vIndexes, SPEC_FREQ_MIN, SPEC_FREQ_MAX, meta::filter_metadata::MESH_POINTS);
             }
 
             // Update latency
@@ -1054,7 +1054,7 @@ namespace lsp
             set_latency(latency);
         }
 
-        void para_equalizer::update_sample_rate(long sr)
+        void filter::update_sample_rate(long sr)
         {
             size_t channels     = (nMode == EQ_MONO) ? 1 : 2;
 
@@ -1069,7 +1069,7 @@ namespace lsp
             }
         }
 
-        void para_equalizer::process_channel(eq_channel_t *c, size_t start, size_t samples)
+        void filter::process_channel(eq_channel_t *c, size_t start, size_t samples)
         {
             // Process the signal by the equalizer
             if (bSmoothMode)
@@ -1107,7 +1107,7 @@ namespace lsp
                 dsp::mul_k2(c->vBuffer, c->fInGain, samples);
         }
 
-        void para_equalizer::process(size_t samples)
+        void filter::process(size_t samples)
         {
             size_t channels     = (nMode == EQ_MONO) ? 1 : 2;
             float *analyze[2];
@@ -1236,11 +1236,11 @@ namespace lsp
                     if (nFftPosition != FFTP_NONE)
                     {
                         // Copy frequency points
-                        dsp::copy(mesh->pvData[0], vFreqs, meta::para_equalizer_metadata::MESH_POINTS);
-                        sAnalyzer.get_spectrum(i, mesh->pvData[1], vIndexes, meta::para_equalizer_metadata::MESH_POINTS);
+                        dsp::copy(mesh->pvData[0], vFreqs, meta::filter_metadata::MESH_POINTS);
+                        sAnalyzer.get_spectrum(i, mesh->pvData[1], vIndexes, meta::filter_metadata::MESH_POINTS);
 
                         // Mark mesh containing data
-                        mesh->data(2, meta::para_equalizer_metadata::MESH_POINTS);
+                        mesh->data(2, meta::filter_metadata::MESH_POINTS);
                     }
                     else
                         mesh->data(2, 0);
@@ -1265,7 +1265,7 @@ namespace lsp
                     eq_filter_t *f  = &c->vFilters[j];
                     if (f->nSync & CS_UPDATE)
                     {
-                        c->sEqualizer.freq_chart(j, f->vTrRe, f->vTrIm, vFreqs, meta::para_equalizer_metadata::MESH_POINTS);
+                        c->sEqualizer.freq_chart(j, f->vTrRe, f->vTrIm, vFreqs, meta::filter_metadata::MESH_POINTS);
                         f->nSync    = CS_SYNC_AMP;
                         c->nSync    = CS_UPDATE;
                     }
@@ -1280,15 +1280,15 @@ namespace lsp
                             {
                                 // Add extra points
                                 mesh->pvData[0][0] = SPEC_FREQ_MIN*0.5f;
-                                mesh->pvData[0][meta::para_equalizer_metadata::MESH_POINTS+1] = SPEC_FREQ_MAX*2.0;
+                                mesh->pvData[0][meta::filter_metadata::MESH_POINTS+1] = SPEC_FREQ_MAX*2.0;
                                 mesh->pvData[1][0] = 1.0f;
-                                mesh->pvData[1][meta::para_equalizer_metadata::MESH_POINTS+1] = 1.0f;
+                                mesh->pvData[1][meta::filter_metadata::MESH_POINTS+1] = 1.0f;
 
                                 // Fill mesh
-                                dsp::copy(&mesh->pvData[0][1], vFreqs, meta::para_equalizer_metadata::MESH_POINTS);
-                                dsp::complex_mod(&mesh->pvData[1][1], f->vTrRe, f->vTrIm, meta::para_equalizer_metadata::MESH_POINTS);
+                                dsp::copy(&mesh->pvData[0][1], vFreqs, meta::filter_metadata::MESH_POINTS);
+                                dsp::complex_mod(&mesh->pvData[1][1], f->vTrRe, f->vTrIm, meta::filter_metadata::MESH_POINTS);
 
-                                mesh->data(2, meta::para_equalizer_metadata::FILTER_MESH_POINTS);
+                                mesh->data(2, meta::filter_metadata::FILTER_MESH_POINTS);
                             }
                             else
                                 mesh->data(2, 0);
@@ -1302,13 +1302,13 @@ namespace lsp
                 if (c->nSync & CS_UPDATE)
                 {
                     // Initialize complex numbers for transfer function
-                    dsp::fill_one(c->vTrRe, meta::para_equalizer_metadata::MESH_POINTS);
-                    dsp::fill_zero(c->vTrIm, meta::para_equalizer_metadata::MESH_POINTS);
+                    dsp::fill_one(c->vTrRe, meta::filter_metadata::MESH_POINTS);
+                    dsp::fill_zero(c->vTrIm, meta::filter_metadata::MESH_POINTS);
 
                     for (size_t j=0; j<=nFilters; ++j)
                     {
                         eq_filter_t *f  = &c->vFilters[j];
-                        dsp::complex_mul2(c->vTrRe, c->vTrIm, f->vTrRe, f->vTrIm, meta::para_equalizer_metadata::MESH_POINTS);
+                        dsp::complex_mul2(c->vTrRe, c->vTrIm, f->vTrRe, f->vTrIm, meta::filter_metadata::MESH_POINTS);
                     }
                     c->nSync    = CS_SYNC_AMP;
                 }
@@ -1320,9 +1320,9 @@ namespace lsp
                     plug::mesh_t *mesh  = c->pTrAmp->buffer<plug::mesh_t>();
                     if ((mesh != NULL) && (mesh->isEmpty()))
                     {
-                        dsp::copy(mesh->pvData[0], vFreqs, meta::para_equalizer_metadata::MESH_POINTS);
-                        dsp::complex_mod(mesh->pvData[1], c->vTrRe, c->vTrIm, meta::para_equalizer_metadata::MESH_POINTS);
-                        mesh->data(2, meta::para_equalizer_metadata::MESH_POINTS);
+                        dsp::copy(mesh->pvData[0], vFreqs, meta::filter_metadata::MESH_POINTS);
+                        dsp::complex_mod(mesh->pvData[1], c->vTrRe, c->vTrIm, meta::filter_metadata::MESH_POINTS);
+                        mesh->data(2, meta::filter_metadata::MESH_POINTS);
 
                         c->nSync           &= ~CS_SYNC_AMP;
                     }
@@ -1348,7 +1348,7 @@ namespace lsp
             }
         }
 
-        bool para_equalizer::inline_display(plug::ICanvas *cv, size_t width, size_t height)
+        bool filter::inline_display(plug::ICanvas *cv, size_t width, size_t height)
         {
             // Check proportions
             if (height > (M_RGOLD_RATIO * width))
@@ -1421,7 +1421,7 @@ namespace lsp
 
                 for (size_t j=0; j<width; ++j)
                 {
-                    size_t k        = (j*meta::para_equalizer_metadata::MESH_POINTS)/width;
+                    size_t k        = (j*meta::filter_metadata::MESH_POINTS)/width;
                     b->v[0][j+1]    = vFreqs[k];
                     b->v[3][j+1]    = c->vTrRe[k];
                     b->v[4][j+1]    = c->vTrIm[k];
@@ -1443,7 +1443,7 @@ namespace lsp
             return true;
         }
 
-        void para_equalizer::dump_filter_params(dspu::IStateDumper *v, const char *id, const dspu::filter_params_t *fp)
+        void filter::dump_filter_params(dspu::IStateDumper *v, const char *id, const dspu::filter_params_t *fp)
         {
             v->begin_object(id, fp, sizeof(*fp));
             {
@@ -1457,7 +1457,7 @@ namespace lsp
             v->end_object();
         }
 
-        void para_equalizer::dump_filter(dspu::IStateDumper *v, const eq_filter_t *f)
+        void filter::dump_filter(dspu::IStateDumper *v, const eq_filter_t *f)
         {
             v->begin_object(f, sizeof(eq_filter_t));
             {
@@ -1483,7 +1483,7 @@ namespace lsp
             v->end_object();
         }
 
-        void para_equalizer::dump_channel(dspu::IStateDumper *v, const eq_channel_t *c) const
+        void filter::dump_channel(dspu::IStateDumper *v, const eq_channel_t *c) const
         {
             v->begin_object(c, sizeof(eq_channel_t));
             {
@@ -1524,7 +1524,7 @@ namespace lsp
             v->end_object();
         }
 
-        void para_equalizer::dump(dspu::IStateDumper *v) const
+        void filter::dump(dspu::IStateDumper *v) const
         {
             plug::Module::dump(v);
 
@@ -1562,5 +1562,3 @@ namespace lsp
 
     } // namespace plugins
 } // namespace lsp
-
-

@@ -19,8 +19,8 @@
  * along with lsp-plugins-para-equalizer. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef PRIVATE_UI_PARA_EQUALIZER_H_
-#define PRIVATE_UI_PARA_EQUALIZER_H_
+#ifndef PRIVATE_UI_FILTER_H_
+#define PRIVATE_UI_FILTER_H_
 
 #include <lsp-plug.in/plug-fw/ui.h>
 #include <lsp-plug.in/lltl/darray.h>
@@ -32,12 +32,12 @@ namespace lsp
         /**
          * UI for Parametric Equalizer plugin series
          */
-        class para_equalizer_ui: public ui::Module, public ui::IPortListener
+        class filter_ui: public ui::Module, public ui::IPortListener
         {
             protected:
                 typedef struct filter_t
                 {
-                    para_equalizer_ui  *pUI;
+                    filter_ui  *pUI;
                     ws::rectangle_t     sRect;          // The overall rectangle over the grid
 
                     bool                bMouseIn;       // Mouse is over filter indicator
@@ -178,8 +178,8 @@ namespace lsp
                 void            transfer_port_value(ui::IPort *dst, ui::IPort *src);
 
             public:
-                explicit para_equalizer_ui(const meta::plugin_t *meta);
-                virtual ~para_equalizer_ui() override;
+                explicit filter_ui(const meta::plugin_t *meta);
+                virtual ~filter_ui() override;
 
                 virtual status_t    post_init() override;
                 virtual status_t    pre_destroy() override;
@@ -189,4 +189,4 @@ namespace lsp
     } // namespace plugins
 } // namespace lsp
 
-#endif /* PRIVATE_UI_PARA_EQUALIZER_H_ */
+#endif /* PRIVATE_UI_FILTER_H_ */
