@@ -46,13 +46,22 @@
 					</ui:with>
 
 					<!-- Meshes -->
-					<ui:for id="i" first="0" last=":num_filters - 1">
-						<marker id="f_${i}" ox="0" oy="1" color="graph_marker_cycle" color.hue=":hue_${i}" visibility=":fv_${i}"/>
-						<marker id="g_${i}" ox="1" oy="0" color="graph_marker_cycle" color.hue=":hue_${i}" visibility=":fv_${i}"/>
-					</ui:for>
-					<ui:for id="i" first="0" last=":num_filters - 1">
-						<mesh id="agf_${i}" width="2" color="graph_mesh_cycle" color.hue=":hue_${i}" fill="true" fcolor="graph_mesh_cycle" fcolor.hue=":hue_${i}" fcolor.a="0.8" visibility=":fv_${i}" smooth="true"/>
-					</ui:for>
+<!-- 					<ui:for id="i" first="0" last=":num_filters - 1"> -->
+<!-- 						<marker id="f_${i}" ox="0" oy="1" color="graph_marker_cycle" color.hue=":hue_${i}" visibility=":fv_${i}"/> -->
+<!-- 						<marker id="g_${i}" ox="1" oy="0" color="graph_marker_cycle" color.hue=":hue_${i}" visibility=":fv_${i}"/> -->
+<!-- 					</ui:for> -->
+<!-- 					<ui:for id="i" first="0" last=":num_filters - 1"> -->
+<!-- 						<mesh id="agf_${i}" width="2" color="graph_mesh_cycle" color.hue=":hue_${i}" fill="true" fcolor="graph_mesh_cycle" fcolor.hue=":hue_${i}" fcolor.a="0.8" visibility=":fv_${i}" smooth="true"/> -->
+<!-- 					</ui:for> -->
+					
+										<!-- Meshes -->
+					
+						<marker id="f_0" ox="0" oy="1" color="graph_marker_cycle"  />
+						<marker id="g_0" ox="1" oy="0" color="graph_marker_cycle"  />
+
+
+						<mesh id="agf_0" width="2" color="graph_mesh_cycle" fill="true" fcolor="graph_mesh_cycle"  fcolor.a="0.8"  smooth="true"/>
+
 
 					<mesh id="fftg_l" width="2" color="left" visibility=":fftv_l"/>
 					<mesh id="fftg_r" width="2" color="right" visibility=":fftv_r"/>

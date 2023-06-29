@@ -52,26 +52,14 @@ namespace lsp
 
         static const meta::plugin_t *plugins[] =
         {
-            &meta::filter_x16_mono,
-            &meta::filter_x16_stereo,
-            &meta::filter_x16_lr,
-            &meta::filter_x16_ms,
-            &meta::filter_x32_mono,
-            &meta::filter_x32_stereo,
-            &meta::filter_x32_lr,
-            &meta::filter_x32_ms
+            &meta::filter_mono,
+            &meta::filter_stereo
         };
 
         static const plugin_settings_t plugin_settings[] =
         {
-            { &meta::filter_x16_mono,   16, filter::EQ_MONO         },
-            { &meta::filter_x16_stereo, 16, filter::EQ_STEREO       },
-            { &meta::filter_x16_lr,     16, filter::EQ_LEFT_RIGHT   },
-            { &meta::filter_x16_ms,     16, filter::EQ_MID_SIDE     },
-            { &meta::filter_x32_mono,   32, filter::EQ_MONO         },
-            { &meta::filter_x32_stereo, 32, filter::EQ_STEREO       },
-            { &meta::filter_x32_lr,     32, filter::EQ_LEFT_RIGHT   },
-            { &meta::filter_x32_ms,     32, filter::EQ_MID_SIDE     },
+            { &meta::filter_mono,   1, filter::EQ_MONO         },
+            { &meta::filter_stereo, 1, filter::EQ_STEREO       },
 
             { NULL, 0, false }
         };
@@ -84,7 +72,7 @@ namespace lsp
             return NULL;
         }
 
-        static plug::Factory factory(plugin_factory, plugins, 8);
+        static plug::Factory factory(plugin_factory, plugins, 2);
 
         //-------------------------------------------------------------------------
         filter::filter(const meta::plugin_t *metadata, size_t filters, size_t mode): plug::Module(metadata)
@@ -96,7 +84,6 @@ namespace lsp
             vIndexes        = NULL;
             fGainIn         = 1.0f;
             fZoom           = 1.0f;
-            bListen         = false;
             bSmoothMode     = false;
             nFftPosition    = FFTP_NONE;
             pIDisplay       = NULL;
@@ -106,13 +93,10 @@ namespace lsp
             pGainOut        = NULL;
             pFftMode        = NULL;
             pReactivity     = NULL;
-            pListen         = NULL;
             pShiftGain      = NULL;
             pZoom           = NULL;
             pEqMode         = NULL;
             pBalance        = NULL;
-            pInspect        = NULL;
-            pInspectRange   = NULL;
         }
 
         filter::~filter()
@@ -453,7 +437,6 @@ namespace lsp
 
             // Initialize global parameters
             fGainIn             = 1.0f;
-            bListen             = false;
             nFftPosition        = FFTP_NONE;
 
             // Allocate indexes
@@ -483,7 +466,6 @@ namespace lsp
                 c->nLatency         = 0;
                 c->fInGain          = 1.0f;
                 c->fOutGain         = 1.0f;
-                c->fPitch           = 1.0f;
                 c->vFilters         = NULL;
                 c->vDryBuf          = abuf;
                 abuf               += EQ_BUFFER_SIZE;
@@ -503,7 +485,6 @@ namespace lsp
                 c->pOut             = NULL;
                 c->pInGain          = NULL;
                 c->pTrAmp           = NULL;
-                c->pPitch           = NULL;
                 c->pFft             = NULL;
                 c->pVisible         = NULL;
                 c->pInMeter         = NULL;
@@ -516,7 +497,6 @@ namespace lsp
                 // Allocate data
                 eq_channel_t *c     = &vChannels[i];
                 c->nSync            = CS_UPDATE;
-                c->bHasSolo         = false;
                 c->vFilters         = new eq_filter_t[nFilters+1];
                 if (c->vFilters == NULL)
                     return;
@@ -536,7 +516,6 @@ namespace lsp
                     f->vTrIm            = abuf;
                     abuf               += meta::filter_metadata::MESH_POINTS;
                     f->nSync            = CS_UPDATE;
-                    f->bSolo            = false;
 
                     // Init filter parameters
                     f->sOldFP.nType     = dspu::FLT_NONE;
@@ -559,8 +538,6 @@ namespace lsp
                     f->pFreq            = NULL;
                     f->pGain            = NULL;
                     f->pQuality         = NULL;
-                    f->pActivity        = NULL;
-                    f->pTrAmp           = NULL;
                 }
             }
 
@@ -592,34 +569,20 @@ namespace lsp
             pReactivity             = TRACE_PORT(ports[port_id++]);
             pShiftGain              = TRACE_PORT(ports[port_id++]);
             pZoom                   = TRACE_PORT(ports[port_id++]);
-            TRACE_PORT(ports[port_id++]); // Skip filter selector
-            pInspect                = TRACE_PORT(ports[port_id++]);
-            pInspectRange           = TRACE_PORT(ports[port_id++]);
-            TRACE_PORT(ports[port_id++]); // Skip auto inspect switch
 
             // Balance
             if (channels > 1)
                 pBalance                = TRACE_PORT(ports[port_id++]);
-
-            // Listen port
-            if (nMode == EQ_MID_SIDE)
-            {
-                pListen                 = TRACE_PORT(ports[port_id++]);
-                vChannels[0].pInGain    = TRACE_PORT(ports[port_id++]);
-                vChannels[1].pInGain    = TRACE_PORT(ports[port_id++]);
-            }
 
             for (size_t i=0; i<channels; ++i)
             {
                 if ((nMode == EQ_STEREO) && (i > 0))
                 {
                     vChannels[i].pTrAmp     = NULL;
-                    vChannels[i].pPitch     = vChannels[i-1].pPitch;
                 }
                 else
                 {
                     vChannels[i].pTrAmp     = TRACE_PORT(ports[port_id++]);
-                    vChannels[i].pPitch     = TRACE_PORT(ports[port_id++]);
                 }
                 vChannels[i].pInMeter   =   TRACE_PORT(ports[port_id++]);
                 vChannels[i].pOutMeter  =   TRACE_PORT(ports[port_id++]);
@@ -635,26 +598,21 @@ namespace lsp
             // Bind filters
             lsp_trace("Binding filter ports");
 
-            for (size_t i=0; i<nFilters; ++i)
-            {
+
                 for (size_t j=0; j<channels; ++j)
                 {
-                    eq_filter_t *f      = &vChannels[j].vFilters[i];
+                    eq_filter_t *f      = &vChannels[j].vFilters[0];
 
                     if ((nMode == EQ_STEREO) && (j > 0))
                     {
                         // 1 port controls 2 filters
-                        eq_filter_t *sf     = &vChannels[0].vFilters[i];
+                        eq_filter_t *sf     = &vChannels[0].vFilters[0];
                         f->pType            = sf->pType;
                         f->pMode            = sf->pMode;
                         f->pSlope           = sf->pSlope;
-                        f->pSolo            = sf->pSolo;
-                        f->pMute            = sf->pMute;
                         f->pFreq            = sf->pFreq;
                         f->pGain            = sf->pGain;
                         f->pQuality         = sf->pQuality;
-                        f->pActivity        = sf->pActivity;
-                        f->pTrAmp           = NULL;
                     }
                     else
                     {
@@ -662,17 +620,12 @@ namespace lsp
                         f->pType        = TRACE_PORT(ports[port_id++]);
                         f->pMode        = TRACE_PORT(ports[port_id++]);
                         f->pSlope       = TRACE_PORT(ports[port_id++]);
-                        f->pSolo        = TRACE_PORT(ports[port_id++]);
-                        f->pMute        = TRACE_PORT(ports[port_id++]);
                         f->pFreq        = TRACE_PORT(ports[port_id++]);
                         f->pGain        = TRACE_PORT(ports[port_id++]);
                         f->pQuality     = TRACE_PORT(ports[port_id++]);
-                        TRACE_PORT(ports[port_id++]); // Skip hue
-                        f->pActivity    = TRACE_PORT(ports[port_id++]);
-                        f->pTrAmp       = TRACE_PORT(ports[port_id++]);
                     }
                 }
-            }
+
         }
 
         void filter::ui_activated()
@@ -741,19 +694,6 @@ namespace lsp
             sAnalyzer.destroy();
         }
 
-        bool filter::filter_inspect_can_be_enabled(eq_channel_t *c, eq_filter_t *f)
-        {
-            if (f == NULL)
-                return false;
-
-            bool mute       = f->pMute->value() >= 0.5f;
-            if ((mute) || ((c->bHasSolo) && (!f->bSolo)))
-                return false;
-
-            // The filter should be enabled
-            return size_t(f->pType->value()) != meta::filter_metadata::EQF_OFF;
-        }
-
         void filter::update_settings()
         {
             // Check sample rate
@@ -788,9 +728,6 @@ namespace lsp
                 bal[1]         *= out_gain;
             }
 
-            // Listen
-            if (pListen != NULL)
-                bListen     = pListen->value() >= 0.5f;
 
             size_t channels     = (nMode == EQ_MONO) ? 1 : 2;
 
@@ -812,34 +749,7 @@ namespace lsp
             if (pShiftGain != NULL)
                 sAnalyzer.set_shift(pShiftGain->value() * 100.0f);
 
-            // Process the 'Solo' button
-            for (size_t i=0; i<channels; ++i)
-            {
-                eq_channel_t *c     = &vChannels[i];
-                c->bHasSolo         = false;
 
-                // Update each filter configuration except the inspection ones
-                for (size_t j=0; j<nFilters; ++j)
-                {
-                    eq_filter_t *f      = &c->vFilters[j];
-                    f->bSolo            = f->pSolo->value() >= 0.5f;
-                    if (f->bSolo)
-                        c->bHasSolo         = true;
-                }
-            }
-
-            // Check that inspection mode is ON
-            ssize_t i_value         = (ui_active()) ? ssize_t(pInspect->value()) : -1;
-            size_t i_channel        = i_value / nFilters;
-            size_t i_filter         = i_value % nFilters;
-            if ((i_value >= 0) && (i_channel < channels))
-            {
-                eq_channel_t *c     = &vChannels[i_channel];
-                if (!filter_inspect_can_be_enabled(c, &c->vFilters[i_filter]))
-                    i_value             = -1;
-            }
-            else
-                i_value             = -1;
 
             // Update equalizer mode
             dspu::equalizer_mode_t eq_mode  = get_eq_mode(pEqMode->value());
@@ -851,7 +761,6 @@ namespace lsp
             for (size_t i=0; i<channels; ++i)
             {
                 eq_channel_t *c     = &vChannels[i];
-                bool visible        = (c->pVisible == NULL) ?  true : (c->pVisible->value() >= 0.5f);
 
                 // Change the operating mode for the equalizer
                 if (c->sEqualizer.mode() != eq_mode)
@@ -866,7 +775,6 @@ namespace lsp
                 c->fOutGain         = bal[i];
                 if (c->pInGain != NULL)
                     c->fInGain          = c->pInGain->value();
-                c->fPitch           = dspu::semitones_to_frequency_shift(c->pPitch->value());
 
                 // Update each filter configuration depending on solo except the inspection one
                 for (size_t j=0; j<nFilters; ++j)
@@ -877,38 +785,11 @@ namespace lsp
                     dspu::filter_params_t *op = &f->sOldFP;
 
                     // Compute filter params
-                    bool mute           = f->pMute->value() >= 0.5f;
-                    if ((mute) || ((c->bHasSolo) && (!f->bSolo)))
-                    {
-                        fp->nType           = dspu::FLT_NONE;
-                        fp->nSlope          = 1;
-                    }
-                    else if (i_value >= 0)
-                    {
-                        if (j != i_filter)
-                        {
-                            fp->nType           = dspu::FLT_NONE;
-                            fp->nSlope          = 1;
-                        }
-                        else if (((nMode == EQ_LEFT_RIGHT) || (nMode == EQ_MID_SIDE)) && (i != i_channel))
-                        {
-                            fp->nType           = dspu::FLT_NONE;
-                            fp->nSlope          = 1;
-                        }
-                        else
-                        {
-                            fp->nType           = f->pType->value();
-                            fp->nSlope          = f->pSlope->value() + 1;
-                            decode_filter(&fp->nType, &fp->nSlope, f->pMode->value());
-                        }
-                    }
-                    else
-                    {
-                        fp->nType     		= f->pType->value();
-                        fp->nSlope          = f->pSlope->value() + 1;
-                        decode_filter(&fp->nType, &fp->nSlope, f->pMode->value());
-                    }
-                    fp->fFreq           = f->pFreq->value() * c->fPitch;
+                    fp->nType           = f->pType->value();
+                    fp->nSlope          = f->pSlope->value() + 1;
+                    decode_filter(&fp->nType, &fp->nSlope, f->pMode->value());
+
+                    fp->fFreq           = f->pFreq->value();
                 #ifdef LSP_NO_EXPERIMENTAL
                     fp->fFreq2          = fp->fFreq;
                 #else
@@ -939,98 +820,7 @@ namespace lsp
                             bSmoothMode     = true;
                     }
 
-                    // Output filter activity
-                    if (f->pActivity != NULL)
-                        f->pActivity->set_value(((visible) && (fp->nType != dspu::FLT_NONE)) ? 1.0f : 0.0f);
                 }
-
-                // Update the settings of the inspection filter
-                {
-                    eq_filter_t *f      = &c->vFilters[nFilters];
-                    f->sOldFP           = f->sFP;
-                    dspu::filter_params_t *fp = &f->sFP;
-                    dspu::filter_params_t *op = &f->sOldFP;
-                    float f_range       = expf(M_LN2 * 0.5f * pInspectRange->value());
-                    size_t xi_channel   = ((nMode == EQ_LEFT_RIGHT) || (nMode == EQ_MID_SIDE)) ? i_channel : i;
-
-                    // Set filter parameters (for mono and stereo do it for both channels)
-                    if ((i_value >= 0) && (xi_channel == i))
-                    {
-                        eq_filter_t *sf     = &c->vFilters[i_filter];
-                        float f1            = sf->sFP.fFreq / f_range;
-                        float f2            = sf->sFP.fFreq * f_range;
-                        fp->fGain           = 1.0f;
-
-                        switch (ssize_t(sf->pType->value()))
-                        {
-                            case meta::filter_metadata::EQF_BELL:
-                            case meta::filter_metadata::EQF_RESONANCE:
-                            case meta::filter_metadata::EQF_NOTCH:
-                                fp->nType       = dspu::FLT_BT_BWC_BANDPASS;
-                                fp->fFreq       = f1;
-                                fp->fFreq2      = f2;
-                                fp->nSlope      = 4;
-                                fp->fQuality    = 0.707f;
-                                break;
-
-                            case meta::filter_metadata::EQF_HISHELF:
-                                fp->nType       = dspu::FLT_BT_BWC_HIPASS;
-                                fp->fFreq       = f1;
-                                fp->fFreq2      = f1;
-                                fp->nSlope      = 8;
-                                fp->fQuality    = 0.707f;
-                                break;
-
-                            case meta::filter_metadata::EQF_LOSHELF:
-                                fp->nType       = dspu::FLT_BT_BWC_LOPASS;
-                                fp->fFreq       = f2;
-                                fp->fFreq2      = f2;
-                                fp->nSlope      = 8;
-                                fp->fQuality    = 0.707f;
-                                break;
-
-                            default:
-                                fp->nType       = dspu::FLT_NONE;
-                                fp->nSlope      = 1;
-                                fp->fQuality    = 0.0f;
-                                break;
-                        }
-                    }
-                    else if (i_value >= 0)
-                    {
-                        c->fInGain      = 0.0f; // Mute the channel without the inspected filter
-                        fp->nType       = dspu::FLT_NONE;
-                        fp->nSlope      = 1;
-                    }
-                    else
-                    {
-                        fp->nType       = dspu::FLT_NONE;
-                        fp->nSlope      = 1;
-                    }
-
-                    // Update the filter settings
-                    c->sEqualizer.limit_params(nFilters, fp);
-                    bool type_changed   =
-                        (fp->nType != op->nType) ||
-                        (fp->nSlope != op->nSlope);
-                    bool param_changed  =
-                        (fp->fGain != op->fGain) ||
-                        (fp->fFreq != op->fFreq) ||
-                        (fp->fFreq2 != op->fFreq2) ||
-                        (fp->fQuality != op->fQuality);
-
-                    // Apply filter params if theey have changed
-                    if ((type_changed) || (param_changed))
-                    {
-                        c->sEqualizer.set_params(nFilters, fp);
-                        f->nSync            = CS_UPDATE;
-
-                        if (type_changed)
-                            mode_changed    = true;
-                        if (param_changed)
-                            bSmoothMode     = true;
-                    }
-                } /* ivalue */
             }
 
             // Do not enable smooth mode if significant changes have been applied
@@ -1135,27 +925,8 @@ namespace lsp
                     c->sDryDelay.process(c->vDryBuf, c->vIn, to_process);
                 }
 
-                // Pre-process data
-                if (nMode == EQ_MID_SIDE)
-                {
-                    if (!bListen)
-                    {
-                        vChannels[0].pInMeter->set_value(dsp::abs_max(vChannels[0].vIn, to_process));
-                        vChannels[1].pInMeter->set_value(dsp::abs_max(vChannels[1].vIn, to_process));
-                    }
-                    dsp::lr_to_ms(vChannels[0].vBuffer, vChannels[1].vBuffer, vChannels[0].vIn, vChannels[1].vIn, to_process);
-                    if (bListen)
-                    {
-                        vChannels[0].pInMeter->set_value(dsp::abs_max(vChannels[0].vBuffer, to_process));
-                        vChannels[1].pInMeter->set_value(dsp::abs_max(vChannels[1].vBuffer, to_process));
-                    }
-                    if (fGainIn != 1.0f)
-                    {
-                        dsp::mul_k2(vChannels[0].vBuffer, fGainIn, to_process);
-                        dsp::mul_k2(vChannels[1].vBuffer, fGainIn, to_process);
-                    }
-                }
-                else if (nMode == EQ_MONO)
+
+                if (nMode == EQ_MONO)
                 {
                     vChannels[0].pInMeter->set_value(dsp::abs_max(vChannels[0].vIn, to_process));
                     if (fGainIn != 1.0f)
@@ -1190,10 +961,6 @@ namespace lsp
                 // Do FFT in 'POST'-position
                 if (fft_pos == FFTP_POST)
                     sAnalyzer.process(analyze, to_process);
-
-                // Post-process data (if needed)
-                if ((nMode == EQ_MID_SIDE) && (!bListen))
-                    dsp::ms_to_lr(vChannels[0].vBuffer, vChannels[1].vBuffer, vChannels[0].vBuffer, vChannels[1].vBuffer, to_process);
 
                 // Process data via bypass
                 for (size_t i=0; i<channels; ++i)
@@ -1270,32 +1037,6 @@ namespace lsp
                         c->nSync    = CS_UPDATE;
                     }
 
-                    // Output amplification curve
-                    if ((f->pTrAmp != NULL) && (f->nSync & CS_SYNC_AMP))
-                    {
-                        plug::mesh_t *mesh  = f->pTrAmp->buffer<plug::mesh_t>();
-                        if ((mesh != NULL) && (mesh->isEmpty()))
-                        {
-                            if (c->sEqualizer.filter_active(j))
-                            {
-                                // Add extra points
-                                mesh->pvData[0][0] = SPEC_FREQ_MIN*0.5f;
-                                mesh->pvData[0][meta::filter_metadata::MESH_POINTS+1] = SPEC_FREQ_MAX*2.0;
-                                mesh->pvData[1][0] = 1.0f;
-                                mesh->pvData[1][meta::filter_metadata::MESH_POINTS+1] = 1.0f;
-
-                                // Fill mesh
-                                dsp::copy(&mesh->pvData[0][1], vFreqs, meta::filter_metadata::MESH_POINTS);
-                                dsp::complex_mod(&mesh->pvData[1][1], f->vTrRe, f->vTrIm, meta::filter_metadata::MESH_POINTS);
-
-                                mesh->data(2, meta::filter_metadata::FILTER_MESH_POINTS);
-                            }
-                            else
-                                mesh->data(2, 0);
-
-                            f->nSync           &= ~CS_SYNC_AMP;
-                        }
-                    }
                 }
 
                 // Synchronize main transfer function of the channel
@@ -1464,7 +1205,6 @@ namespace lsp
                 v->write("vTrRe", f->vTrRe);
                 v->write("vTrIm", f->vTrIm);
                 v->write("nSync", f->nSync);
-                v->write("bSolo", f->bSolo);
 
                 dump_filter_params(v, "sOldFP", &f->sOldFP);
                 dump_filter_params(v, "sFP", &f->sFP);
@@ -1473,12 +1213,8 @@ namespace lsp
                 v->write("pMode", f->pMode);
                 v->write("pFreq", f->pFreq);
                 v->write("pSlope", f->pSlope);
-                v->write("pSolo", f->pSolo);
-                v->write("pMute", f->pMute);
                 v->write("pGain", f->pGain);
                 v->write("pQuality", f->pQuality);
-                v->write("pActivity", f->pActivity);
-                v->write("pTrAmp", f->pTrAmp);
             }
             v->end_object();
         }
@@ -1494,7 +1230,6 @@ namespace lsp
                 v->write("nLatency", c->nLatency);
                 v->write("fInGain", c->fInGain);
                 v->write("fOutGain", c->fOutGain);
-                v->write("fPitch", c->fPitch);
                 v->begin_array("vFilters", c->vFilters, nFilters+1);
                 {
                     for (size_t i=0; i<=nFilters; ++i)
@@ -1506,7 +1241,6 @@ namespace lsp
                 v->write("vIn", c->vIn);
                 v->write("vOut", c->vOut);
                 v->write("nSync", c->nSync);
-                v->write("bHasSolo", c->bHasSolo);
 
                 v->write("vTrRe", c->vTrRe);
                 v->write("vTrIm", c->vTrIm);
@@ -1515,9 +1249,7 @@ namespace lsp
                 v->write("pOut", c->pOut);
                 v->write("pInGain", c->pInGain);
                 v->write("pTrAmp", c->pTrAmp);
-                v->write("pPitch", c->pPitch);
                 v->write("pFft", c->pFft);
-                v->write("pVisible", c->pVisible);
                 v->write("pInMeter", c->pInMeter);
                 v->write("pOutMeter", c->pOutMeter);
             }
@@ -1543,7 +1275,7 @@ namespace lsp
             v->write("vIndexes", vIndexes);
             v->write("fGainIn", fGainIn);
             v->write("fZoom", fZoom);
-            v->write("bListen", bListen);
+            //v->write("bListen", bListen);
             v->write("bSmoothMode", bSmoothMode);
             v->write("nFftPosition", nFftPosition);
             v->write_object("pIDisplay", pIDisplay);
@@ -1553,7 +1285,7 @@ namespace lsp
             v->write("pGainOut", pGainOut);
             v->write("pFftMode", pFftMode);
             v->write("pReactivity", pReactivity);
-            v->write("pListen", pListen);
+            //v->write("pListen", pListen);
             v->write("pShiftGain", pShiftGain);
             v->write("pZoom", pZoom);
             v->write("pEqMode", pEqMode);

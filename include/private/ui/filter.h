@@ -46,17 +46,12 @@ namespace lsp
                     ui::IPort          *pMode;
                     ui::IPort          *pSlope;
                     ui::IPort          *pFreq;
-                    ui::IPort          *pSolo;
-                    ui::IPort          *pMute;
                     ui::IPort          *pQuality;
                     ui::IPort          *pGain;
 
                     tk::Widget         *wGrid;          // Grid associated with the filter
                     tk::GraphDot       *wDot;           // Graph dot for editing
                     tk::GraphText      *wNote;          // Text with note and frequency
-                    tk::Button         *wInspect;       // Inspect button
-                    tk::Button         *wSolo;          // Solo button
-                    tk::Button         *wMute;          // Mute button
                     tk::ComboBox       *wType;          // Filter type
                     tk::ComboBox       *wMode;          // Filter mode
                     tk::ComboBox       *wSlope;         // Filter slope
@@ -67,12 +62,9 @@ namespace lsp
 
             protected:
                 ui::IPort          *pRewPath;
-                ui::IPort          *pInspect;           // Inspected filter index
-                ui::IPort          *pAutoInspect;       // Automatically inspect the filter
                 ui::IPort          *pSelector;          // Filter selector
                 tk::FileDialog     *pRewImport;
                 tk::Graph          *wGraph;
-                tk::Button         *wInspectReset;      // Inspect reset button
                 tk::Timer           sEditTimer;         // Edit timer
                 const char        **fmtStrings;
                 ssize_t             nXAxisIndex;
@@ -83,10 +75,6 @@ namespace lsp
                 filter_t           *pCurrDot;           // Current filter associated with dot
                 filter_t           *pCurrNote;          // Current filter note
                 tk::Menu           *wFilterMenu;        // Popup menu for filter properties
-                tk::MenuItem       *wFilterInspect;
-                tk::MenuItem       *wFilterSolo;
-                tk::MenuItem       *wFilterMute;
-                tk::MenuItem       *wFilterSwitch;      // Switch filter between Left/Right and Mid/Side
                 lltl::parray<tk::MenuItem> vFilterTypes;
                 lltl::parray<tk::MenuItem> vFilterModes;
                 lltl::parray<tk::MenuItem> vFilterSlopes;
@@ -135,7 +123,6 @@ namespace lsp
                 void            on_filter_dot_right_click(tk::Widget *dot, ssize_t x, ssize_t y);
                 void            on_filter_menu_item_submit(tk::MenuItem *mi);
                 void            on_filter_menu_item_selected(lltl::parray<tk::MenuItem> *list, ui::IPort *port, tk::MenuItem *mi);
-                void            on_filter_inspect_submit(tk::Widget *button);
                 void            on_begin_filter_edit(tk::Widget *w);
                 void            on_filter_change(tk::Widget *w);
                 void            on_filter_edit_timer();
@@ -163,15 +150,9 @@ namespace lsp
 
                 filter_t       *find_filter_by_widget(tk::Widget *widget);
                 filter_t       *find_filter_by_rect(tk::Widget *grid, ssize_t x, ssize_t y);
-                filter_t       *find_filter_by_mute(ui::IPort *port);
                 tk::Widget     *find_filter_grid(filter_t *f);
                 void            add_filters();
                 void            create_filter_menu();
-                void            select_inspected_filter(filter_t *f, bool commit);
-                void            toggle_inspected_filter(filter_t *f, bool commit);
-                bool            filter_inspect_can_be_enabled(filter_t *f);
-                void            sync_filter_inspect_state();
-                bool            is_filter_inspect_port(ui::IPort *port);
                 void            bind_filter_edit(tk::Widget *w);
                 void            update_filter_note_text();
                 filter_t       *find_switchable_filter(filter_t *filter);

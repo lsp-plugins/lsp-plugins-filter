@@ -66,11 +66,6 @@ namespace lsp
             static constexpr float          PITCH_DFL           = 0.0f;
             static constexpr float          PITCH_STEP          = 0.01f;
 
-            static constexpr float          INSPECT_MIN         = 0.0f;
-            static constexpr float          INSPECT_MAX         = 5.0f;
-            static constexpr float          INSPECT_DFL         = 1.0f;
-            static constexpr float          INSPECT_STEP        = 0.005f;
-
             static constexpr size_t         REFRESH_RATE        = 20;
 
             enum eq_filter_t
@@ -115,14 +110,8 @@ namespace lsp
             };
         };
 
-        extern const meta::plugin_t filter_x16_mono;
-        extern const meta::plugin_t filter_x16_stereo;
-        extern const meta::plugin_t filter_x16_lr;
-        extern const meta::plugin_t filter_x16_ms;
-        extern const meta::plugin_t filter_x32_mono;
-        extern const meta::plugin_t filter_x32_stereo;
-        extern const meta::plugin_t filter_x32_lr;
-        extern const meta::plugin_t filter_x32_ms;
+        extern const meta::plugin_t filter_mono;
+        extern const meta::plugin_t filter_stereo;
 
     } // namespace meta
 } // namespace lsp

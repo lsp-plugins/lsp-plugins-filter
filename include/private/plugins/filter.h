@@ -44,9 +44,7 @@ namespace lsp
                 enum eq_mode_t
                 {
                     EQ_MONO,
-                    EQ_STEREO,
-                    EQ_LEFT_RIGHT,
-                    EQ_MID_SIDE
+                    EQ_STEREO
                 };
 
             protected:
@@ -68,7 +66,6 @@ namespace lsp
                     float              *vTrRe;          // Transfer function (real part)
                     float              *vTrIm;          // Transfer function (imaginary part)
                     size_t              nSync;          // Chart state
-                    bool                bSolo;          // Soloing filter
                     dspu::filter_params_t sOldFP;       // Old filter parameters
                     dspu::filter_params_t sFP;          // Filter parameters
 
@@ -76,12 +73,8 @@ namespace lsp
                     plug::IPort        *pMode;          // Filter mode
                     plug::IPort        *pFreq;          // Filter frequency
                     plug::IPort        *pSlope;         // Filter slope
-                    plug::IPort        *pSolo;          // Solo port
-                    plug::IPort        *pMute;          // Mute port
                     plug::IPort        *pGain;          // Filter gain
                     plug::IPort        *pQuality;       // Quality factor
-                    plug::IPort        *pActivity;      // Filter activity flag
-                    plug::IPort        *pTrAmp;         // Amplitude chart
                 } eq_filter_t;
 
                 typedef struct eq_channel_t
@@ -93,14 +86,12 @@ namespace lsp
                     size_t              nLatency;       // Latency of the channel
                     float               fInGain;        // Input gain
                     float               fOutGain;       // Output gain
-                    float               fPitch;         // Frequency shift
                     eq_filter_t        *vFilters;       // List of filters
                     float              *vDryBuf;        // Dry buffer
                     float              *vBuffer;        // Buffer for temporary data
                     float              *vIn;            // Input buffer
                     float              *vOut;           // Output buffer
                     size_t              nSync;          // Chart state
-                    bool                bHasSolo;       // Channel has soloing filter
 
                     float              *vTrRe;          // Transfer function (real part)
                     float              *vTrIm;          // Transfer function (imaginary part)
@@ -109,7 +100,6 @@ namespace lsp
                     plug::IPort        *pOut;           // Output port
                     plug::IPort        *pInGain;        // Input gain
                     plug::IPort        *pTrAmp;         // Amplitude chart
-                    plug::IPort        *pPitch;         // Frequency shift
                     plug::IPort        *pFft;           // FFT chart
                     plug::IPort        *pVisible;       // Visibility flag
                     plug::IPort        *pInMeter;       // Output level meter
@@ -125,7 +115,6 @@ namespace lsp
                 uint32_t           *vIndexes;               // FFT indexes
                 float               fGainIn;                // Input gain
                 float               fZoom;                  // Zoom gain
-                bool                bListen;                // Listen mode (only for MS filter)
                 bool                bSmoothMode;            // Smooth mode for the equalizer
                 fft_position_t      nFftPosition;           // FFT position
                 core::IDBuffer     *pIDisplay;              // Inline display buffer
@@ -135,13 +124,10 @@ namespace lsp
                 plug::IPort        *pGainOut;               // Output gain port
                 plug::IPort        *pFftMode;               // FFT mode
                 plug::IPort        *pReactivity;            // FFT reactivity
-                plug::IPort        *pListen;                // Listen mode (only for MS equalizer)
                 plug::IPort        *pShiftGain;             // Shift gain
                 plug::IPort        *pZoom;                  // Graph zoom
                 plug::IPort        *pEqMode;                // Equalizer mode
                 plug::IPort        *pBalance;               // Output balance
-                plug::IPort        *pInspect;               // Inspected filter index
-                plug::IPort        *pInspectRange;          // Inspecting range
 
             protected:
                 static inline dspu::equalizer_mode_t get_eq_mode(ssize_t mode);
@@ -155,8 +141,6 @@ namespace lsp
                 void                dump_channel(dspu::IStateDumper *v, const eq_channel_t *c) const;
                 static void         dump_filter(dspu::IStateDumper *v, const eq_filter_t *f);
                 static void         dump_filter_params(dspu::IStateDumper *v, const char *id, const dspu::filter_params_t *fp);
-
-                bool                filter_inspect_can_be_enabled(eq_channel_t *c, eq_filter_t *f);
 
             public:
                 explicit filter(const meta::plugin_t *metadata, size_t filters, size_t mode);

@@ -37,14 +37,8 @@ namespace lsp
         // Plugin UI factory
         static const meta::plugin_t *plugin_uis[] =
         {
-            &meta::filter_x16_mono,
-            &meta::filter_x16_stereo,
-            &meta::filter_x16_lr,
-            &meta::filter_x16_ms,
-            &meta::filter_x32_mono,
-            &meta::filter_x32_stereo,
-            &meta::filter_x32_lr,
-            &meta::filter_x32_ms
+            &meta::filter_mono,
+            &meta::filter_stereo
         };
 
         static ui::Module *ui_factory(const meta::plugin_t *meta)
@@ -52,7 +46,7 @@ namespace lsp
             return new filter_ui(meta);
         }
 
-        static ui::Factory factory(ui_factory, plugin_uis, 8);
+        static ui::Factory factory(ui_factory, plugin_uis, 2);
 
         static const tk::tether_t dot_menu_tether_list[] =
         {
@@ -66,20 +60,6 @@ namespace lsp
         static const char *fmt_strings[] =
         {
             "%s_%d",
-            NULL
-        };
-
-        static const char *fmt_strings_lr[] =
-        {
-            "%sl_%d",
-            "%sr_%d",
-            NULL
-        };
-
-        static const char *fmt_strings_ms[] =
-        {
-            "%sm_%d",
-            "%ss_%d",
             NULL
         };
 
@@ -99,12 +79,9 @@ namespace lsp
         filter_ui::filter_ui(const meta::plugin_t *meta): ui::Module(meta)
         {
             pRewPath        = NULL;
-            pInspect        = NULL;
-            pAutoInspect    = NULL;
             pSelector       = NULL;
             pRewImport      = NULL;
             wGraph          = NULL;
-            wInspectReset   = NULL;
             fmtStrings      = fmt_strings;
             nSplitChannels  = 1;
             nXAxisIndex     = -1;
@@ -113,30 +90,7 @@ namespace lsp
             pCurrDot        = NULL;
             pCurrNote       = NULL;
             wFilterMenu     = NULL;
-            wFilterInspect  = NULL;
-            wFilterSolo     = NULL;
-            wFilterMute     = NULL;
-            wFilterSwitch   = NULL;
-
-            if ((!strcmp(meta->uid, meta::filter_x16_lr.uid)) ||
-                (!strcmp(meta->uid, meta::filter_x32_lr.uid)))
-            {
-                fmtStrings      = fmt_strings_lr;
-                nSplitChannels  = 2;
-            }
-            else if ((!strcmp(meta->uid, meta::filter_x16_ms.uid)) ||
-                 (!strcmp(meta->uid, meta::filter_x32_ms.uid)))
-            {
-                fmtStrings      = fmt_strings_ms;
-                nSplitChannels  = 2;
-            }
-
-            nFilters        = 16;
-            if ((!strcmp(meta->uid, meta::filter_x32_lr.uid)) ||
-                (!strcmp(meta->uid, meta::filter_x32_mono.uid)) ||
-                (!strcmp(meta->uid, meta::filter_x32_ms.uid)) ||
-                (!strcmp(meta->uid, meta::filter_x32_stereo.uid)))
-                nFilters       = 32;
+            nFilters        = 1;
         }
 
         filter_ui::~filter_ui()
@@ -297,18 +251,6 @@ namespace lsp
             return STATUS_OK;
         }
 
-        status_t filter_ui::slot_filter_inspect_submit(tk::Widget *sender, void *ptr, void *data)
-        {
-            // Fetch parameters
-            filter_ui *_this = static_cast<filter_ui *>(ptr);
-            if (_this == NULL)
-                return STATUS_BAD_STATE;
-
-            // Process the event
-            _this->on_filter_inspect_submit(sender);
-
-            return STATUS_OK;
-        }
 
         status_t filter_ui::slot_filter_begin_edit(tk::Widget *sender, void *ptr, void *data)
         {
@@ -434,9 +376,6 @@ namespace lsp
                 filter_t *d = vFilters.uget(i);
                 if ((d->wDot == widget) ||
                     (d->wNote == widget) ||
-                    (d->wInspect == widget) ||
-                    (d->wSolo == widget) ||
-                    (d->wMute == widget) ||
                     (d->wType == widget) ||
                     (d->wMode == widget) ||
                     (d->wSlope == widget) ||
@@ -463,8 +402,6 @@ namespace lsp
 
         void filter_ui::on_begin_filter_edit(tk::Widget *w)
         {
-            if (pInspect == NULL)
-                return;
 
             // Cancel the previously launched timer
             pCurrDot = NULL;
@@ -475,9 +412,6 @@ namespace lsp
             if (f == NULL)
                 return;
 
-            // Check the auto-inspect mode
-            if (pAutoInspect->value() < 0.5f)
-                return;
 
             // Remember the selected filter and launch the timer
             pCurrDot    = f;
@@ -486,23 +420,17 @@ namespace lsp
 
         void filter_ui::on_filter_edit_timer()
         {
-            if ((pInspect == NULL) || (pCurrDot == NULL))
-                return;
-            select_inspected_filter(pCurrDot, true);
+            //select_inspected_filter(pCurrDot, true);
         }
 
         void filter_ui::on_filter_change(tk::Widget *w)
         {
-            if ((pCurrDot == NULL) || (pInspect == NULL))
+            if (pCurrDot == NULL)
                 return;
 
             // Cancel the previously launched timer
             sEditTimer.cancel();
 
-            // Check the auto-inspect mode
-            if (pAutoInspect->value() < 0.5f)
-                return;
-            select_inspected_filter(pCurrDot, true);
         }
 
         void filter_ui::on_end_filter_edit(tk::Widget *w)
@@ -515,13 +443,11 @@ namespace lsp
                 return;
             lsp_finally { pCurrDot = NULL; };
 
-            // Clear the inspected filter
-            select_inspected_filter(NULL, true);
         }
 
         void filter_ui::on_filter_mouse_in(filter_t *f)
         {
-            pCurrNote   = (f->pMute->value() >= 0.5) ? NULL : f;
+            pCurrNote   = f;
             f->bMouseIn = true;
             update_filter_note_text();
         }
@@ -540,11 +466,8 @@ namespace lsp
 
         void filter_ui::update_filter_note_text()
         {
-            // Determine which frequency/note to show: of inspected filter or of selected filter
-            ssize_t inspect = (pInspect != NULL) ? ssize_t(pInspect->value()) : -1;
-            filter_t *f = (inspect >= 0) ? vFilters.uget(inspect) : NULL;
-            if (f == NULL)
-                f = pCurrNote;
+
+            filter_t *f  = pCurrNote;
 
             // Commit current filter pointer and update note text
             for (size_t i=0, n=vFilters.size(); i<n; ++i)
@@ -658,9 +581,6 @@ namespace lsp
             tk::Widget *list[] =
             {
                 f->wNote,
-                f->wInspect,
-                f->wSolo,
-                f->wMute,
                 f->wType,
                 f->wSlope,
                 f->wGain,
@@ -702,9 +622,6 @@ namespace lsp
 
                     f.wDot          = find_filter_widget<tk::GraphDot>(*fmt, "filter_dot", port_id);
                     f.wNote         = find_filter_widget<tk::GraphText>(*fmt, "filter_note", port_id);
-                    f.wInspect      = find_filter_widget<tk::Button>(*fmt, "filter_inspect", port_id);
-                    f.wSolo         = find_filter_widget<tk::Button>(*fmt, "filter_solo", port_id);
-                    f.wMute         = find_filter_widget<tk::Button>(*fmt, "filter_mute", port_id);
                     f.wType         = find_filter_widget<tk::ComboBox>(*fmt, "filter_type", port_id);
                     f.wMode         = find_filter_widget<tk::ComboBox>(*fmt, "filter_mode", port_id);
                     f.wSlope        = find_filter_widget<tk::ComboBox>(*fmt, "filter_slope", port_id);
@@ -717,20 +634,13 @@ namespace lsp
                     f.pMode         = find_port(*fmt, "fm", port_id);
                     f.pSlope        = find_port(*fmt, "s", port_id);
                     f.pFreq         = find_port(*fmt, "f", port_id);
-                    f.pSolo         = find_port(*fmt, "xs", port_id);
-                    f.pMute         = find_port(*fmt, "xm", port_id);
                     f.pGain         = find_port(*fmt, "g", port_id);
                     f.pQuality      = find_port(*fmt, "q", port_id);
 
                     if (f.wDot != NULL)
                         f.wDot->slots()->bind(tk::SLOT_MOUSE_CLICK, slot_filter_dot_click, this);
-                    if (f.wInspect != NULL)
-                        f.wInspect->slots()->bind(tk::SLOT_SUBMIT, slot_filter_inspect_submit, this);
 
                     bind_filter_edit(f.wDot);
-                    bind_filter_edit(f.wInspect);
-                    bind_filter_edit(f.wSolo);
-                    bind_filter_edit(f.wMute);
                     bind_filter_edit(f.wType);
                     bind_filter_edit(f.wMode);
                     bind_filter_edit(f.wSlope);
@@ -742,10 +652,6 @@ namespace lsp
                         f.pType->bind(this);
                     if (f.pFreq != NULL)
                         f.pFreq->bind(this);
-                    if (f.pSolo != NULL)
-                        f.pSolo->bind(this);
-                    if (f.pMute != NULL)
-                        f.pMute->bind(this);
 
                     vFilters.add(&f);
                 }
@@ -877,26 +783,12 @@ namespace lsp
             if ((create_submenu(root, "labels.slope", &vFilterSlopes, dot->pSlope->metadata())) == NULL)
                 return;
 
-            if ((wFilterInspect = create_menu_item(root, "labels.chan.inspect")) == NULL)
-                return;
-            wFilterInspect->type()->set_check();
-            wFilterInspect->slots()->bind(tk::SLOT_SUBMIT, slot_filter_menu_submit, this);
-
-            if ((wFilterSolo = create_menu_item(root, "labels.chan.solo")) == NULL)
-                return;
-            wFilterSolo->type()->set_check();
-            wFilterSolo->slots()->bind(tk::SLOT_SUBMIT, slot_filter_menu_submit, this);
-
-            if ((wFilterMute = create_menu_item(root, "labels.chan.mute")) == NULL)
-                return;
-
-            wFilterMute->type()->set_check();
-            wFilterMute->slots()->bind(tk::SLOT_SUBMIT, slot_filter_menu_submit, this);
+            /*
 
             if ((wFilterSwitch = create_menu_item(root, "")) == NULL)
                 return;
 
-            wFilterSwitch->slots()->bind(tk::SLOT_SUBMIT, slot_filter_menu_submit, this);
+            wFilterSwitch->slots()->bind(tk::SLOT_SUBMIT, slot_filter_menu_submit, this);*/
 
             wFilterMenu    = root;
         }
@@ -925,12 +817,6 @@ namespace lsp
 
             // Find REW port
             pRewPath            = pWrapper->port(UI_CONFIG_PORT_PREFIX UI_DLG_REW_PATH_ID);
-            pInspect            = pWrapper->port("insp_id");
-            if (pInspect != NULL)
-                pInspect->bind(this);
-            pAutoInspect        = pWrapper->port("insp_on");
-            if (pAutoInspect != NULL)
-                pAutoInspect->bind(this);
             pSelector           = pWrapper->port("fsel");
 
             // Add subwidgets
@@ -958,16 +844,9 @@ namespace lsp
                 nYAxisIndex         = find_axis("para_eq_oy");
             }
 
-            wInspectReset       = wnd->widgets()->get<tk::Button>("filter_inspect_reset");
-            if (wInspectReset != NULL)
-                wInspectReset->slots()->bind(tk::SLOT_SUBMIT, slot_filter_inspect_submit, this);
-
             // Bind the timer
             sEditTimer.bind(pDisplay);
             sEditTimer.set_handler(slot_filter_edit_timer, this);
-
-            // Update state
-            sync_filter_inspect_state();
 
             return STATUS_OK;
         }
@@ -976,13 +855,6 @@ namespace lsp
         {
             // Cancel the edit timer
             sEditTimer.cancel();
-
-            // Force the inspect mode to be turned off
-            if (pInspect != NULL)
-            {
-                pInspect->set_value(-1.0f);
-                pInspect->notify_all();
-            }
 
             return ui::Module::pre_destroy();
         }
@@ -1042,26 +914,15 @@ namespace lsp
             on_filter_menu_item_selected(&vFilterTypes, pCurrDot->pType, mi);
             on_filter_menu_item_selected(&vFilterModes, pCurrDot->pMode, mi);
             on_filter_menu_item_selected(&vFilterSlopes, pCurrDot->pSlope, mi);
-            if ((mi == wFilterMute) && (pCurrDot->pMute != NULL))
-            {
-                pCurrDot->pMute->set_value((mi->checked()->get()) ? 0.0f : 1.0f);
-                pCurrDot->pMute->notify_all();
-            }
-            if ((mi == wFilterSolo) && (pCurrDot->pSolo != NULL))
-            {
-                pCurrDot->pSolo->set_value((mi->checked()->get()) ? 0.0f : 1.0f);
-                pCurrDot->pSolo->notify_all();
-            }
-            if (mi == wFilterSwitch)
-            {
+
+           /* if (mi == wFilterSwitch)
+            {*/
                 filter_t *alt_f     = find_switchable_filter(pCurrDot);
 
                 // Set-up alternate filter and disable current filter
                 transfer_port_value(alt_f->pMode, pCurrDot->pMode);
                 transfer_port_value(alt_f->pSlope, pCurrDot->pSlope);
                 transfer_port_value(alt_f->pFreq, pCurrDot->pFreq);
-                transfer_port_value(alt_f->pSolo, pCurrDot->pSolo);
-                transfer_port_value(alt_f->pMute, pCurrDot->pMute);
                 transfer_port_value(alt_f->pQuality, pCurrDot->pQuality);
                 transfer_port_value(alt_f->pGain, pCurrDot->pGain);
                 transfer_port_value(alt_f->pType, pCurrDot->pType);
@@ -1078,9 +939,7 @@ namespace lsp
 
                 // Update current filter
                 pCurrDot            = alt_f;
-            }
-            if (mi == wFilterInspect)
-                toggle_inspected_filter(pCurrDot, true);
+           // }
         }
 
         filter_ui::filter_t *filter_ui::find_switchable_filter(filter_t *filter)
@@ -1128,19 +987,8 @@ namespace lsp
             set_menu_items_checked(&vFilterModes, pCurrDot->pMode);
             set_menu_items_checked(&vFilterSlopes, pCurrDot->pSlope);
 
-            if (pInspect != NULL)
-            {
-                ssize_t inspect = pInspect->value();
-                ssize_t index   = vFilters.index_of(pCurrDot);
-                wFilterInspect->checked()->set(index == inspect);
-            }
-            else
-                wFilterInspect->checked()->set(false);
 
-            wFilterMute->checked()->set(pCurrDot->pMute->value() >= 0.5f);
-            wFilterSolo->checked()->set(pCurrDot->pSolo->value() >= 0.5f);
-
-            if (find_switchable_filter(pCurrDot) != NULL)
+            /*if (find_switchable_filter(pCurrDot) != NULL)
             {
                 LSPString id_type;
                 id_type.set_ascii(pCurrDot->pType->id());
@@ -1158,7 +1006,7 @@ namespace lsp
                     wFilterSwitch->visibility()->set(false);
             }
             else
-                wFilterSwitch->visibility()->set(false);
+                wFilterSwitch->visibility()->set(false);*/
 
             // Show the dot menu
             ws::rectangle_t r;
@@ -1242,112 +1090,6 @@ namespace lsp
             set_filter_quality(fid, mask, filter_quality);
             set_filter_enabled(fid, mask, true);
             set_filter_solo(fid, mask, false);
-        }
-
-        bool filter_ui::filter_inspect_can_be_enabled(filter_t *f)
-        {
-            if (f == NULL)
-                return false;
-
-            // The filter should not be muted
-            bool has_solo   = false;
-            for (size_t i=0, n=vFilters.size(); i<n; ++i)
-            {
-                filter_t *xf    = vFilters.uget(i);
-                if ((xf->pSolo != NULL) && (xf->pSolo->value() >= 0.5f))
-                {
-                    has_solo        = true;
-                    break;
-                }
-            }
-
-            bool mute       = (f->pMute != NULL) ? f->pMute->value() >= 0.5f : false;
-            bool solo       = (f->pSolo != NULL) ? f->pSolo->value() >= 0.5f : false;
-            if ((mute) || ((has_solo) && (!solo)))
-                return false;
-
-            // The filter should be enabled
-            size_t type     = (f->pType != NULL) ? size_t(f->pType->value()) : meta::filter_metadata::EQF_OFF;
-            return type != meta::filter_metadata::EQF_OFF;
-        }
-
-        void filter_ui::sync_filter_inspect_state()
-        {
-            if (pInspect == NULL)
-                return;
-
-            ssize_t index = pInspect->value();
-            filter_t *f = (index >= 0) ? vFilters.get(index) : NULL;
-            select_inspected_filter(f, false);
-        }
-
-        void filter_ui::select_inspected_filter(filter_t *f, bool commit)
-        {
-            bool auto_inspect = (pAutoInspect != NULL) && (pAutoInspect->value() >= 0.5f);
-
-            // Set the down state of inspect button for all filters
-            for (size_t i=0, n=vFilters.size(); i<n; ++i)
-            {
-                filter_t *xf    = vFilters.uget(i);
-                if (xf->wInspect != NULL)
-                    xf->wInspect->down()->set((f != NULL) ? (xf == f) : false);
-            }
-
-            // Update the inspection port
-            ssize_t inspect = (pInspect != NULL) ? ssize_t(pInspect->value()) : -1;
-            ssize_t index = (f != NULL) ? vFilters.index_of(f) : -1;
-
-            if ((pInspect != NULL) && (commit) && (inspect != index))
-            {
-                pInspect->set_value(index);
-                pInspect->notify_all();
-                inspect     = index;
-            }
-
-            if (wInspectReset != NULL)
-                wInspectReset->down()->set((!auto_inspect) && (inspect >= 0));
-            if ((pCurrDot == f) && (wFilterInspect != NULL))
-                wFilterInspect->checked()->set((inspect >= 0) && (inspect == index));
-
-            // Make the frequency and note visible
-            update_filter_note_text();
-        }
-
-        void filter_ui::toggle_inspected_filter(filter_t *f, bool commit)
-        {
-            if (pInspect == NULL)
-            {
-                select_inspected_filter(NULL, true);
-                return;
-            }
-
-            ssize_t curr    = pInspect->value();
-            ssize_t index   = vFilters.index_of(f);
-
-            if (curr == index)
-                select_inspected_filter(NULL, true);
-            else if (filter_inspect_can_be_enabled(f))
-                select_inspected_filter(f, true);
-        }
-
-        void filter_ui::on_filter_inspect_submit(tk::Widget *button)
-        {
-            if (pInspect == NULL)
-                return;
-            if ((pAutoInspect != NULL) && (pAutoInspect->value() >= 0.5f))
-            {
-                select_inspected_filter(NULL, true);
-                return;
-            }
-
-            // Filter inspect button submitted?
-            filter_t *f     = find_filter_by_widget(button);
-            if (f != NULL)
-                toggle_inspected_filter(f, true);
-
-            // We need to reset inspection?
-            if (button == wInspectReset)
-                select_inspected_filter(NULL, true);
         }
 
         ssize_t filter_ui::find_axis(const char *id)
@@ -1579,20 +1321,13 @@ namespace lsp
 
         void filter_ui::notify(ui::IPort *port)
         {
-            if (is_filter_inspect_port(port))
-            {
-                if ((port == pAutoInspect) && (pAutoInspect->value() >= 0.5f))
-                    select_inspected_filter(NULL, true);
-                else
-                    sync_filter_inspect_state();
-            }
             if (pCurrNote != NULL)
             {
                 if ((port == pCurrNote->pFreq) || (port == pCurrNote->pType))
                     update_filter_note_text();
             }
 
-            filter_t *f = find_filter_by_mute(port);
+  /*          filter_t *f = find_filter_by_mute(port);
             if (f != NULL)
             {
                 if (port->value() >= 0.5)
@@ -1611,42 +1346,10 @@ namespace lsp
                         update_filter_note_text();
                     }
                 }
-            }
+            }*/
         }
 
-        bool filter_ui::is_filter_inspect_port(ui::IPort *port)
-        {
-            if (pInspect == NULL)
-                return false;
 
-            if ((port == pInspect) || (port == pAutoInspect))
-                return true;
-
-            ssize_t inspect = pInspect->value();
-            if (inspect < 0)
-                return false;
-
-            filter_t *f = vFilters.get(inspect);
-            if (f == NULL)
-                return false;
-
-            return (f->pType == port) ||
-                (f->pSolo == port) ||
-                (f->pMute == port);
-        }
-
-        filter_ui::filter_t *filter_ui::find_filter_by_mute(ui::IPort *port)
-        {
-            for (size_t i = 0, n = vFilters.size(); i < n; ++i)
-            {
-                filter_t *f = vFilters.uget(i);
-                if (f == NULL)
-                    continue;
-                if (f->pMute == port)
-                    return f;
-            }
-            return NULL;
-        }
 
         void filter_ui::on_main_grid_realized(tk::Widget *w)
         {
