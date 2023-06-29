@@ -86,7 +86,7 @@ namespace lsp
                     size_t              nLatency;       // Latency of the channel
                     float               fInGain;        // Input gain
                     float               fOutGain;       // Output gain
-                    eq_filter_t        *vFilters;       // List of filters
+                    eq_filter_t        sFilter;       // Filter
                     float              *vDryBuf;        // Dry buffer
                     float              *vBuffer;        // Buffer for temporary data
                     float              *vIn;            // Input buffer

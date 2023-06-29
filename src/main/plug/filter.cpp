@@ -464,7 +464,6 @@ namespace lsp
                 c->nLatency         = 0;
                 c->fInGain          = 1.0f;
                 c->fOutGain         = 1.0f;
-                c->vFilters         = NULL;
                 c->vDryBuf          = abuf;
                 abuf               += EQ_BUFFER_SIZE;
                 c->vBuffer          = abuf;
@@ -495,48 +494,42 @@ namespace lsp
                 // Allocate data
                 eq_channel_t *c     = &vChannels[i];
                 c->nSync            = CS_UPDATE;
-                c->vFilters         = new eq_filter_t[nFilters+1];
-                if (c->vFilters == NULL)
-                    return;
 
                 c->sEqualizer.init(nFilters + 1, EQ_RANK);
                 c->sEqualizer.set_smooth(true);
                 max_latency         = lsp_max(max_latency, c->sEqualizer.max_latency());
 
-                // Initialize filters
-                for (size_t j=0; j<=nFilters; ++j)
-                {
-                    eq_filter_t *f      = &c->vFilters[j];
+                // Initialize filter
+                eq_filter_t *f      = &c->sFilter;
 
-                    // Filter characteristics
-                    f->vTrRe            = abuf;
-                    abuf               += meta::filter_metadata::MESH_POINTS;
-                    f->vTrIm            = abuf;
-                    abuf               += meta::filter_metadata::MESH_POINTS;
-                    f->nSync            = CS_UPDATE;
+                // Filter characteristics
+                f->vTrRe            = abuf;
+                abuf               += meta::filter_metadata::MESH_POINTS;
+                f->vTrIm            = abuf;
+                abuf               += meta::filter_metadata::MESH_POINTS;
+                f->nSync            = CS_UPDATE;
 
-                    // Init filter parameters
-                    f->sOldFP.nType     = dspu::FLT_NONE;
-                    f->sOldFP.fFreq     = 0.0f;
-                    f->sOldFP.fFreq2    = 0.0f;
-                    f->sOldFP.fGain     = GAIN_AMP_0_DB;
-                    f->sOldFP.nSlope    = 0;
-                    f->sOldFP.fQuality  = 0.0f;
+                // Init filter parameters
+                f->sOldFP.nType     = dspu::FLT_NONE;
+                f->sOldFP.fFreq     = 0.0f;
+                f->sOldFP.fFreq2    = 0.0f;
+                f->sOldFP.fGain     = GAIN_AMP_0_DB;
+                f->sOldFP.nSlope    = 0;
+                f->sOldFP.fQuality  = 0.0f;
 
-                    f->sFP.nType        = dspu::FLT_NONE;
-                    f->sFP.fFreq        = 0.0f;
-                    f->sFP.fFreq2       = 0.0f;
-                    f->sFP.fGain        = GAIN_AMP_0_DB;
-                    f->sFP.nSlope       = 0;
-                    f->sFP.fQuality     = 0.0f;
+                f->sFP.nType        = dspu::FLT_NONE;
+                f->sFP.fFreq        = 0.0f;
+                f->sFP.fFreq2       = 0.0f;
+                f->sFP.fGain        = GAIN_AMP_0_DB;
+                f->sFP.nSlope       = 0;
+                f->sFP.fQuality     = 0.0f;
 
-                    // Additional parameters
-                    f->pType            = NULL;
-                    f->pMode            = NULL;
-                    f->pFreq            = NULL;
-                    f->pGain            = NULL;
-                    f->pQuality         = NULL;
-                }
+                // Additional parameters
+                f->pType            = NULL;
+                f->pMode            = NULL;
+                f->pFreq            = NULL;
+                f->pGain            = NULL;
+                f->pQuality         = NULL;
             }
 
             // Initialize latency compensation delay
@@ -597,32 +590,32 @@ namespace lsp
             lsp_trace("Binding filter ports");
 
 
-                for (size_t j=0; j<channels; ++j)
-                {
-                    eq_filter_t *f      = &vChannels[j].vFilters[0];
+            for (size_t j=0; j<channels; ++j)
+            {
+                eq_filter_t *f      = &vChannels[j].sFilter;
 
-                    if ((nMode == EQ_STEREO) && (j > 0))
-                    {
-                        // 1 port controls 2 filters
-                        eq_filter_t *sf     = &vChannels[0].vFilters[0];
-                        f->pType            = sf->pType;
-                        f->pMode            = sf->pMode;
-                        f->pSlope           = sf->pSlope;
-                        f->pFreq            = sf->pFreq;
-                        f->pGain            = sf->pGain;
-                        f->pQuality         = sf->pQuality;
-                    }
-                    else
-                    {
-                        // 1 port controls 1 filter
-                        f->pType        = TRACE_PORT(ports[port_id++]);
-                        f->pMode        = TRACE_PORT(ports[port_id++]);
-                        f->pSlope       = TRACE_PORT(ports[port_id++]);
-                        f->pFreq        = TRACE_PORT(ports[port_id++]);
-                        f->pGain        = TRACE_PORT(ports[port_id++]);
-                        f->pQuality     = TRACE_PORT(ports[port_id++]);
-                    }
+                if ((nMode == EQ_STEREO) && (j > 0))
+                {
+                    // 1 port controls 2 filters
+                    eq_filter_t *sf     = &vChannels[0].sFilter;
+                    f->pType            = sf->pType;
+                    f->pMode            = sf->pMode;
+                    f->pSlope           = sf->pSlope;
+                    f->pFreq            = sf->pFreq;
+                    f->pGain            = sf->pGain;
+                    f->pQuality         = sf->pQuality;
                 }
+                else
+                {
+                    // 1 port controls 1 filter
+                    f->pType        = TRACE_PORT(ports[port_id++]);
+                    f->pMode        = TRACE_PORT(ports[port_id++]);
+                    f->pSlope       = TRACE_PORT(ports[port_id++]);
+                    f->pFreq        = TRACE_PORT(ports[port_id++]);
+                    f->pGain        = TRACE_PORT(ports[port_id++]);
+                    f->pQuality     = TRACE_PORT(ports[port_id++]);
+                }
+            }
 
         }
 
@@ -631,8 +624,8 @@ namespace lsp
             size_t channels     = ((nMode == EQ_MONO) || (nMode == EQ_STEREO)) ? 1 : 2;
             for (size_t i=0; i<channels; ++i)
             {
-                for (size_t j=0; j<=nFilters; ++j)
-                    vChannels[i].vFilters[j].nSync = CS_UPDATE;
+
+                vChannels[i].sFilter.nSync = CS_UPDATE;
                 vChannels[i].nSync = CS_UPDATE;
             }
             pWrapper->request_settings_update();
@@ -650,21 +643,9 @@ namespace lsp
 
         void filter::destroy_state()
         {
-            size_t channels     = (nMode == EQ_MONO) ? 1 : 2;
-
             // Delete channels
             if (vChannels != NULL)
             {
-                for (size_t i=0; i<channels; ++i)
-                {
-                    eq_channel_t *c     = &vChannels[i];
-                    if (c->vFilters != NULL)
-                    {
-                        delete [] c->vFilters;
-                        c->vFilters         = NULL;
-                    }
-                }
-
                 delete [] vChannels;
                 vChannels = NULL;
             }
@@ -775,50 +756,44 @@ namespace lsp
                     c->fInGain          = c->pInGain->value();
 
                 // Update each filter configuration depending on solo except the inspection one
-                for (size_t j=0; j<nFilters; ++j)
+
+                eq_filter_t *f      = &c->sFilter;
+                f->sOldFP           = f->sFP;
+                dspu::filter_params_t *fp = &f->sFP;
+                dspu::filter_params_t *op = &f->sOldFP;
+
+                // Compute filter params
+                fp->nType           = f->pType->value();
+                fp->nSlope          = f->pSlope->value() + 1;
+                decode_filter(&fp->nType, &fp->nSlope, f->pMode->value());
+
+                fp->fFreq           = f->pFreq->value();
+                fp->fFreq2          = 100.0f * fp->fFreq;
+                fp->fGain           = (adjust_gain(fp->nType)) ? f->pGain->value() : 1.0f;
+                fp->fQuality        = f->pQuality->value();
+
+                c->sEqualizer.limit_params(0, fp);
+                bool type_changed   =
+                    (fp->nType != op->nType) ||
+                    (fp->nSlope != op->nSlope);
+                bool param_changed  =
+                    (fp->fGain != op->fGain) ||
+                    (fp->fFreq != op->fFreq) ||
+                    (fp->fFreq2 != op->fFreq2) ||
+                    (fp->fQuality != op->fQuality);
+
+                // Apply filter params if theey have changed
+                if ((type_changed) || (param_changed))
                 {
-                    eq_filter_t *f      = &c->vFilters[j];
-                    f->sOldFP           = f->sFP;
-                    dspu::filter_params_t *fp = &f->sFP;
-                    dspu::filter_params_t *op = &f->sOldFP;
+                    c->sEqualizer.set_params(0, fp);
+                    f->nSync            = CS_UPDATE;
 
-                    // Compute filter params
-                    fp->nType           = f->pType->value();
-                    fp->nSlope          = f->pSlope->value() + 1;
-                    decode_filter(&fp->nType, &fp->nSlope, f->pMode->value());
-
-                    fp->fFreq           = f->pFreq->value();
-                #ifdef LSP_NO_EXPERIMENTAL
-                    fp->fFreq2          = fp->fFreq;
-                #else
-                    fp->fFreq2          = 100.0f * fp->fFreq;
-                #endif /* LSP_NO_EXPERIMENTAL */
-                    fp->fGain           = (adjust_gain(fp->nType)) ? f->pGain->value() : 1.0f;
-                    fp->fQuality        = f->pQuality->value();
-
-                    c->sEqualizer.limit_params(j, fp);
-                    bool type_changed   =
-                        (fp->nType != op->nType) ||
-                        (fp->nSlope != op->nSlope);
-                    bool param_changed  =
-                        (fp->fGain != op->fGain) ||
-                        (fp->fFreq != op->fFreq) ||
-                        (fp->fFreq2 != op->fFreq2) ||
-                        (fp->fQuality != op->fQuality);
-
-                    // Apply filter params if theey have changed
-                    if ((type_changed) || (param_changed))
-                    {
-                        c->sEqualizer.set_params(j, fp);
-                        f->nSync            = CS_UPDATE;
-
-                        if (type_changed)
-                            mode_changed    = true;
-                        if (param_changed)
-                            bSmoothMode     = true;
-                    }
-
+                    if (type_changed)
+                        mode_changed    = true;
+                    if (param_changed)
+                        bSmoothMode     = true;
                 }
+
             }
 
             // Do not enable smooth mode if significant changes have been applied
@@ -869,20 +844,18 @@ namespace lsp
                 {
                     // Tune the filters
                     float k                     = float(start + offset) * den;
-                    for (size_t j=0; j<=nFilters; ++j)
-                    {
-                        eq_filter_t *f              = &c->vFilters[j];
-                        dspu::filter_params_t fp;
 
-                        fp.nType                    = f->sFP.nType;
-                        fp.fFreq                    = f->sOldFP.fFreq * expf(logf(f->sFP.fFreq/f->sOldFP.fFreq)*k);
-                        fp.fFreq2                   = f->sOldFP.fFreq2 * expf(logf(f->sFP.fFreq2/f->sOldFP.fFreq2)*k);
-                        fp.nSlope                   = f->sFP.nSlope;
-                        fp.fGain                    = f->sOldFP.fGain * expf(logf(f->sFP.fGain/f->sOldFP.fGain)*k);
-                        fp.fQuality                 = f->sOldFP.fQuality + (f->sFP.fQuality -f->sOldFP.fQuality)*k;
+                    eq_filter_t *f              = &c->sFilter;
+                    dspu::filter_params_t fp;
 
-                        c->sEqualizer.set_params(j, &fp);
-                    }
+                    fp.nType                    = f->sFP.nType;
+                    fp.fFreq                    = f->sOldFP.fFreq * expf(logf(f->sFP.fFreq/f->sOldFP.fFreq)*k);
+                    fp.fFreq2                   = f->sOldFP.fFreq2 * expf(logf(f->sFP.fFreq2/f->sOldFP.fFreq2)*k);
+                    fp.nSlope                   = f->sFP.nSlope;
+                    fp.fGain                    = f->sOldFP.fGain * expf(logf(f->sFP.fGain/f->sOldFP.fGain)*k);
+                    fp.fQuality                 = f->sOldFP.fQuality + (f->sFP.fQuality -f->sOldFP.fQuality)*k;
+
+                    c->sEqualizer.set_params(0, &fp);
 
                     // Apply processing
                     c->sEqualizer.process(&c->vBuffer[offset], &c->vBuffer[offset], 1);
@@ -1023,19 +996,18 @@ namespace lsp
             {
                 eq_channel_t *c     = &vChannels[i];
 
-                // Synchronize filters
-                for (size_t j=0; j<=nFilters; ++j)
-                {
-                    // Update transfer chart of the filter
-                    eq_filter_t *f  = &c->vFilters[j];
-                    if (f->nSync & CS_UPDATE)
-                    {
-                        c->sEqualizer.freq_chart(j, f->vTrRe, f->vTrIm, vFreqs, meta::filter_metadata::MESH_POINTS);
-                        f->nSync    = CS_SYNC_AMP;
-                        c->nSync    = CS_UPDATE;
-                    }
 
+
+                // Update transfer chart of the filter
+                eq_filter_t *f  = &c->sFilter;
+                if (f->nSync & CS_UPDATE)
+                {
+                    c->sEqualizer.freq_chart(0, f->vTrRe, f->vTrIm, vFreqs, meta::filter_metadata::MESH_POINTS);
+                    f->nSync    = CS_SYNC_AMP;
+                    c->nSync    = CS_UPDATE;
                 }
+
+
 
                 // Synchronize main transfer function of the channel
                 if (c->nSync & CS_UPDATE)
@@ -1044,11 +1016,10 @@ namespace lsp
                     dsp::fill_one(c->vTrRe, meta::filter_metadata::MESH_POINTS);
                     dsp::fill_zero(c->vTrIm, meta::filter_metadata::MESH_POINTS);
 
-                    for (size_t j=0; j<=nFilters; ++j)
-                    {
-                        eq_filter_t *f  = &c->vFilters[j];
-                        dsp::complex_mul2(c->vTrRe, c->vTrIm, f->vTrRe, f->vTrIm, meta::filter_metadata::MESH_POINTS);
-                    }
+
+                    eq_filter_t *f  = &c->sFilter;
+                    dsp::complex_mul2(c->vTrRe, c->vTrIm, f->vTrRe, f->vTrIm, meta::filter_metadata::MESH_POINTS);
+
                     c->nSync    = CS_SYNC_AMP;
                 }
 
@@ -1079,8 +1050,8 @@ namespace lsp
                 for (size_t i=0; i<channels; ++i)
                 {
                     eq_channel_t *c     = &vChannels[i];
-                    for (size_t j=0; j<=nFilters; ++j)
-                        c->sEqualizer.set_params(j, &c->vFilters[j].sFP);
+
+                    c->sEqualizer.set_params(0, &c->sFilter.sFP);
                 }
 
                 bSmoothMode     = false;
@@ -1228,12 +1199,11 @@ namespace lsp
                 v->write("nLatency", c->nLatency);
                 v->write("fInGain", c->fInGain);
                 v->write("fOutGain", c->fOutGain);
-                v->begin_array("vFilters", c->vFilters, nFilters+1);
+                v->begin_object("sFilter", &c->sFilter, sizeof(eq_filter_t));
                 {
-                    for (size_t i=0; i<=nFilters; ++i)
-                        dump_filter(v, &c->vFilters[i]);
+                    dump_filter(v, &c->sFilter);
                 }
-                v->end_array();
+                v->end_object();
                 v->write("vDryBuf", c->vDryBuf);
                 v->write("vBuffer", c->vBuffer);
                 v->write("vIn", c->vIn);
