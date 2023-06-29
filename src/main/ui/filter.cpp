@@ -490,8 +490,8 @@ namespace lsp
             }
 
             // Check that filter is enabled
-            ssize_t type = (f->pType != NULL) ? ssize_t(f->pType->value()) : meta::filter_metadata::EQF_OFF;
-            if (type == meta::filter_metadata::EQF_OFF)
+            ssize_t type = (f->pType != NULL) ? ssize_t(f->pType->value()) : -1;
+            if (type < 0)
             {
                 f->wNote->visibility()->set(false);
                 return;
@@ -962,9 +962,6 @@ namespace lsp
                 filter_t *alt_f = vFilters.uget(index);
                 if ((alt_f == NULL) || (alt_f->pType == NULL))
                     continue;
-
-                if (ssize_t(alt_f->pType->value()) == meta::filter_metadata::EQF_OFF)
-                    return alt_f;
             }
 
             return NULL;
@@ -1050,17 +1047,6 @@ namespace lsp
 
             // Allocate new port index
             ssize_t fid         = -1;
-            for (size_t i=0; i<32; ++i)
-            {
-                ssize_t type = get_filter_type(i, channel);
-                if (type == meta::filter_metadata::EQF_OFF)
-                {
-                    fid             = i;
-                    break;
-                }
-                else if (type < 0)
-                    break;
-            }
 
             if (fid < 0)
             {
@@ -1308,7 +1294,7 @@ namespace lsp
             // Reset state of all other filters
             for (; fid < 32; ++fid)
             {
-                set_filter_type(fid, 0x03, meta::filter_metadata::EQF_OFF);
+                set_filter_type(fid, 0x03, meta::filter_metadata::EQF_LOPASS);
                 set_filter_slope(fid, 0x03, 1);
                 set_filter_gain(fid, 0x03, 1.0f);
                 set_filter_quality(fid, 0x03, 0.0f);

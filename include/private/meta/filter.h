@@ -70,7 +70,6 @@ namespace lsp
 
             enum eq_filter_t
             {
-                EQF_OFF,
                 EQF_BELL,
                 EQF_HIPASS,
                 EQF_HISHELF,
@@ -79,15 +78,12 @@ namespace lsp
                 EQF_NOTCH,
                 EQF_RESONANCE,
                 EQF_ALLPASS,
-
-            #ifdef LSP_USE_EXPERIMENTAL
                 EQF_ALLPASS2,
                 EQF_LADDERPASS,
                 EQF_LADDERREJ,
                 EQF_ENVELOPE,
                 EQF_BANDPASS,
-                EQF_LUFS,
-            #endif /* LSP_USE_EXPERIMENTAL */
+                EQF_LUFS
             };
 
             enum eq_filter_mode_t

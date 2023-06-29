@@ -246,7 +246,7 @@ namespace lsp
                     break;
                 }
 
-            #ifdef LSP_USE_EXPERIMENTAL
+
                 case EQF(ALLPASS2):
                 {
                     switch (mode)
@@ -342,10 +342,8 @@ namespace lsp
                     }
                     break;
                 }
-            #endif /* LSP_USE_EXPERIMENTAL */
 
-                case EQF(OFF):
-                    EQDFL;
+                EQDFL;
             }
             #undef EQDFL
             #undef EQS

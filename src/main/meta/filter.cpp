@@ -64,25 +64,20 @@ namespace lsp
 
         static const port_item_t filter_types[] =
         {
-            { "Off",            "eq.flt.off" },
-            { "Bell",           "eq.flt.bell" },
-            { "Hi-pass",        "eq.flt.hipass" },
-            { "Hi-shelf",       "eq.flt.hishelf" },
-            { "Lo-pass",        "eq.flt.lopass" },
-            { "Lo-shelf",       "eq.flt.loshelf" },
-            { "Notch",          "eq.flt.notch" },
-            { "Resonance",      "eq.flt.resonance" },
+            { "Bell",           "eq.flt.bell" },    // 5
+            { "Hi-pass",        "eq.flt.hipass" },  // 2
+            { "Hi-shelf",       "eq.flt.hishelf" }, //4
+            { "Lo-pass",        "eq.flt.lopass" },  // 1
+            { "Lo-shelf",       "eq.flt.loshelf" }, // 3
+            { "Notch",          "eq.flt.notch" },   // 7
+            { "Resonance",      "eq.flt.resonance" }, // 6
             { "Allpass",        "eq.flt.allpass" },
-
-            // Additional stuff
-        #ifdef LSP_USE_EXPERIMENTAL
             { "Allpass2",       "eq.flt.allpass2" },
             { "Ladder-pass",    "eq.flt.ladpass" },
             { "Ladder-rej",     "eq.flt.ladrej" },
             { "Envelope",       "eq.flt.envelope" },
             { "Bandpass",       "eq.flt.bandpass" },
             { "LUFS",           "eq.flt.lufs" },
-        #endif /* LSP_USE_EXPERIMENTAL */
             { NULL, NULL }
         };
 
