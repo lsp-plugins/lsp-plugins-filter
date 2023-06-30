@@ -68,16 +68,17 @@ namespace lsp
         {
             for (const plugin_settings_t *s = plugin_settings; s->metadata != NULL; ++s)
                 if (s->metadata == meta)
-                    return new filter(s->metadata, s->channels, s->mode);
+                    return new filter(s->metadata, s->mode);
             return NULL;
         }
 
         static plug::Factory factory(plugin_factory, plugins, 2);
 
         //-------------------------------------------------------------------------
-        filter::filter(const meta::plugin_t *metadata, size_t filters, size_t mode): plug::Module(metadata)
+       // filter::filter(const meta::plugin_t *metadata, size_t filters, size_t mode): plug::Module(metadata)
+        filter::filter(const meta::plugin_t *metadata, size_t mode): plug::Module(metadata)
         {
-            nFilters        = filters;
+            //nFilters        = filters;
             nMode           = mode;
             vChannels       = NULL;
             vFreqs          = NULL;
@@ -443,7 +444,7 @@ namespace lsp
                 return;
 
             // Calculate amount of bulk data to allocate
-            size_t allocate     = (2 * meta::filter_metadata::MESH_POINTS * (nFilters + 2) + EQ_BUFFER_SIZE * 2) * channels +
+            size_t allocate     = (2 * meta::filter_metadata::MESH_POINTS * 3 + EQ_BUFFER_SIZE * 2) * channels +
                                   meta::filter_metadata::MESH_POINTS;
             float *abuf         = new float[allocate];
             if (abuf == NULL)
@@ -483,7 +484,6 @@ namespace lsp
                 c->pInGain          = NULL;
                 c->pTrAmp           = NULL;
                 c->pFft             = NULL;
-                c->pVisible         = NULL;
                 c->pInMeter         = NULL;
                 c->pOutMeter        = NULL;
             }
@@ -495,7 +495,7 @@ namespace lsp
                 eq_channel_t *c     = &vChannels[i];
                 c->nSync            = CS_UPDATE;
 
-                c->sEqualizer.init(nFilters + 1, EQ_RANK);
+                c->sEqualizer.init(2, EQ_RANK);
                 c->sEqualizer.set_smooth(true);
                 max_latency         = lsp_max(max_latency, c->sEqualizer.max_latency());
 
@@ -579,11 +579,7 @@ namespace lsp
                 vChannels[i].pOutMeter  =   TRACE_PORT(ports[port_id++]);
                 vChannels[i].pFft       =   TRACE_PORT(ports[port_id++]);
                 if (channels > 1)
-                {
-                    vChannels[i].pVisible   = TRACE_PORT(ports[port_id++]);
-                    if ((nMode == EQ_MONO) || (nMode == EQ_STEREO))
-                        vChannels[i].pVisible       = NULL;
-                }
+                    TRACE_PORT(ports[port_id++]); // Skip FFT Visibility
             }
 
             // Bind filters
@@ -1231,7 +1227,7 @@ namespace lsp
             size_t channels     = (nMode == EQ_MONO) ? 1 : 2;
 
             v->write_object("sAnalyzer", &sAnalyzer);
-            v->write("nFilters", nFilters);
+            //v->write("nFilters", nFilters);
             v->write("nMode", nMode);
             v->begin_array("vChannels", vChannels, channels);
             {

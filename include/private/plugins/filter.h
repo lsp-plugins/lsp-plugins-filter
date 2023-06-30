@@ -36,7 +36,7 @@ namespace lsp
     namespace plugins
     {
         /**
-         * Parametric equalizer plugin
+         * Parametric filter plugin
          */
         class filter: public plug::Module
         {
@@ -86,7 +86,7 @@ namespace lsp
                     size_t              nLatency;       // Latency of the channel
                     float               fInGain;        // Input gain
                     float               fOutGain;       // Output gain
-                    eq_filter_t        sFilter;       // Filter
+                    eq_filter_t         sFilter;        // Filter
                     float              *vDryBuf;        // Dry buffer
                     float              *vBuffer;        // Buffer for temporary data
                     float              *vIn;            // Input buffer
@@ -101,14 +101,13 @@ namespace lsp
                     plug::IPort        *pInGain;        // Input gain
                     plug::IPort        *pTrAmp;         // Amplitude chart
                     plug::IPort        *pFft;           // FFT chart
-                    plug::IPort        *pVisible;       // Visibility flag
                     plug::IPort        *pInMeter;       // Output level meter
                     plug::IPort        *pOutMeter;      // Output level meter
                 } eq_channel_t;
 
             protected:
                 dspu::Analyzer      sAnalyzer;              // Analyzer
-                size_t              nFilters;               // Number of filters
+                //size_t              nFilters;               // Number of filters
                 size_t              nMode;                  // Operating mode
                 eq_channel_t       *vChannels;              // List of channels
                 float              *vFreqs;                 // Frequency list
@@ -143,7 +142,8 @@ namespace lsp
                 static void         dump_filter_params(dspu::IStateDumper *v, const char *id, const dspu::filter_params_t *fp);
 
             public:
-                explicit filter(const meta::plugin_t *metadata, size_t filters, size_t mode);
+                //explicit filter(const meta::plugin_t *metadata, size_t filters, size_t mode);
+                explicit filter(const meta::plugin_t *metadata, size_t mode);
                 virtual ~filter() override;
 
             public:

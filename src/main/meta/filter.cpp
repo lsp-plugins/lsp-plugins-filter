@@ -101,16 +101,13 @@ namespace lsp
             { NULL, NULL }
         };
 
-        #define EQ_FILTER(id, label, x, total, f) \
-                COMBO("ft" id "_" #x, "Filter type " label #x, 0, filter_types), \
-                COMBO("fm" id "_" #x, "Filter mode " label #x, 0, filter_modes), \
-                COMBO("s" id "_" #x, "Filter slope " label #x, 0, filter_slopes), \
-                LOG_CONTROL_DFL("f" id "_" #x, "Frequency " label #x, U_HZ, filter_metadata::FREQ, f), \
-                { "g" id "_" #x, "Gain " label # x, U_GAIN_AMP, R_CONTROL, F_IN | F_LOG | F_UPPER | F_LOWER | F_STEP, GAIN_AMP_M_36_DB, GAIN_AMP_P_36_DB, GAIN_AMP_0_DB, 0.01, NULL, NULL }, \
-                { "q" id "_" #x, "Quality factor " label #x, U_NONE, R_CONTROL, F_IN | F_UPPER | F_LOWER | F_STEP, 0.0f, 100.0f, 0.0f, 0.025f, NULL        }
-
-        #define EQ_FILTER_MONO(x, total, f)     EQ_FILTER("", "", x, total, f)
-        #define EQ_FILTER_STEREO(x, total, f)   EQ_FILTER("", "", x, total, f)
+        #define EQ_FILTER \
+                COMBO("ft", "Filter type", 0, filter_types), \
+                COMBO("fm", "Filter mode", 0, filter_modes), \
+                COMBO("s", "Filter slope", 0, filter_slopes), \
+                LOG_CONTROL_DFL("f", "Frequency", U_HZ, filter_metadata::FREQ, 10000.0f), \
+                { "g", "Gain", U_GAIN_AMP, R_CONTROL, F_IN | F_LOG | F_UPPER | F_LOWER | F_STEP, GAIN_AMP_M_36_DB, GAIN_AMP_P_36_DB, GAIN_AMP_0_DB, 0.01, NULL, NULL }, \
+                { "q", "Quality factor", U_NONE, R_CONTROL, F_IN | F_UPPER | F_LOWER | F_STEP, 0.0f, 100.0f, 0.0f, 0.025f, NULL        }
 
         #define EQ_COMMON \
                 BYPASS, \
@@ -146,7 +143,7 @@ namespace lsp
             PORTS_MONO_PLUGIN,
             EQ_COMMON,
             EQ_MONO_PORTS,
-            EQ_FILTER_MONO(0, 1, 10000.0f),
+            EQ_FILTER,
 
             PORTS_END
         };
@@ -156,7 +153,7 @@ namespace lsp
             PORTS_STEREO_PLUGIN,
             EQ_COMMON,
             EQ_STEREO_PORTS,
-            EQ_FILTER_STEREO(0, 1, 10000.0f),
+            EQ_FILTER,
 
             PORTS_END
         };
