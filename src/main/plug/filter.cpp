@@ -354,24 +354,37 @@ namespace lsp
         size_t filter::decode_slope(size_t slope)
         {
             if (slope < 4)
-            {
                 return slope + 1;
-            }
-            else
+
+            switch (slope)
             {
-                switch (slope)
-                {
-                    case 4:
-                        return 6;
-                    case 5:
-                        return 8;
-                    case 6:
-                        return 12;
-                    case 7:
-                        return 16;
-                }
+                case 4:
+                    return 6;
+                case 5:
+                    return 8;
+                case 6:
+                    return 12;
+                case 7:
+                    return 16;
             }
             return STATUS_UNKNOWN_ERR;
+        }
+
+        bool filter::is_bandpass_filter(size_t type)
+        {
+            switch (type)
+            {
+                case dspu::FLT_BT_RLC_BANDPASS:
+                case dspu::FLT_MT_RLC_BANDPASS:
+                case dspu::FLT_BT_BWC_BANDPASS:
+                case dspu::FLT_MT_BWC_BANDPASS:
+                case dspu::FLT_BT_LRX_BANDPASS:
+                case dspu::FLT_MT_LRX_BANDPASS:
+                case dspu::FLT_DR_APO_BANDPASS:
+                    return true;
+            }
+
+            return false;
         }
 
         inline bool filter::adjust_gain(size_t filter_type)
@@ -411,11 +424,75 @@ namespace lsp
                 case dspu::FLT_DR_APO_HIPASS:
                 case dspu::FLT_DR_APO_ALLPASS:
                 case dspu::FLT_DR_APO_ALLPASS2:
+
+                case dspu::FLT_BT_RLC_BANDPASS:
+                case dspu::FLT_MT_RLC_BANDPASS:
+                case dspu::FLT_BT_BWC_BANDPASS:
+                case dspu::FLT_MT_BWC_BANDPASS:
+                case dspu::FLT_BT_LRX_BANDPASS:
+                case dspu::FLT_MT_LRX_BANDPASS:
+                case dspu::FLT_DR_APO_BANDPASS:
                     return false;
                 default:
                     break;
             }
             return true;
+        }
+
+        float   filter::calc_qfactor(float q, size_t type, size_t slope)
+        {
+            switch (type)
+            {
+                case dspu::FLT_BT_BWC_LOSHELF:
+                case dspu::FLT_MT_BWC_LOSHELF:
+                case dspu::FLT_BT_BWC_HISHELF:
+                case dspu::FLT_MT_BWC_HISHELF:
+                case dspu::FLT_BT_BWC_LADDERPASS:
+                case dspu::FLT_MT_BWC_LADDERPASS:
+                case dspu::FLT_BT_BWC_LADDERREJ:
+                case dspu::FLT_MT_BWC_LADDERREJ:
+                case dspu::FLT_BT_LRX_LOSHELF:
+                case dspu::FLT_MT_LRX_LOSHELF:
+                case dspu::FLT_BT_LRX_HISHELF:
+                case dspu::FLT_MT_LRX_HISHELF:
+                case dspu::FLT_BT_LRX_LADDERPASS:
+                case dspu::FLT_MT_LRX_LADDERPASS:
+                case dspu::FLT_BT_LRX_LADDERREJ:
+                case dspu::FLT_MT_LRX_LADDERREJ:
+                    return 0.0f;
+
+                case dspu::FLT_BT_RLC_BELL:
+                case dspu::FLT_MT_RLC_BELL:
+                case dspu::FLT_BT_BWC_BELL:
+                case dspu::FLT_MT_BWC_BELL:
+                case dspu::FLT_BT_LRX_BELL:
+                case dspu::FLT_MT_LRX_BELL:
+                case dspu::FLT_DR_APO_LOPASS:
+                case dspu::FLT_DR_APO_HIPASS:
+                case dspu::FLT_DR_APO_BANDPASS:
+                case dspu::FLT_DR_APO_NOTCH:
+                case dspu::FLT_DR_APO_ALLPASS:
+                case dspu::FLT_DR_APO_ALLPASS2:
+                case dspu::FLT_DR_APO_PEAKING:
+                case dspu::FLT_DR_APO_LOSHELF:
+                case dspu::FLT_DR_APO_HISHELF:
+                case dspu::FLT_DR_APO_LADDERPASS:
+                case dspu::FLT_DR_APO_LADDERREJ:
+                case dspu::FLT_BT_BWC_LOPASS:
+                case dspu::FLT_MT_BWC_LOPASS:
+                case dspu::FLT_BT_BWC_HIPASS:
+                case dspu::FLT_MT_BWC_HIPASS:
+                case dspu::FLT_BT_LRX_LOPASS:
+                case dspu::FLT_MT_LRX_LOPASS:
+                case dspu::FLT_BT_LRX_HIPASS:
+                case dspu::FLT_MT_LRX_HIPASS:
+                    return q;
+
+                default:
+                    break;
+            }
+
+            return q/slope;
         }
 
         inline dspu::equalizer_mode_t filter::get_eq_mode(ssize_t mode)
@@ -551,6 +628,7 @@ namespace lsp
                 f->pType            = NULL;
                 f->pMode            = NULL;
                 f->pFreq            = NULL;
+                f->pWidth           = NULL;
                 f->pGain            = NULL;
                 f->pQuality         = NULL;
             }
@@ -621,6 +699,7 @@ namespace lsp
                     f->pMode            = sf->pMode;
                     f->pSlope           = sf->pSlope;
                     f->pFreq            = sf->pFreq;
+                    f->pWidth           = sf->pWidth;
                     f->pGain            = sf->pGain;
                     f->pQuality         = sf->pQuality;
                 }
@@ -631,6 +710,7 @@ namespace lsp
                     f->pMode        = TRACE_PORT(ports[port_id++]);
                     f->pSlope       = TRACE_PORT(ports[port_id++]);
                     f->pFreq        = TRACE_PORT(ports[port_id++]);
+                    f->pWidth       = TRACE_PORT(ports[port_id++]);
                     f->pGain        = TRACE_PORT(ports[port_id++]);
                     f->pQuality     = TRACE_PORT(ports[port_id++]);
                 }
@@ -786,10 +866,20 @@ namespace lsp
                 fp->nSlope          = decode_slope(f->pSlope->value());
                 decode_filter(&fp->nType, &fp->nSlope, f->pMode->value());
 
-                fp->fFreq           = f->pFreq->value();
-                fp->fFreq2          = 100.0f * fp->fFreq;
+                if (is_bandpass_filter(fp->nType))
+                {
+                    float center = f->pFreq->value();
+                    float k = powf(2, (f->pWidth->value()*0.5f));
+                    fp->fFreq           = center/k;
+                    fp->fFreq2          = center*k;
+                }
+                else
+                {
+                    fp->fFreq           = f->pFreq->value();
+                    fp->fFreq2          = fp->fFreq;
+                }
                 fp->fGain           = (adjust_gain(fp->nType)) ? f->pGain->value() : 1.0f;
-                fp->fQuality        = f->pQuality->value();
+                fp->fQuality        = calc_qfactor(f->pQuality->value(), fp->nType, fp->nSlope);
 
                 c->sEqualizer.limit_params(0, fp);
                 bool type_changed   =

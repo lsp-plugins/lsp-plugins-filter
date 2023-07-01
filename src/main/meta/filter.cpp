@@ -75,13 +75,13 @@ namespace lsp
             { "Lo-shelf",       "filter.flt.loshelf" }, // 3
             { "Notch",          "filter.flt.notch" },   // 7
             { "Resonance",      "filter.flt.resonance" }, // 6
-            { "Allpass",        "filter.flt.allpass" },
-            { "Allpass2",       "filter.flt.allpass2" },
-            { "Ladder-pass",    "filter.flt.ladpass" },
-            { "Ladder-rej",     "filter.flt.ladrej" },
-            { "Envelope",       "filter.flt.envelope" },
-            { "Bandpass",       "filter.flt.bandpass" },
-            { "LUFS",           "filter.flt.lufs" },
+            { "Allpass",        "filter.flt.allpass" },// del
+            { "Allpass2",       "filter.flt.allpass2" },// del
+            { "Ladder-pass",    "filter.flt.ladpass" }, //
+            { "Ladder-rej",     "filter.flt.ladrej" }, //
+            { "Envelope",       "filter.flt.envelope" }, // del
+            { "Bandpass",       "filter.flt.bandpass" }, //
+            { "LUFS",           "filter.flt.lufs" }, // del
             { NULL, NULL }
         };
 
@@ -109,7 +109,8 @@ namespace lsp
                 COMBO("ft", "Filter type", 0, filter_types), \
                 COMBO("fm", "Filter mode", 0, filter_modes), \
                 COMBO("s", "Filter slope", 0, filter_slopes), \
-                LOG_CONTROL_DFL("f", "Frequency", U_HZ, filter_metadata::FREQ, 10000.0f), \
+                LOG_CONTROL("f", "Frequency", U_HZ, filter_metadata::FREQ), \
+                CONTROL("w", "Filter Width", U_OCTAVES, filter_metadata::WIDTH), \
                 { "g", "Gain", U_GAIN_AMP, R_CONTROL, F_IN | F_LOG | F_UPPER | F_LOWER | F_STEP, GAIN_AMP_M_36_DB, GAIN_AMP_P_36_DB, GAIN_AMP_0_DB, 0.01, NULL, NULL }, \
                 { "q", "Quality factor", U_NONE, R_CONTROL, F_IN | F_UPPER | F_LOWER | F_STEP, 0.0f, 100.0f, 0.0f, 0.025f, NULL        }
 

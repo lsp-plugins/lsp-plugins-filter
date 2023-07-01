@@ -72,6 +72,7 @@ namespace lsp
                     plug::IPort        *pType;          // Filter type
                     plug::IPort        *pMode;          // Filter mode
                     plug::IPort        *pFreq;          // Filter frequency
+                    plug::IPort        *pWidth;         // Filter width
                     plug::IPort        *pSlope;         // Filter slope
                     plug::IPort        *pGain;          // Filter gain
                     plug::IPort        *pQuality;       // Quality factor
@@ -132,7 +133,9 @@ namespace lsp
                 static inline dspu::equalizer_mode_t get_eq_mode(ssize_t mode);
                 static inline void  decode_filter(size_t *ftype, size_t *slope, size_t mode);
                 static size_t       decode_slope(size_t slope);
+                static bool         is_bandpass_filter(size_t type);
                 static inline bool  adjust_gain(size_t filter_type);
+                static float        calc_qfactor(float q, size_t type, size_t slope);
 
             protected:
                 void                destroy_state();

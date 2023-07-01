@@ -37,8 +37,13 @@ namespace lsp
         {
             static constexpr float          FREQ_MIN            = SPEC_FREQ_MIN;
             static constexpr float          FREQ_MAX            = SPEC_FREQ_MAX;
-            static constexpr float          FREQ_DFL            = 1000;
+            static constexpr float          FREQ_DFL            = 10000.0f;
             static constexpr float          FREQ_STEP           = 0.002;
+
+            static constexpr float          WIDTH_MIN           = 0.0f;
+            static constexpr float          WIDTH_MAX           = 12.0f;
+            static constexpr float          WIDTH_DFL           = 4.0f;
+            static constexpr float          WIDTH_STEP          = 0.002;
 
             static constexpr size_t         FFT_RANK            = 13;
             static constexpr size_t         FFT_ITEMS           = 1 << FFT_RANK;

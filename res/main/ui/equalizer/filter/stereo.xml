@@ -5,7 +5,7 @@
 
 			<!-- Graph -->
 			<group ui:inject="GraphGroup" ipadding="0" expand="true" fill="true" text="labels.graphs.spectrum">
-				<graph width.min="640" height.min="340" expand="true">
+				<graph width.min="390" height.min="110" expand="true">
 				<!-- <graph ui:id="filter_graph" width.min="640" height.min="340" expand="true"> -->
 					<origin hpos="-1" vpos="-1" visible="false"/>
 
@@ -271,67 +271,12 @@
 									<knob id="g" size="20" pad.t="6"/>
 									<value id="g" width.min="40" detailed="false" pad.t="3"/>
 
-								<cell rows="2">
-									<align halign="1" valign="1">
-										<bevel size="34" ui:inject="Bevel_cycle" dir.deg="225" />
-									</align>
-								</cell>
+
+									<knob id="w" size="20" pad.t="6"/>
+									<value id="w" width.min="40" detailed="false" precision="1" pad.t="3"/>
+								
 
 					</grid>
 		</cell>
-
-		<!-- <cell cols="3">
-					<grid ui:group="filters" transpose="true" rows="8" cols="4" spacing="0">
-						<ui:with expand="false">
-							<label text="labels.specials.num" fill="true" halign="0"/>
-							<label text="labels.filter" fill="true" halign="0" pad.b="6"/>
-							<label text="labels.mode" fill="true" halign="0" pad.b="6"/>
-							<label text="labels.slope" fill="true" halign="0" pad.b="6"/>
-							<label text="labels.controls" fill="true" halign="0" pad.b="6"/>
-							<label text="labels.freq_gain" halign="0" pad.h="6" pad.t="6"/>
-							<label text="labels.hz_db" halign="0" pad.t="3"/>
-							<cell rows="2"><label text="labels.q" halign="0" /></cell>
-						</ui:with>
--->
-						<!-- Filters -->
-
-<!--
-								<cell rows="8" bg.color="bg" pad.r="2" pad.l="2" expand="false" pad.t="6" pad.b="6">
-									<vsep/>
-								</cell>
-
-
-									<cell cols="2" fill="true">
-										<combo ui:id="filter_type" id="ft" fill="true" pad.l="6" pad.r="6" pad.b="6"/>
-									</cell>
-									<cell cols="2" fill="true">
-										<combo ui:id="filter_mode" id="fm" fill="true" pad.h="6" expand="true" pad.b="6"/>
-									</cell>
-									<cell cols="2" fill="true">
-										<combo ui:id="filter_slope" id="s" fill="true" pad.h="6" expand="true" pad.b="6"/>
-									</cell>
-									<cell cols="2" fill="true">
-										<hbox pad.b="6">
-
-										</hbox>
-									</cell>
-
-									<knob ui:id="filter_freq" id="f" size="20" pad.t="6"/>
-									<value id="f" width.min="40" detailed="false" precision="1" pad.t="3"/>
-
-									<knob ui:id="filter_q" id="q" size="20" pad.t="6"/>
-									<value id="q" width.min="40" detailed="false" pad.t="3" pad.b="6"/>
-
-									<knob ui:id="filter_gain" id="g" size="20" pad.t="6"/>
-									<value id="g" width.min="40" detailed="false" pad.t="3"/>
-
-								<cell rows="2">
-									<align halign="1" valign="1">
-										<bevel size="34" ui:inject="Bevel_cycle" dir.deg="225" bg.bright="(:ft${ch} igt 0) ? 1.0 : :const_bg_darken"/>
-									</align>
-								</cell>
-
-					</grid>
-		</cell> -->
 	</grid>
 </plugin>
