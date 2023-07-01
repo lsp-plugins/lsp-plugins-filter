@@ -351,6 +351,29 @@ namespace lsp
             #undef EQF
         }
 
+        size_t filter::decode_slope(size_t slope)
+        {
+            if (slope < 4)
+            {
+                return slope + 1;
+            }
+            else
+            {
+                switch (slope)
+                {
+                    case 4:
+                        return 6;
+                    case 5:
+                        return 8;
+                    case 6:
+                        return 12;
+                    case 7:
+                        return 16;
+                }
+            }
+            return STATUS_UNKNOWN_ERR;
+        }
+
         inline bool filter::adjust_gain(size_t filter_type)
         {
             switch (filter_type)
@@ -760,7 +783,7 @@ namespace lsp
 
                 // Compute filter params
                 fp->nType           = f->pType->value();
-                fp->nSlope          = f->pSlope->value() + 1;
+                fp->nSlope          = decode_slope(f->pSlope->value());
                 decode_filter(&fp->nType, &fp->nSlope, f->pMode->value());
 
                 fp->fFreq           = f->pFreq->value();

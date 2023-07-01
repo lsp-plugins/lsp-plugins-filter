@@ -46,50 +46,54 @@ namespace lsp
 
         static const port_item_t filter_slopes[] =
         {
-            { "x1",             "eq.slope.x1" },
-            { "x2",             "eq.slope.x2" },
-            { "x3",             "eq.slope.x3" },
-            { "x4",             "eq.slope.x4" },
+            { "x1",             "filter.slope.x1" },
+            { "x2",             "filter.slope.x2" },
+            { "x3",             "filter.slope.x3" },
+            { "x4",             "filter.slope.x4" },
+            { "x6",             "filter.slope.x6" },
+            { "x8",             "filter.slope.x8" },
+            { "x12",            "filter.slope.x12" },
+            { "x16",            "filter.slope.x16" },
             { NULL, NULL }
         };
 
         static const port_item_t equalizer_eq_modes[] =
         {
-            { "IIR",            "eq.type.iir" },
-            { "FIR",            "eq.type.fir" },
-            { "FFT",            "eq.type.fft" },
-            { "SPM",            "eq.type.spm" },
+            { "IIR",            "filter.type.iir" },
+            { "FIR",            "filter.type.fir" },
+            { "FFT",            "filter.type.fft" },
+            { "SPM",            "filter.type.spm" },
             { NULL, NULL }
         };
 
         static const port_item_t filter_types[] =
         {
-            { "Bell",           "eq.flt.bell" },    // 5
-            { "Hi-pass",        "eq.flt.hipass" },  // 2
-            { "Hi-shelf",       "eq.flt.hishelf" }, //4
-            { "Lo-pass",        "eq.flt.lopass" },  // 1
-            { "Lo-shelf",       "eq.flt.loshelf" }, // 3
-            { "Notch",          "eq.flt.notch" },   // 7
-            { "Resonance",      "eq.flt.resonance" }, // 6
-            { "Allpass",        "eq.flt.allpass" },
-            { "Allpass2",       "eq.flt.allpass2" },
-            { "Ladder-pass",    "eq.flt.ladpass" },
-            { "Ladder-rej",     "eq.flt.ladrej" },
-            { "Envelope",       "eq.flt.envelope" },
-            { "Bandpass",       "eq.flt.bandpass" },
-            { "LUFS",           "eq.flt.lufs" },
+            { "Bell",           "filter.flt.bell" },    // 5
+            { "Hi-pass",        "filter.flt.hipass" },  // 2
+            { "Hi-shelf",       "filter.flt.hishelf" }, //4
+            { "Lo-pass",        "filter.flt.lopass" },  // 1
+            { "Lo-shelf",       "filter.flt.loshelf" }, // 3
+            { "Notch",          "filter.flt.notch" },   // 7
+            { "Resonance",      "filter.flt.resonance" }, // 6
+            { "Allpass",        "filter.flt.allpass" },
+            { "Allpass2",       "filter.flt.allpass2" },
+            { "Ladder-pass",    "filter.flt.ladpass" },
+            { "Ladder-rej",     "filter.flt.ladrej" },
+            { "Envelope",       "filter.flt.envelope" },
+            { "Bandpass",       "filter.flt.bandpass" },
+            { "LUFS",           "filter.flt.lufs" },
             { NULL, NULL }
         };
 
         static const port_item_t filter_modes[] =
         {
-            { "RLC (BT)",       "eq.mode.rlc_bt" },
-            { "RLC (MT)",       "eq.mode.rlc_mt" },
-            { "BWC (BT)",       "eq.mode.bwc_bt" },
-            { "BWC (MT)",       "eq.mode.bwc_mt" },
-            { "LRX (BT)",       "eq.mode.lrx_bt" },
-            { "LRX (MT)",       "eq.mode.lrx_mt" },
-            { "APO (DR)",       "eq.mode.apo_dr" },
+            { "RLC (BT)",       "filter.mode.rlc_bt" },
+            { "RLC (MT)",       "filter.mode.rlc_mt" },
+            { "BWC (BT)",       "filter.mode.bwc_bt" },
+            { "BWC (MT)",       "filter.mode.bwc_mt" },
+            { "LRX (BT)",       "filter.mode.lrx_bt" },
+            { "LRX (MT)",       "filter.mode.lrx_mt" },
+            { "APO (DR)",       "filter.mode.apo_dr" },
             { NULL, NULL }
         };
 
@@ -163,7 +167,7 @@ namespace lsp
             "filter",
             "Filter",
             B_EQUALIZERS,
-            "TfpJPsiouuU",
+            "", // TODO Insert youtube link
             "This plugin allows you to process a specific part of your audio's frequency spectrum."
         };
 
@@ -176,7 +180,7 @@ namespace lsp
             "filter_mono",
             LSP_LV2_URI("filter_mono"),
             LSP_LV2UI_URI("filter_mono"),
-            "dh3y",
+            "fltm",
             LSP_LADSPA_FILTER_BASE + 0,
             LSP_LADSPA_URI("filter_mono"),
             LSP_CLAP_URI("filter_mono"),
@@ -200,7 +204,7 @@ namespace lsp
             "filter_stereo",
             LSP_LV2_URI("filter_stereo"),
             LSP_LV2UI_URI("filter_stereo"),
-            "a5er",
+            "flts",
             LSP_LADSPA_FILTER_BASE + 1,
             LSP_LADSPA_URI("filter_stereo"),
             LSP_CLAP_URI("filter_stereo"),

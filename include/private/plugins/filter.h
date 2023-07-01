@@ -131,6 +131,7 @@ namespace lsp
             protected:
                 static inline dspu::equalizer_mode_t get_eq_mode(ssize_t mode);
                 static inline void  decode_filter(size_t *ftype, size_t *slope, size_t mode);
+                static size_t       decode_slope(size_t slope);
                 static inline bool  adjust_gain(size_t filter_type);
 
             protected:
