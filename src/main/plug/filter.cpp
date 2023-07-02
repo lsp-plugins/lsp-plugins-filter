@@ -267,8 +267,8 @@ namespace lsp
                 {
                     switch (mode)
                     {
-                        EQS(RLC_BT, FLT_BT_RLC_BANDPASS, 1)
-                        EQS(RLC_MT, FLT_MT_RLC_BANDPASS, 1)
+                        EQS(RLC_BT, FLT_BT_RLC_BANDPASS, 2)
+                        EQS(RLC_MT, FLT_MT_RLC_BANDPASS, 2)
                         EQS(BWC_BT, FLT_BT_BWC_BANDPASS, 1)
                         EQS(BWC_MT, FLT_MT_BWC_BANDPASS, 1)
                         EQS(LRX_BT, FLT_BT_LRX_BANDPASS, 1)
