@@ -75,20 +75,16 @@ namespace lsp
 
             enum eq_filter_t
             {
-                EQF_BELL,
-                EQF_HIPASS,
-                EQF_HISHELF,
                 EQF_LOPASS,
+                EQF_HIPASS,
                 EQF_LOSHELF,
+                EQF_HISHELF,
+                EQF_BELL,
+                EQF_BANDPASS,
                 EQF_NOTCH,
                 EQF_RESONANCE,
-                EQF_ALLPASS,
-                EQF_ALLPASS2,
                 EQF_LADDERPASS,
-                EQF_LADDERREJ,
-                EQF_ENVELOPE,
-                EQF_BANDPASS,
-                EQF_LUFS
+                EQF_LADDERREJ
             };
 
             enum eq_filter_mode_t

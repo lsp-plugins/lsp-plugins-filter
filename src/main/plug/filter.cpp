@@ -215,22 +215,6 @@ namespace lsp
                     break;
                 }
 
-                case EQF(ALLPASS):
-                {
-                    switch (mode)
-                    {
-                        EQS(RLC_BT, FLT_BT_RLC_ALLPASS, 1)
-                        EQS(RLC_MT, FLT_BT_RLC_ALLPASS, 1)
-                        EQS(BWC_BT, FLT_BT_BWC_ALLPASS, 2)
-                        EQS(BWC_MT, FLT_BT_BWC_ALLPASS, 2)
-                        EQS(LRX_BT, FLT_BT_LRX_ALLPASS, 1)
-                        EQS(LRX_MT, FLT_BT_LRX_ALLPASS, 1)
-                        EQS(APO_DR, FLT_DR_APO_ALLPASS, 1)
-                        EQDFL
-                    }
-                    break;
-                }
-
                 case EQF(RESONANCE):
                 {
                     switch (mode)
@@ -242,23 +226,6 @@ namespace lsp
                         EQS(LRX_BT, FLT_BT_RLC_RESONANCE, 1)
                         EQS(LRX_MT, FLT_MT_RLC_RESONANCE, 1)
                         EQS(APO_DR, FLT_DR_APO_PEAKING, 1)
-                        EQDFL
-                    }
-                    break;
-                }
-
-
-                case EQF(ALLPASS2):
-                {
-                    switch (mode)
-                    {
-                        EQS(RLC_BT, FLT_BT_RLC_ALLPASS2, 1)
-                        EQS(RLC_MT, FLT_BT_RLC_ALLPASS2, 1)
-                        EQS(BWC_BT, FLT_BT_RLC_ALLPASS2, 1)
-                        EQS(BWC_MT, FLT_BT_RLC_ALLPASS2, 1)
-                        EQS(LRX_BT, FLT_BT_RLC_ALLPASS2, 1)
-                        EQS(LRX_MT, FLT_BT_RLC_ALLPASS2, 1)
-                        EQS(APO_DR, FLT_DR_APO_ALLPASS2, 1)
                         EQDFL
                     }
                     break;
@@ -296,22 +263,6 @@ namespace lsp
                     break;
                 }
 
-                case EQF(ENVELOPE):
-                {
-                    switch (mode)
-                    {
-                        EQS(RLC_BT, FLT_BT_RLC_ENVELOPE, 1)
-                        EQS(RLC_MT, FLT_MT_RLC_ENVELOPE, 1)
-                        EQS(BWC_BT, FLT_BT_RLC_ENVELOPE, 1)
-                        EQS(BWC_MT, FLT_MT_RLC_ENVELOPE, 1)
-                        EQS(LRX_BT, FLT_BT_RLC_ENVELOPE, 1)
-                        EQS(LRX_MT, FLT_MT_RLC_ENVELOPE, 1)
-                        EQS(APO_DR, FLT_MT_RLC_ENVELOPE, 1)
-                        EQDFL
-                    }
-                    break;
-                }
-
                 case EQF(BANDPASS):
                 {
                     switch (mode)
@@ -323,22 +274,6 @@ namespace lsp
                         EQS(LRX_BT, FLT_BT_LRX_BANDPASS, 1)
                         EQS(LRX_MT, FLT_MT_LRX_BANDPASS, 1)
                         EQS(APO_DR, FLT_DR_APO_BANDPASS, 1)
-                        EQDFL
-                    }
-                    break;
-                }
-
-                case EQF(LUFS):
-                {
-                    switch (mode)
-                    {
-                        EQS(RLC_BT, FLT_A_WEIGHTED, 1)
-                        EQS(RLC_MT, FLT_B_WEIGHTED, 1)
-                        EQS(BWC_BT, FLT_C_WEIGHTED, 1)
-                        EQS(BWC_MT, FLT_D_WEIGHTED, 1)
-                        EQS(LRX_BT, FLT_K_WEIGHTED, 1)
-                        EQS(LRX_MT, FLT_K_WEIGHTED, 1)
-                        EQS(APO_DR, FLT_K_WEIGHTED, 1)
                         EQDFL
                     }
                     break;

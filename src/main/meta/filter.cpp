@@ -68,20 +68,16 @@ namespace lsp
 
         static const port_item_t filter_types[] =
         {
-            { "Bell",           "filter.flt.bell" },    // 5
-            { "Hi-pass",        "filter.flt.hipass" },  // 2
-            { "Hi-shelf",       "filter.flt.hishelf" }, //4
-            { "Lo-pass",        "filter.flt.lopass" },  // 1
-            { "Lo-shelf",       "filter.flt.loshelf" }, // 3
-            { "Notch",          "filter.flt.notch" },   // 7
-            { "Resonance",      "filter.flt.resonance" }, // 6
-            { "Allpass",        "filter.flt.allpass" },// del
-            { "Allpass2",       "filter.flt.allpass2" },// del
-            { "Ladder-pass",    "filter.flt.ladpass" }, //
-            { "Ladder-rej",     "filter.flt.ladrej" }, //
-            { "Envelope",       "filter.flt.envelope" }, // del
-            { "Bandpass",       "filter.flt.bandpass" }, //
-            { "LUFS",           "filter.flt.lufs" }, // del
+            { "Lo-pass",        "filter.flt.lopass" },
+            { "Hi-pass",        "filter.flt.hipass" },
+            { "Lo-shelf",       "filter.flt.loshelf" },
+            { "Hi-shelf",       "filter.flt.hishelf" },
+            { "Bell",           "filter.flt.bell" },
+            { "Bandpass",       "filter.flt.bandpass" },
+            { "Notch",          "filter.flt.notch" },
+            { "Resonance",      "filter.flt.resonance" },
+            { "Ladder-pass",    "filter.flt.ladpass" },
+            { "Ladder-rej",     "filter.flt.ladrej" },
             { NULL, NULL }
         };
 
