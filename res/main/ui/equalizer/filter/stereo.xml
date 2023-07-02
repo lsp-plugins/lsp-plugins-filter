@@ -5,7 +5,7 @@
 
 			<!-- Graph -->
 			<group ui:inject="GraphGroup" ipadding="0" expand="true" fill="true" text="labels.graphs.spectrum">
-				<graph width.min="390" height.min="110" expand="true">
+				<graph width.min="390" height.min="140" expand="true" fill="true">
 				<!-- <graph ui:id="filter_graph" width.min="640" height.min="340" expand="true"> -->
 					<origin hpos="-1" vpos="-1" visible="false"/>
 
@@ -22,8 +22,9 @@
 						</ui:for>
 						<marker value="20000" color="graph_alt_1"/>
 					</ui:with>
+
 					<ui:for id="g" first="-36" last="36" step="24">
-						<marker v="${g} db" ox="1" oy="0" color="graph_alt_1"/>
+						<marker v="${g} db" ox="1" oy="0" color="graph_alt_1" />
 					</ui:for>
 					<ui:for id="g" first="-18" last="18" step="12">
 						<marker v="${g} db" ox="1" oy="0" color="graph_alt_1" visibility=":zoom le -18 db"/>
@@ -84,8 +85,8 @@
 					<marker ox="0" oy="1" v="24000" color="graph_prim" visibility="false"/>
 
 					<!-- Axis -->
-					<axis ui:id="filter_ox" min="10" max="24000" color="graph_prim" angle="0.0" log="true" visibility="false"/>
-					<axis ui:id="filter_oy" min="-48 db / :zoom" max="48 db * :zoom" color="graph_prim" angle="0.5" log="true" visibility="false"/>
+					<axis min="10" max="24000" color="graph_prim" angle="0.0" log="true" visibility="false"/>
+					<axis min="-48 db / :zoom" max="48 db * :zoom" color="graph_prim" angle="0.5" log="true" visibility="false"/>
 					<!-- -48..+48 dB -->
 					<axis min="-1" max="1" visible="false" angle="0.5"/>
 
@@ -111,7 +112,6 @@
 						<text y="36 db" text="+36" valign="-1"/>
 						<text y="24 db" text="+24" valign="-1"/>
 						<text y="12 db" text="+12" valign="-1"/>
-						<text y="0 db" text="0" valign="1"/>
 						<text y="-12 db" text="-12" valign="1"/>
 						<text y="-24 db" text="-24" valign="1"/>
 						<text y="-36 db" text="-36" valign="1"/>
@@ -148,7 +148,7 @@
 		</vbox>
 
 		<!-- Zoom Fader -->
-		<hbox spacing="4" bg.color="bg">
+		<hbox spacing="4" bg.color="bg" hexpand="false">
 			<vbox vexpand="true" bg.color="bg_schema">
 				<label font.name="lsp-icons" font.size="12" font.antialias="true" text="E" color="text_icon" pad.b="4" pad.t="4"/>
 				<fader id="zoom" angle="1" vexpand="true" bg.inherit="true" flat="true"/>
@@ -157,7 +157,7 @@
 
 			<!-- Signal meters -->
 
-			<vbox vexpand="true" bg.color="bg_schema">
+			<vbox vexpand="true" bg.color="bg_schema" visibility="false">
 				<label text="labels.chan.in" pad.b="3" pad.t="3"/>
 				<ledmeter vexpand="true" angle="1">
 					<ledchannel id="iml" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="left_in"/>
@@ -165,7 +165,7 @@
 				</ledmeter>
 			</vbox>
 
-			<vbox vexpand="true" bg.color="bg_schema">
+			<vbox vexpand="true" bg.color="bg_schema" visibility="false">
 				<label text="labels.chan.out" pad.b="3" pad.t="3"/>
 				<ledmeter vexpand="true" angle="1">
 					<ledchannel id="sml" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="left"/>
@@ -175,7 +175,7 @@
 		</hbox>
 
 		<vbox spacing="4">
-			<group text="groups.signal" expand="true">
+			<group text="groups.signal" expand="true" visibility="false">
 				<grid rows="4" cols="2" hspacing="4">
 					<knob id="g_in" pad.r="4"/>
 					<vbox vfill="false">
@@ -202,24 +202,21 @@
 					</vbox>
 				</grid>
 			</group>
-			<group text="groups.analysis" expand="true">
+			<group text="groups.analysis" hexpand="false">
 				<vbox>
 					<label text="labels.fft.fft" halign="0"/>
 					<combo id="fft" fill="true"/>
-
-					<grid rows="2" cols="2" transpose="false" expand="true" hspacing="4">
-						<knob id="react" size="20" pad.r="4"/>
-						<vbox vfill="false">
+					<vbox vfill="false" pad.v="4" pad.h="6">
 							<label text="labels.metering.reactivity" halign="0"/>
+							<knob id="react" size="20" pad.v="4"/>
 							<value id="react" width.min="50" sline="true" halign="0"/>
 						</vbox>
-
-						<knob id="shift" size="20" pad.r="4"/>
-						<vbox vfill="false">
+						<vbox vfill="false" pad.v="4" pad.h="6">
 							<label text="labels.metering.shift" halign="0"/>
+							<knob id="shift" size="20" pad.v="4"/>
 							<value id="shift" width.min="50" sline="true" halign="0"/>
 						</vbox>
-					</grid>
+
 				</vbox>
 			</group>
 		</vbox>
@@ -227,56 +224,62 @@
 
 
 		<cell cols="3" bg.color="bg_schema">
-					<grid transpose="true" rows="8" cols="4" spacing="0">
-						<ui:with expand="false">
-							<label text="labels.specials.num" fill="true" halign="0"/>
-							<label text="labels.filter" fill="true" halign="0" pad.b="6"/>
-							<label text="labels.mode" fill="true" halign="0" pad.b="6"/>
-							<label text="labels.slope" fill="true" halign="0" pad.b="6"/>
-							<label text="labels.controls" fill="true" halign="0" pad.b="6"/>
-							<label text="labels.freq_gain" halign="0" pad.h="6" pad.t="6"/>
-							<label text="labels.hz_db" halign="0" pad.t="3"/>
-							<cell rows="2"><label text="labels.q" halign="0" /></cell>
+			<group text="labels.filter.controls" ipadding="0" hexpand="true">
+					<grid transpose="true" rows="3" cols="10" spacing="0">
+						<ui:with hexpand="false" hfill="false" hreduce="true" pad.l="6" halign="0" pad.b="4">
+							<label text="labels.filter" pad.t="4"/>
+							<label text="labels.mode" />
+							<label text="labels.slope" />
 						</ui:with>
-
-						<!-- Filters -->
-
-
-								<cell rows="8" bg.color="bg" pad.r="2" pad.l="2" expand="false" pad.t="6" pad.b="6">
-									<vsep/>
+							<combo id="ft" fill="true" pad.h="6" pad.v="4"/>
+							<combo id="fm" fill="true" pad.h="6" pad.b="4"/>
+							<combo id="s" fill="true" pad.h="6" pad.b="4"/>
+								<cell rows="3" >
+									<vsep bg.color="bg" pad.h="2" hreduce="true"/>
 								</cell>
 
+								<cell rows="3" >
+									<vbox vfill="false" pad.v="4" pad.h="6" width.min="85">
+											<label text="labels.frequency" halign="0"/>
+											<knob id="f" size="20" pad.v="4"/>
+											<value id="f" width.min="40" sline="true" precision="1" halign="0"/>
+										</vbox>
+								</cell>
+								<cell rows="3" >
+									<vsep bg.color="bg" pad.h="2" hreduce="true"/>
+								</cell>
 
-									<cell cols="2" fill="true">
-										<combo id="ft" fill="true" pad.l="6" pad.r="6" pad.b="6"/>
-									</cell>
-									<cell cols="2" fill="true">
-										<combo id="fm" fill="true" pad.h="6" expand="true" pad.b="6"/>
-									</cell>
-									<cell cols="2" fill="true">
-										<combo id="s" fill="true" pad.h="6" expand="true" pad.b="6"/>
-									</cell>
-									<cell cols="2" fill="true">
-										<hbox pad.b="6">
+								<cell rows="3" >
+										<vbox vfill="false" pad.v="4" pad.h="6" width.min="85">
+											<label text="labels.filter.bp_width" halign="0"/>
+											<knob id="w" size="20" pad.v="4"/>
+											<value id="w" width.min="40" sline="true" precision="1" halign="0"/>
+										</vbox>
+								</cell>
+								<cell rows="3" >
+									<vsep bg.color="bg" pad.h="2" hreduce="true"/>
+								</cell>
 
-										</hbox>
-									</cell>
+								<cell rows="3" >
+										<vbox vfill="false" pad.v="4" pad.h="6" width.min="85">
+											<label text="labels.quality" halign="0"/>
+											<knob id="q" size="20" pad.v="4"/>
+											<value id="q" width.min="40" sline="true" halign="0"/>
+										</vbox>
+								</cell>
+								<cell rows="3" >
+									<vsep bg.color="bg" pad.h="2" hreduce="true"/>
+								</cell>
 
-									<knob id="f" size="20" pad.t="6"/>
-									<value id="f" width.min="40" detailed="false" precision="1" pad.t="3"/>
-
-									<knob id="q" size="20" pad.t="6"/>
-									<value id="q" width.min="40" detailed="false" pad.t="3" pad.b="6"/>
-
-									<knob id="g" size="20" pad.t="6"/>
-									<value id="g" width.min="40" detailed="false" pad.t="3"/>
-
-
-									<knob id="w" size="20" pad.t="6"/>
-									<value id="w" width.min="40" detailed="false" precision="1" pad.t="3"/>
-								
-
+								<cell rows="3" >
+										<vbox vfill="false" pad.v="4" pad.h="6" width.min="85">
+											<label text="labels.filter.gain" halign="0"/>
+											<knob id="g" size="20" pad.v="4"/>
+											<value id="g" width.min="40" sline="true" halign="0"/>
+										</vbox>
+								</cell>
 					</grid>
+				</group>
 		</cell>
 	</grid>
 </plugin>
