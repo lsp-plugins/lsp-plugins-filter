@@ -1,22 +1,22 @@
 /*
- * Copyright (C) 2021 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2021 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
- * This file is part of lsp-plugins-para-equalizer
- * Created on: 2 авг. 2021 г.
+ * This file is part of lsp-plugins-filter
+ * Created on: 16 июн. 2023 г.
  *
- * lsp-plugins-para-equalizer is free software: you can redistribute it and/or modify
+ * lsp-plugins-filter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
- * lsp-plugins-para-equalizer is distributed in the hope that it will be useful,
+ * lsp-plugins-filter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with lsp-plugins-para-equalizer. If not, see <https://www.gnu.org/licenses/>.
+ * along with lsp-plugins-filter. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef PRIVATE_UI_FILTER_H_
@@ -27,20 +27,14 @@
 
 namespace lsp
 {
-    namespace plugins
+    namespace plugui
     {
-
-         // UI for Filter plugin series
-
+        // UI for Filter plugin series
         class filter_ui: public ui::Module, public ui::IPortListener
         {
             protected:
-
                 ui::IPort          *pType;
-
                 ui::IPort          *pFreq;
-//                ui::IPort          *pQuality;
-//                ui::IPort          *pGain;
 
                 tk::GraphText      *wNote;          // Text with note and frequency
 
@@ -61,7 +55,7 @@ namespace lsp
 
                 virtual void        notify(ui::IPort *port) override;
         };
-    } // namespace plugins
-} // namespace lsp
+    } /* namespace plugui */
+} /* namespace plugui */
 
 #endif /* PRIVATE_UI_FILTER_H_ */

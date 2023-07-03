@@ -1,22 +1,22 @@
 /*
- * Copyright (C) 2021 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2021 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
- * This file is part of lsp-plugins-para-equalizer
- * Created on: 2 авг. 2021 г.
+ * This file is part of lsp-plugins-filter
+ * Created on: 16 июн. 2023 г.
  *
- * lsp-plugins-para-equalizer is free software: you can redistribute it and/or modify
+ * lsp-plugins-filter is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * any later version.
  *
- * lsp-plugins-para-equalizer is distributed in the hope that it will be useful,
+ * lsp-plugins-filter is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with lsp-plugins-para-equalizer. If not, see <https://www.gnu.org/licenses/>.
+ * along with lsp-plugins-filter. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef PRIVATE_PLUGINS_FILTER_H_
@@ -61,30 +61,18 @@ namespace lsp
                     FFTP_PRE
                 };
 
-                typedef struct eq_filter_t
-                {
-                    dspu::filter_params_t sOldFP;       // Old filter parameters
-                    dspu::filter_params_t sFP;          // Filter parameters
-
-                    plug::IPort        *pType;          // Filter type
-                    plug::IPort        *pMode;          // Filter mode
-                    plug::IPort        *pFreq;          // Filter frequency
-                    plug::IPort        *pWidth;         // Filter width
-                    plug::IPort        *pSlope;         // Filter slope
-                    plug::IPort        *pGain;          // Filter gain
-                    plug::IPort        *pQuality;       // Quality factor
-                } eq_filter_t;
-
                 typedef struct eq_channel_t
                 {
                     dspu::Equalizer     sEqualizer;     // Equalizer
                     dspu::Bypass        sBypass;        // Bypass
                     dspu::Delay         sDryDelay;      // Dry delay
 
+                    dspu::filter_params_t sOldFP;       // Old filter parameters
+                    dspu::filter_params_t sFP;          // Filter parameters
+
                     size_t              nLatency;       // Latency of the channel
                     float               fInGain;        // Input gain
                     float               fOutGain;       // Output gain
-                    eq_filter_t         sFilter;        // Filter
                     float              *vDryBuf;        // Dry buffer
                     float              *vBuffer;        // Buffer for temporary data
                     float              *vIn;            // Input buffer
@@ -93,6 +81,14 @@ namespace lsp
 
                     float              *vTr;            // Transfer function (real part)
                     float              *vTrMem;         // Transfer function (stored output)
+
+                    plug::IPort        *pType;          // Filter type
+                    plug::IPort        *pMode;          // Filter mode
+                    plug::IPort        *pFreq;          // Filter frequency
+                    plug::IPort        *pWidth;         // Filter width
+                    plug::IPort        *pSlope;         // Filter slope
+                    plug::IPort        *pGain;          // Filter gain
+                    plug::IPort        *pQuality;       // Quality factor
 
                     plug::IPort        *pIn;            // Input port
                     plug::IPort        *pOut;           // Output port
@@ -138,7 +134,6 @@ namespace lsp
                 void                process_channel(eq_channel_t *c, size_t start, size_t samples);
 
                 void                dump_channel(dspu::IStateDumper *v, const eq_channel_t *c) const;
-                static void         dump_filter(dspu::IStateDumper *v, const eq_filter_t *f);
                 static void         dump_filter_params(dspu::IStateDumper *v, const char *id, const dspu::filter_params_t *fp);
 
             public:
