@@ -489,47 +489,7 @@ namespace lsp
             {
                 eq_channel_t *c     = &vChannels[i];
 
-                c->nLatency         = 0;
-                c->fInGain          = 1.0f;
-                c->fOutGain         = 1.0f;
-                c->vDryBuf          = abuf;
-                abuf               += EQ_BUFFER_SIZE;
-                c->vBuffer          = abuf;
-                abuf               += EQ_BUFFER_SIZE;
-                c->vTr              = abuf;
-                abuf               += meta::filter_metadata::MESH_POINTS * 2;
-                c->vTrMem           = abuf;
-                abuf               += meta::filter_metadata::MESH_POINTS;
-
-                // Input and output ports
-                c->vIn              = NULL;
-                c->vOut             = NULL;
-
-                // Ports
-                c->pIn              = NULL;
-                c->pOut             = NULL;
-                c->pInGain          = NULL;
-                c->pTrAmp           = NULL;
-                c->pFft             = NULL;
-                c->pInMeter         = NULL;
-                c->pOutMeter        = NULL;
-            }
-
-            // Allocate data
-            for (size_t i=0; i<channels; ++i)
-            {
-                // Allocate data
-                eq_channel_t *c     = &vChannels[i];
-
-                c->nLatency         = 0;
-                c->fInGain          = 0.0f;
-                c->fOutGain         = 0.0f;
-                c->vDryBuf          = NULL;
-                c->vBuffer          = NULL;
-                c->vIn              = NULL;
-                c->vOut             = NULL;
-                c->nSync            = CS_UPDATE;
-
+                // Initialize equalizer
                 c->sEqualizer.init(1, EQ_RANK);
                 c->sEqualizer.set_smooth(true);
                 max_latency         = lsp_max(max_latency, c->sEqualizer.max_latency());
@@ -549,7 +509,22 @@ namespace lsp
                 c->sFP.nSlope       = 0;
                 c->sFP.fQuality     = 0.0f;
 
-                // Additional parameters
+                c->nLatency         = 0;
+                c->fInGain          = 1.0f;
+                c->fOutGain         = 1.0f;
+                c->vDryBuf          = abuf;
+                abuf               += EQ_BUFFER_SIZE;
+                c->vBuffer          = abuf;
+                c->vIn              = NULL;
+                c->vOut             = NULL;
+                abuf               += EQ_BUFFER_SIZE;
+                c->vTr              = abuf;
+                abuf               += meta::filter_metadata::MESH_POINTS * 2;
+                c->vTrMem           = abuf;
+                abuf               += meta::filter_metadata::MESH_POINTS;
+                c->nSync            = CS_UPDATE;
+
+                // Ports
                 c->pType            = NULL;
                 c->pMode            = NULL;
                 c->pFreq            = NULL;
@@ -1186,10 +1161,9 @@ namespace lsp
                 v->write("vBuffer", c->vBuffer);
                 v->write("vIn", c->vIn);
                 v->write("vOut", c->vOut);
-                v->write("nSync", c->nSync);
-
                 v->write("vTr", c->vTr);
                 v->write("vTrMem", c->vTrMem);
+                v->write("nSync", c->nSync);
 
                 v->write("pType", c->pType);
                 v->write("pMode", c->pMode);

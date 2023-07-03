@@ -77,10 +77,9 @@ namespace lsp
                     float              *vBuffer;        // Buffer for temporary data
                     float              *vIn;            // Input buffer
                     float              *vOut;           // Output buffer
-                    size_t              nSync;          // Chart state
-
                     float              *vTr;            // Transfer function (real part)
                     float              *vTrMem;         // Transfer function (stored output)
+                    size_t              nSync;          // Chart state
 
                     plug::IPort        *pType;          // Filter type
                     plug::IPort        *pMode;          // Filter mode
