@@ -70,8 +70,6 @@ namespace lsp
         {
             pType       = NULL;
             pFreq       = NULL;
-//          pQuality    = NULL;
-//          pGain       = NULL;
             wNote       = NULL;
         }
 
@@ -80,13 +78,8 @@ namespace lsp
 
         }
 
-
-
         void filter_ui::update_filter_note_text()
         {
-
-
-
             // Check that we have the widget to display
             if (wNote == NULL)
                 return;
@@ -165,21 +158,9 @@ namespace lsp
             if (res != STATUS_OK)
                 return res;
 
-
-//            wDot          = filter_widget<tk::GraphDot>("filter_dot");
             wNote         = filter_widget<tk::GraphText>("filter_note");
-/*            wType         = filter_widget<tk::ComboBox>("filter_type");
-            wMode         = filter_widget<tk::ComboBox>("filter_mode");
-            wSlope        = filter_widget<tk::ComboBox>("filter_slope");
-            wGain         = filter_widget<tk::Knob>("filter_gain");
-            wFreq         = filter_widget<tk::Knob>("filter_freq");
-            wQuality      = filter_widget<tk::Knob>("filter_q");*/
-
             pType         = find_port("ft");
             pFreq         = find_port("f");
-            //pGain         = find_port("g");
-            //pQuality      = find_port("q");
-
 
             if (pType != NULL)
                 pType->bind(this);
@@ -195,9 +176,7 @@ namespace lsp
         void filter_ui::notify(ui::IPort *port)
         {
                     update_filter_note_text();
-
         }
-
 
     } /* namespace plugins */
 } /* namespace lsp */

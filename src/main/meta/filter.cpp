@@ -115,7 +115,7 @@ namespace lsp
                 AMP_GAIN("g_in", "Input gain", filter_metadata::IN_GAIN_DFL, 10.0f), \
                 AMP_GAIN("g_out", "Output gain", filter_metadata::OUT_GAIN_DFL, 10.0f), \
                 COMBO("mode", "Equalizer mode", 0, equalizer_eq_modes), \
-                COMBO("fft", "FFT analysis", 0, equalizer_fft_mode), \
+                COMBO("fft", "FFT analysis", 1, equalizer_fft_mode), \
                 LOG_CONTROL("react", "FFT reactivity", U_MSEC, filter_metadata::REACT_TIME), \
                 AMP_GAIN("shift", "Shift gain", 1.0f, 100.0f), \
                 LOG_CONTROL("zoom", "Graph zoom", U_GAIN_AMP, filter_metadata::ZOOM)
@@ -186,8 +186,8 @@ namespace lsp
             clap_features_mono,
             E_INLINE_DISPLAY | E_DUMP_STATE,
             filter_mono_ports,
-            "equalizer/filter/mono.xml",
-            "equalizer/filter/mono",
+            "equalizer/filter/filter.xml",
+            NULL,
             mono_plugin_port_groups,
             &filter_bundle
         };
@@ -210,8 +210,8 @@ namespace lsp
             clap_features_stereo,
             E_INLINE_DISPLAY | E_DUMP_STATE,
             filter_stereo_ports,
-            "equalizer/filter/stereo.xml",
-            "equalizer/filter/stereo",
+            "equalizer/filter/filter.xml",
+            NULL,
             stereo_plugin_port_groups,
             &filter_bundle
         };

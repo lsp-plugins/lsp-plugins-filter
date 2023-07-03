@@ -75,10 +75,8 @@ namespace lsp
         static plug::Factory factory(plugin_factory, plugins, 2);
 
         //-------------------------------------------------------------------------
-       // filter::filter(const meta::plugin_t *metadata, size_t filters, size_t mode): plug::Module(metadata)
         filter::filter(const meta::plugin_t *metadata, size_t mode): plug::Module(metadata)
         {
-            //nFilters        = filters;
             nMode           = mode;
             vChannels       = NULL;
             vFreqs          = NULL;
@@ -288,24 +286,11 @@ namespace lsp
 
         size_t filter::decode_slope(size_t slope)
         {
-            if (slope < 4)
-                return slope + 1;
-
-            switch (slope)
-            {
-                case 4:
-                    return 6;
-                case 5:
-                    return 8;
-                case 6:
-                    return 12;
-                case 7:
-                    return 16;
-            }
-            return STATUS_UNKNOWN_ERR;
+            size_t arr[8]{1, 2, 3, 4, 6, 8, 12, 16};
+            return arr[slope];
         }
 
-        bool filter::is_bandpass_filter(size_t type)
+        bool filter::filter_have_width(size_t type)
         {
             switch (type)
             {
@@ -316,6 +301,20 @@ namespace lsp
                 case dspu::FLT_BT_LRX_BANDPASS:
                 case dspu::FLT_MT_LRX_BANDPASS:
                 case dspu::FLT_DR_APO_BANDPASS:
+                case dspu::FLT_BT_RLC_LADDERPASS:
+                case dspu::FLT_MT_RLC_LADDERPASS:
+                case dspu::FLT_BT_RLC_LADDERREJ:
+                case dspu::FLT_MT_RLC_LADDERREJ:
+                case dspu::FLT_BT_BWC_LADDERPASS:
+                case dspu::FLT_MT_BWC_LADDERPASS:
+                case dspu::FLT_BT_BWC_LADDERREJ:
+                case dspu::FLT_MT_BWC_LADDERREJ:
+                case dspu::FLT_BT_LRX_LADDERPASS:
+                case dspu::FLT_MT_LRX_LADDERPASS:
+                case dspu::FLT_BT_LRX_LADDERREJ:
+                case dspu::FLT_MT_LRX_LADDERREJ:
+                case dspu::FLT_DR_APO_LADDERPASS:
+                case dspu::FLT_DR_APO_LADDERREJ:
                     return true;
             }
 
@@ -334,31 +333,21 @@ namespace lsp
                 case dspu::FLT_MT_RLC_HIPASS:
                 case dspu::FLT_BT_RLC_NOTCH:
                 case dspu::FLT_MT_RLC_NOTCH:
-                case dspu::FLT_BT_RLC_ALLPASS:
-                case dspu::FLT_MT_RLC_ALLPASS:
-                case dspu::FLT_BT_RLC_ALLPASS2:
-                case dspu::FLT_MT_RLC_ALLPASS2:
 
                 case dspu::FLT_BT_BWC_LOPASS:
                 case dspu::FLT_MT_BWC_LOPASS:
                 case dspu::FLT_BT_BWC_HIPASS:
                 case dspu::FLT_MT_BWC_HIPASS:
-                case dspu::FLT_BT_BWC_ALLPASS:
-                case dspu::FLT_MT_BWC_ALLPASS:
 
                 case dspu::FLT_BT_LRX_LOPASS:
                 case dspu::FLT_MT_LRX_LOPASS:
                 case dspu::FLT_BT_LRX_HIPASS:
                 case dspu::FLT_MT_LRX_HIPASS:
-                case dspu::FLT_BT_LRX_ALLPASS:
-                case dspu::FLT_MT_LRX_ALLPASS:
 
                 // Disable gain adjust for several APO filters, too
                 case dspu::FLT_DR_APO_NOTCH:
                 case dspu::FLT_DR_APO_LOPASS:
                 case dspu::FLT_DR_APO_HIPASS:
-                case dspu::FLT_DR_APO_ALLPASS:
-                case dspu::FLT_DR_APO_ALLPASS2:
 
                 case dspu::FLT_BT_RLC_BANDPASS:
                 case dspu::FLT_MT_RLC_BANDPASS:
@@ -406,9 +395,6 @@ namespace lsp
                 case dspu::FLT_DR_APO_HIPASS:
                 case dspu::FLT_DR_APO_BANDPASS:
                 case dspu::FLT_DR_APO_NOTCH:
-                case dspu::FLT_DR_APO_ALLPASS:
-                case dspu::FLT_DR_APO_ALLPASS2:
-                case dspu::FLT_DR_APO_PEAKING:
                 case dspu::FLT_DR_APO_LOSHELF:
                 case dspu::FLT_DR_APO_HISHELF:
                 case dspu::FLT_DR_APO_LADDERPASS:
@@ -650,7 +636,6 @@ namespace lsp
                     f->pQuality     = TRACE_PORT(ports[port_id++]);
                 }
             }
-
         }
 
         void filter::ui_activated()
@@ -801,7 +786,7 @@ namespace lsp
                 fp->nSlope          = decode_slope(f->pSlope->value());
                 decode_filter(&fp->nType, &fp->nSlope, f->pMode->value());
 
-                if (is_bandpass_filter(fp->nType))
+                if (filter_have_width(fp->nType))
                 {
                     float center = f->pFreq->value();
                     float k = powf(2, (f->pWidth->value()*0.5f));
@@ -1239,7 +1224,6 @@ namespace lsp
                 v->write_object("sEqualizer", &c->sEqualizer);
                 v->write_object("sBypass", &c->sBypass);
                 v->write_object("sDryDelay", &c->sDryDelay);
-
                 v->write("nLatency", c->nLatency);
                 v->write("fInGain", c->fInGain);
                 v->write("fOutGain", c->fOutGain);
@@ -1253,10 +1237,8 @@ namespace lsp
                 v->write("vIn", c->vIn);
                 v->write("vOut", c->vOut);
                 v->write("nSync", c->nSync);
-
                 v->write("vTrRe", c->vTrRe);
                 v->write("vTrIm", c->vTrIm);
-
                 v->write("pIn", c->pIn);
                 v->write("pOut", c->pOut);
                 v->write("pInGain", c->pInGain);
@@ -1287,17 +1269,14 @@ namespace lsp
             v->write("vIndexes", vIndexes);
             v->write("fGainIn", fGainIn);
             v->write("fZoom", fZoom);
-            //v->write("bListen", bListen);
             v->write("bSmoothMode", bSmoothMode);
             v->write("nFftPosition", nFftPosition);
             v->write_object("pIDisplay", pIDisplay);
-
             v->write("pBypass", pBypass);
             v->write("pGainIn", pGainIn);
             v->write("pGainOut", pGainOut);
             v->write("pFftMode", pFftMode);
             v->write("pReactivity", pReactivity);
-            //v->write("pListen", pListen);
             v->write("pShiftGain", pShiftGain);
             v->write("pZoom", pZoom);
             v->write("pEqMode", pEqMode);

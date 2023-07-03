@@ -108,7 +108,6 @@ namespace lsp
 
             protected:
                 dspu::Analyzer      sAnalyzer;              // Analyzer
-                //size_t              nFilters;               // Number of filters
                 size_t              nMode;                  // Operating mode
                 eq_channel_t       *vChannels;              // List of channels
                 float              *vFreqs;                 // Frequency list
@@ -133,7 +132,7 @@ namespace lsp
                 static inline dspu::equalizer_mode_t get_eq_mode(ssize_t mode);
                 static inline void  decode_filter(size_t *ftype, size_t *slope, size_t mode);
                 static size_t       decode_slope(size_t slope);
-                static bool         is_bandpass_filter(size_t type);
+                static bool         filter_have_width(size_t type);
                 static inline bool  adjust_gain(size_t filter_type);
                 static float        calc_qfactor(float q, size_t type, size_t slope);
 
@@ -146,7 +145,6 @@ namespace lsp
                 static void         dump_filter_params(dspu::IStateDumper *v, const char *id, const dspu::filter_params_t *fp);
 
             public:
-                //explicit filter(const meta::plugin_t *metadata, size_t filters, size_t mode);
                 explicit filter(const meta::plugin_t *metadata, size_t mode);
                 virtual ~filter() override;
 
@@ -164,7 +162,6 @@ namespace lsp
 
                 virtual void        dump(dspu::IStateDumper *v) const override;
         };
-
     } // namespace plugins
 } // namespace lsp
 
