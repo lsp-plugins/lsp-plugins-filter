@@ -153,8 +153,8 @@ namespace lsp
 
                 virtual void        dump(dspu::IStateDumper *v) const override;
         };
-    } // namespace plugins
-} // namespace lsp
+    } /* namespace plugins */
+} /* namespace lsp */
 
 
 #endif /* PRIVATE_PLUGINS_FILTER_H_ */

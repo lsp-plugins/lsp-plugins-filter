@@ -1215,5 +1215,5 @@ namespace lsp
             v->write("pBalance", pBalance);
         }
 
-    } // namespace plugins
-} // namespace lsp
+    } /* namespace plugins */
+} /* namespace lsp */
