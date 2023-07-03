@@ -63,9 +63,6 @@ namespace lsp
 
                 typedef struct eq_filter_t
                 {
-                    float              *vTrRe;          // Transfer function (real part)
-                    float              *vTrIm;          // Transfer function (imaginary part)
-                    size_t              nSync;          // Chart state
                     dspu::filter_params_t sOldFP;       // Old filter parameters
                     dspu::filter_params_t sFP;          // Filter parameters
 
@@ -94,8 +91,8 @@ namespace lsp
                     float              *vOut;           // Output buffer
                     size_t              nSync;          // Chart state
 
-                    float              *vTrRe;          // Transfer function (real part)
-                    float              *vTrIm;          // Transfer function (imaginary part)
+                    float              *vTr;            // Transfer function (real part)
+                    float              *vTrMem;         // Transfer function (stored output)
 
                     plug::IPort        *pIn;            // Input port
                     plug::IPort        *pOut;           // Output port

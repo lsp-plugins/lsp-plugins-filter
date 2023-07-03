@@ -54,7 +54,7 @@
 						<mesh id="fftg_l" width="2" color="left" color.a="0.3" visibility=":fftv_l"/>
 						<mesh id="fftg_r" width="2" color="right" color.a="0.3" visibility=":fftv_r"/>
 					</ui:if>
-					<ui:if test="ex :in_l">
+					<ui:if test="!ex :in_l">
 						<mesh id="fftg" width="2" color.a="0.3" color="mono"/>
 					</ui:if>
 					<mesh id="ag" width="3" color="bright_cyan" smooth="true"/>

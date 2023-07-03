@@ -465,8 +465,14 @@ namespace lsp
                 return;
 
             // Calculate amount of bulk data to allocate
-            size_t allocate     = (2 * meta::filter_metadata::MESH_POINTS * 3 + EQ_BUFFER_SIZE * 2) * channels +
-                                  meta::filter_metadata::MESH_POINTS;
+            size_t allocate     =
+                meta::filter_metadata::MESH_POINTS + // vFreqs
+                channels * (
+                    EQ_BUFFER_SIZE + // vDryBuf
+                    EQ_BUFFER_SIZE + // vBuffer
+                    2 * meta::filter_metadata::MESH_POINTS +    // vTr
+                    meta::filter_metadata::MESH_POINTS          // vTrMem
+                );
             float *abuf         = new float[allocate];
             if (abuf == NULL)
                 return;
@@ -490,9 +496,9 @@ namespace lsp
                 abuf               += EQ_BUFFER_SIZE;
                 c->vBuffer          = abuf;
                 abuf               += EQ_BUFFER_SIZE;
-                c->vTrRe            = abuf;
-                abuf               += meta::filter_metadata::MESH_POINTS;
-                c->vTrIm            = abuf;
+                c->vTr              = abuf;
+                abuf               += meta::filter_metadata::MESH_POINTS * 2;
+                c->vTrMem           = abuf;
                 abuf               += meta::filter_metadata::MESH_POINTS;
 
                 // Input and output ports
@@ -516,19 +522,12 @@ namespace lsp
                 eq_channel_t *c     = &vChannels[i];
                 c->nSync            = CS_UPDATE;
 
-                c->sEqualizer.init(2, EQ_RANK);
+                c->sEqualizer.init(1, EQ_RANK);
                 c->sEqualizer.set_smooth(true);
                 max_latency         = lsp_max(max_latency, c->sEqualizer.max_latency());
 
                 // Initialize filter
                 eq_filter_t *f      = &c->sFilter;
-
-                // Filter characteristics
-                f->vTrRe            = abuf;
-                abuf               += meta::filter_metadata::MESH_POINTS;
-                f->vTrIm            = abuf;
-                abuf               += meta::filter_metadata::MESH_POINTS;
-                f->nSync            = CS_UPDATE;
 
                 // Init filter parameters
                 f->sOldFP.nType     = dspu::FLT_NONE;
@@ -607,7 +606,6 @@ namespace lsp
             // Bind filters
             lsp_trace("Binding filter ports");
 
-
             for (size_t j=0; j<channels; ++j)
             {
                 eq_filter_t *f      = &vChannels[j].sFilter;
@@ -642,11 +640,8 @@ namespace lsp
         {
             size_t channels     = ((nMode == EQ_MONO) || (nMode == EQ_STEREO)) ? 1 : 2;
             for (size_t i=0; i<channels; ++i)
-            {
-
-                vChannels[i].sFilter.nSync = CS_UPDATE;
                 vChannels[i].nSync = CS_UPDATE;
-            }
+
             pWrapper->request_settings_update();
         }
 
@@ -747,8 +742,6 @@ namespace lsp
             if (pShiftGain != NULL)
                 sAnalyzer.set_shift(pShiftGain->value() * 100.0f);
 
-
-
             // Update equalizer mode
             dspu::equalizer_mode_t eq_mode  = get_eq_mode(pEqMode->value());
             bool bypass                     = pBypass->value() >= 0.5f;
@@ -815,7 +808,7 @@ namespace lsp
                 if ((type_changed) || (param_changed))
                 {
                     c->sEqualizer.set_params(0, fp);
-                    f->nSync            = CS_UPDATE;
+                    c->nSync            = CS_UPDATE;
 
                     if (type_changed)
                         mode_changed    = true;
@@ -925,7 +918,6 @@ namespace lsp
                     c->sDryDelay.process(c->vDryBuf, c->vIn, to_process);
                 }
 
-
                 if (nMode == EQ_MONO)
                 {
                     vChannels[0].pInMeter->set_value(dsp::abs_max(vChannels[0].vIn, to_process));
@@ -1024,43 +1016,26 @@ namespace lsp
             for (size_t i=0; i<channels; ++i)
             {
                 eq_channel_t *c     = &vChannels[i];
-
-
-
-                // Update transfer chart of the filter
-                eq_filter_t *f  = &c->sFilter;
-                if (f->nSync & CS_UPDATE)
-                {
-                    c->sEqualizer.freq_chart(0, f->vTrRe, f->vTrIm, vFreqs, meta::filter_metadata::MESH_POINTS);
-                    f->nSync    = CS_SYNC_AMP;
-                    c->nSync    = CS_UPDATE;
-                }
-
-
+                if (c->pTrAmp == NULL)
+                    continue;
 
                 // Synchronize main transfer function of the channel
                 if (c->nSync & CS_UPDATE)
                 {
-                    // Initialize complex numbers for transfer function
-                    dsp::fill_one(c->vTrRe, meta::filter_metadata::MESH_POINTS);
-                    dsp::fill_zero(c->vTrIm, meta::filter_metadata::MESH_POINTS);
-
-
-                    eq_filter_t *f  = &c->sFilter;
-                    dsp::complex_mul2(c->vTrRe, c->vTrIm, f->vTrRe, f->vTrIm, meta::filter_metadata::MESH_POINTS);
-
+                    c->sEqualizer.freq_chart(c->vTr, vFreqs, meta::filter_metadata::MESH_POINTS);
+                    dsp::pcomplex_mod(c->vTrMem, c->vTr, meta::filter_metadata::MESH_POINTS);
                     c->nSync    = CS_SYNC_AMP;
                 }
 
                 // Output amplification curve
-                if ((c->pTrAmp != NULL) && (c->nSync & CS_SYNC_AMP))
+                if (c->nSync & CS_SYNC_AMP)
                 {
                     // Sync mesh
                     plug::mesh_t *mesh  = c->pTrAmp->buffer<plug::mesh_t>();
                     if ((mesh != NULL) && (mesh->isEmpty()))
                     {
                         dsp::copy(mesh->pvData[0], vFreqs, meta::filter_metadata::MESH_POINTS);
-                        dsp::complex_mod(mesh->pvData[1], c->vTrRe, c->vTrIm, meta::filter_metadata::MESH_POINTS);
+                        dsp::copy(mesh->pvData[1], c->vTrMem, meta::filter_metadata::MESH_POINTS);
                         mesh->data(2, meta::filter_metadata::MESH_POINTS);
 
                         c->nSync           &= ~CS_SYNC_AMP;
@@ -1128,8 +1103,8 @@ namespace lsp
                 cv->line(0, ay, width, ay);
             }
 
-            // Allocate buffer: f, x, y, re, im
-            pIDisplay           = core::IDBuffer::reuse(pIDisplay, 5, width+2);
+            // Allocate buffer: f, x, y, amp
+            pIDisplay           = core::IDBuffer::reuse(pIDisplay, 4, width+2);
             core::IDBuffer *b   = pIDisplay;
             if (b == NULL)
                 return false;
@@ -1139,18 +1114,8 @@ namespace lsp
             b->v[0][width+1]    = SPEC_FREQ_MAX*2.0f;
             b->v[3][0]          = 1.0f;
             b->v[3][width+1]    = 1.0f;
-            b->v[4][0]          = 0.0f;
-            b->v[4][width+1]    = 0.0f;
 
             size_t channels = ((nMode == EQ_MONO) || (nMode == EQ_STEREO)) ? 1 : 2;
-            static uint32_t c_colors[] =
-            {
-                CV_MIDDLE_CHANNEL, CV_MIDDLE_CHANNEL,
-                CV_MIDDLE_CHANNEL, CV_MIDDLE_CHANNEL,
-                CV_LEFT_CHANNEL, CV_RIGHT_CHANNEL,
-                CV_MIDDLE_CHANNEL, CV_SIDE_CHANNEL
-            };
-
             bool aa = cv->set_anti_aliasing(true);
             cv->set_line_width(2);
 
@@ -1162,18 +1127,16 @@ namespace lsp
                 {
                     size_t k        = (j*meta::filter_metadata::MESH_POINTS)/width;
                     b->v[0][j+1]    = vFreqs[k];
-                    b->v[3][j+1]    = c->vTrRe[k];
-                    b->v[4][j+1]    = c->vTrIm[k];
+                    b->v[3][j+1]    = c->vTrMem[k];
                 }
 
-                dsp::complex_mod(b->v[3], b->v[3], b->v[4], width+2);
                 dsp::fill(b->v[1], 0.0f, width+2);
                 dsp::fill(b->v[2], height, width+2);
                 dsp::axis_apply_log1(b->v[1], b->v[0], zx, dx, width+2);
                 dsp::axis_apply_log1(b->v[2], b->v[3], zy, dy, width+2);
 
                 // Draw mesh
-                uint32_t color = (bypassing || !(active())) ? CV_SILVER : c_colors[nMode*2 + i];
+                uint32_t color = (bypassing || !(active())) ? CV_SILVER : CV_MIDDLE_CHANNEL;
                 Color stroke(color), fill(color, 0.5f);
                 cv->draw_poly(b->v[1], b->v[2], width+2, stroke, fill);
             }
@@ -1200,10 +1163,6 @@ namespace lsp
         {
             v->begin_object(f, sizeof(eq_filter_t));
             {
-                v->write("vTrRe", f->vTrRe);
-                v->write("vTrIm", f->vTrIm);
-                v->write("nSync", f->nSync);
-
                 dump_filter_params(v, "sOldFP", &f->sOldFP);
                 dump_filter_params(v, "sFP", &f->sFP);
 
@@ -1237,8 +1196,8 @@ namespace lsp
                 v->write("vIn", c->vIn);
                 v->write("vOut", c->vOut);
                 v->write("nSync", c->nSync);
-                v->write("vTrRe", c->vTrRe);
-                v->write("vTrIm", c->vTrIm);
+                v->write("vTr", c->vTr);
+                v->write("vTrMem", c->vTrMem);
                 v->write("pIn", c->pIn);
                 v->write("pOut", c->pOut);
                 v->write("pInGain", c->pInGain);

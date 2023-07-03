@@ -124,8 +124,7 @@ namespace lsp
                 MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS), \
                 METER_GAIN("im", "Input signal meter", GAIN_AMP_P_12_DB), \
                 METER_GAIN("sm", "Output signal meter", GAIN_AMP_P_12_DB), \
-                MESH("fftg", "FFT graph", 2, filter_metadata::MESH_POINTS), \
-                SWITCH("fftv", "FFT visibility", 1.0f)
+                MESH("fftg", "FFT graph", 2, filter_metadata::MESH_POINTS)
 
         #define EQ_STEREO_PORTS \
                 PAN_CTL("bal", "Output balance", 0.0f), \
