@@ -1,6 +1,6 @@
 {
-	"para_equalizer": {
-		"name": "Parametric Equalizer",
+	"filter": {
+		"name": "Parametric Filter",
 		"description": "This plugin allows you to process a specific part of your audio's frequency spectrum."
 	}
 }
