@@ -49,7 +49,6 @@
 					<marker id="f" ox="0" oy="1" color="graph_marker_line" color.a="0.5" />
 					<marker id="g" ox="1" oy="0" color="graph_marker_line" color.a="0.5"  />
 
-					<mesh id="agf_0" width="2" color="graph_mesh" fill="false" fcolor="graph_mesh" fcolor.a="0.9" smooth="true" color.a="0.6"/>
 					<ui:if test="ex :in_l">
 						<mesh id="fftg_l" width="2" color="left" color.a="0.3" visibility=":fftv_l"/>
 						<mesh id="fftg_r" width="2" color="right" color.a="0.3" visibility=":fftv_r"/>
@@ -228,12 +227,14 @@
 							<value id="g_out" width.min="50" sline="true" halign="0"/>
 						</vbox>
 						<hsep bg.color="bg" pad.v="2" vreduce="true"/>
-						<vbox vfill="false" pad.v="4" pad.h="6">
+						<ui:if test="ex :in_l">
+							<vbox vfill="false" pad.v="4" pad.h="6">
 							<label text="labels.balance" halign="0"/>
 							<knob id="bal" size="20" balance="0.5" scolor="balance" pad.v="4"/>
 							<value id="bal" width.min="50" sline="true" halign="0"/>
 						</vbox>
 						<hsep bg.color="bg" pad.v="2" vreduce="true"/>
+						</ui:if>
 						<void expand="true"/>
 					</vbox>
 				</group>
