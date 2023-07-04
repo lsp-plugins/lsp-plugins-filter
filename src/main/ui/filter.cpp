@@ -150,8 +150,6 @@ namespace lsp
             }
         }
 
-
-
         status_t filter_ui::post_init()
         {
             status_t res = ui::Module::post_init();
@@ -173,9 +171,9 @@ namespace lsp
         }
 
 
-        void filter_ui::notify(ui::IPort *port)
+        void filter_ui::notify(ui::IPort *port, size_t flags)
         {
-                    update_filter_note_text();
+            update_filter_note_text();
         }
 
     } /* namespace plugui */
