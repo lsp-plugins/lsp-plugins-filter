@@ -391,6 +391,8 @@ namespace lsp
                 case dspu::FLT_MT_BWC_BELL:
                 case dspu::FLT_BT_LRX_BELL:
                 case dspu::FLT_MT_LRX_BELL:
+                case dspu::FLT_BT_RLC_NOTCH:
+                case dspu::FLT_MT_RLC_NOTCH:
                 case dspu::FLT_DR_APO_LOPASS:
                 case dspu::FLT_DR_APO_HIPASS:
                 case dspu::FLT_DR_APO_BANDPASS:
