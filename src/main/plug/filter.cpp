@@ -300,7 +300,6 @@ namespace lsp
                 case dspu::FLT_MT_BWC_BANDPASS:
                 case dspu::FLT_BT_LRX_BANDPASS:
                 case dspu::FLT_MT_LRX_BANDPASS:
-                case dspu::FLT_DR_APO_BANDPASS:
                 case dspu::FLT_BT_RLC_LADDERPASS:
                 case dspu::FLT_MT_RLC_LADDERPASS:
                 case dspu::FLT_BT_RLC_LADDERREJ:
