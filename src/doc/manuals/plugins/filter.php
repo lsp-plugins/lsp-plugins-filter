@@ -1,17 +1,11 @@
 <?php
 	plugin_header();
 	
-	$nf     =   (strpos($PAGE, '_x32') > 0) ? 32 : 16;
-	$m      =   (strpos($PAGE, '_mono') > 0) ? 'm' : (
-	            (strpos($PAGE, '_stereo') > 0) ? 's' : (
-                (strpos($PAGE, '_lr') > 0) ? 'lr' : (
-                (strpos($PAGE, '_ms') > 0) ? 'ms' : '?'
-	            )));
-	$cc     =   ($m == 'm') ? 'mono' : 'stereo';
+	$m      =   (strpos($PAGE, '_mono') > 0) ? 'm' : 's';
 ?>
 <?php require_once("${DOC_BASE}/manuals/common/filters.php"); ?>
 <p>
-	There are some recommendations that could be given when applying equalization:
+	There are some recommendations that could be given about filters:
 </p>
 <ul>
 	<li><b>Resonance filter</b> with high Quality Factor can be good choice to cut annoying masking resonances from the original sound.</li>
@@ -27,25 +21,8 @@
     <li><b>Direct Design (DR) filters</b> add alterantive implementations for the various supperted filter types, and may be chosen whenever their frequency response is best suited.</li>
 </ul>
 <p>
-	This plugin performs parametric equalization of <?= $cc ?> channel<?php 
-	if ($m == 'ms') echo " in Mid-Side mode";
-	elseif ($m == 'lr') echo " by applying individual equalization to left and right channels separately";
-	?>. Up to <?= $nf ?> filters are available for signal processing simultaneously.
+	This plugin introduces a single filter.
 </p>
-<p>
-	Additional filter inspection feature with the controlled width of the bandpass filter allows to listen the frequency
-	band around several filter types to make search and cut off resonances much easier:
-</p>
-<? if (($m == 'ms') || ($m == 'lr')) { ?>
-<p>
-	It is also possible to switch filter between <? if ($m == 'ms') echo "Mid and Side"; else "Left and Right"; ?> channels
-	by selecting corresponding menu item in the popup menu (
-		<? if ($m == 'ms') echo "Switch to Mid / Switch to Side";
-		   else "Switch to Left / Switch to Right"; ?>
-	) above the filter's dot on the graph. 
-</p>
-<? } ?>
-
 <p>The steepness of the filter is depending on the type of the filter selected, it's slope and Q factor.<p>
 <p>There is a simple rule that allows to compute the steepness of IIR (recursive) low-pass or high-pass filter which consists
 of so-called poles and zeros:<p>
@@ -123,7 +100,7 @@ of so-called poles and zeros:<p>
 </tr>
 </table>
 
-<p>Adjusting q can give additional steepness to the curve but making it too high gives extra non-linearity of the magnitude in the passed spectrum.</p>
+<p>Adjusting Q factor can give additional steepness to the curve but making it too high gives extra non-linearity of the magnitude in the passed spectrum.</p>
 
 <ul>
 <li>Bell-shaped filters;</li>
@@ -136,29 +113,12 @@ of so-called poles and zeros:<p>
 	The frequency control feature allows to detect the note and the note detune the filter is operating with at the top
 	of the graph area.
 </p>
-<p>
-	Additionally, mouse double-click on the graph area allows to add a filter with desired frequency and gain
-	settings depending on the actual frequency value at the position of the mouse click:
-</p>
-<ul>
-	<li>100 Hz and below: Hi-pass RLC BT filter with Q=0.5;</li>
-	<li>100 Hz - 300 Hz: Lo-shelf RLC BT filter with Q=0.5;</li>
-	<li>300 Hz - 7 kHz: Bell RLC BT filter with Q=2;</li>
-	<li>7 kHz - 15 kHz: Hi-shelf RLC BT filter with Q=0.5;</li>
-	<li>15 kHz and above: Lo-pass RLC BT filter with Q=0.5.</li>
-</ul>
-<p>
-	Several filter parameters like type, mode, slope, inspection, solo and mute are also available for change from the
-	context menu which can be displayed by the right mouse click over the filter's control dot in the graph area.
-</p>
+
+
 <p><b>Meters:</b></p>
 <ul>
-	<?php if ($m == 'ms') { ?>
-		<li><b>Input</b> - the level meter for left and right channels of the input signal.
-		If <b>Listen</b> button is pressed, it shows the level of middle and side channels of the input signal respectively.</li>
-		<li><b>Output</b> - the level meter for left and right channels of the output signal.
-		If <b>Listen</b> button is pressed, it shows the level of middle and side channels of the output signal respectively.</li>
-	<?php } elseif ($m != 'm') { ?>
+
+	<?php if ($m == 's') { ?>
 		<li><b>Input</b> - the level meter for left and right channels of the input signal.</li>
 		<li><b>Output</b> - the level meter for left and right channels of the output signal.</li>
 	<?php } else { ?>
@@ -178,35 +138,11 @@ of so-called poles and zeros:<p>
 		<li><b>FFT</b> - Fast Fourier Transform approximation of the frequency chart, linear phase. Adds noticeable latency to output signal.</li>
 		<li><b>SPM</b> - Spectral Processor Mode of equalizer, equalizer transforms the magnitude of signal spectrum instead of applying impulse response to the signal.</li>
 	</ul>
-	<?php if ($m == 'ms') { ?>
-	<li><b>Mid</b> - button enables the frequency chart and FFT analysis for the middle channel, knob allows to adjust the level of the middle channel.</li>
-	<li><b>Side</b> - button enables the frequency chart and FFT analysis for the side channel, knob allows to adjust the level of the side channel.</li>
-	<li><b>Listen</b> - allows to listen middle channel and side channel. Passes middle channel to the left output channel, side channel to the right output channel.</li>
-	<?php } elseif ($m != 'm') { ?>
+	<?php if ($m == 's') { ?>
 	<li><b>Left</b> - enables the <?php if ($m != 's') echo "frequency chart and "; ?>FFT analysis for the left channel.</li>
 	<li><b>Right</b> - enables the <?php if ($m != 's') echo "frequency chart and "; ?>FFT analysis for the right channel.</li>
 	<?php } ?>
 	<li><b>Zoom</b> - zoom fader, allows to adjust zoom on the frequency chart.</li>
-	<li><b>Inspect</b> - the button that disables the inspect mode for currently selected filter.</li>
-	<li><b>Auto</b> - the button that enables automatic filter inspection for the currently edited filter.</li>
-	<li><b>Inspect knob</b> - the knob that controls the bandwidth of the bandpass filter around the inspected filter.</li>
-</ul>
-<p><b>'Signal' section:</b></p>
-<ul>
-	<li><b>Input</b> - input signal amplification.</li>
-	<li><b>Output</b> - output signal amplification.</li>
-	<?php if ($m != 'm') { ?>
-	<li><b>Balance</b> - balance between left and right output channels.</li>
-	<?php } ?>
-	<?php if ($m == 'ms') { ?>
-	<li><b>Pitch Mid</b> - the frequency shift for all filters of the middle channel, in semitones.</li>
-	<li><b>Pitch Side</b> - the frequency shift for all filters of the side channel, in semitones.</li>
-	<?php } elseif ($m == 'lr' ) { ?>
-	<li><b>Pitch Left</b> - the frequency shift for all filters of the left channel, in semitones.</li>
-	<li><b>Pitch Right</b> - the frequency shift for all filters of the right channel, in semitones.</li>
-	<?php } else { ?>
-	<li><b>Pitch</b> - the frequency shift for all filters, in semitones.</li>
-	<?php }?>
 </ul>
 <p><b>'Analysis' section:</b></p>
 <ul>
@@ -214,19 +150,28 @@ of so-called poles and zeros:<p>
 	<li><b>Reactivity</b> - the reactivity (smoothness) of the spectral analysis.</li>
 	<li><b>Shift</b> - allows to adjust the overall gain of the analysis.</li>
 </ul>
-<p><b>'Filters' section:</b></p>
+<p><b>'Signal' section:</b></p>
+<ul>
+	<li><b>Input</b> - input signal amplification.</li>
+	<li><b>Output</b> - output signal amplification.</li>
+	<?php if ($m == 's') { ?>
+	<li><b>Balance</b> - balance between left and right output channels.</li>
+	<?php } ?>
+</ul>
+<p><b>'Filters controls' section:</b></p>
 <ul>
 	<li><b>Filter</b> - sets up the mode of the selected filter. Currently available filters:</li>
 	<ul>
-		<li><b>Off</b> - Filter is not working (turned off).</li>
-		<li><b>Bell</b> - Bell filter with smooth peak/recess.</li>
-		<li><b>Hi-pass</b> - High-pass filter with rejection of low frequencies.</li>
-		<li><b>Hi-shelf</b> - Shelving filter with adjustment of high frequency range.</li>
 		<li><b>Lo-pass</b> - Low-pass filter with rejection of high frequencies.</li>
+		<li><b>Hi-pass</b> - High-pass filter with rejection of low frequencies.</li>
 		<li><b>Lo-shelf</b> - Shelving filter with adjustment of low frequencies.</li>
+		<li><b>Hi-shelf</b> - Shelving filter with adjustment of high frequency range.</li>
+		<li><b>Bell</b> - Bell filter with smooth peak/recess.</li>
+		<li><b>Bandpass</b> - Bandpass filter.</li>
 		<li><b>Notch</b> - Notch filter with full rejection of selected frequency.</li>
 		<li><b>Resonance</b> - Resonance filter wih sharp peak/recess.</li>
-		<li><b>Allpass</b> - All-pass filter which only affects the phase of the audio signal.</li>
+		<li><b>Ladder-pass</b> - The filter that makes some ladder-passing in the spectrum domain.</li>
+		<li><b>Ladder-rej</b> - The filter that makes some ladder-rejection in the spectrum domain.</li>
 	</ul>
 	<li><b>Mode</b> - sets up the class of the filter:</li>
 	<ul>
@@ -241,11 +186,8 @@ of so-called poles and zeros:<p>
         <li><b>DR</b> - Direct design is used to serve the digital filter coefficients directly in the digital domain, without performing transforms.</li>
 	</ul>
 	<li><b>Slope</b> - the slope of the filter characteristics.</li>
-	<li><b>I</b> - the inspection button, allows to inspect selected filter.</li>
-	<li><b>S</b> - the soloing button, allows to solo selected filters.</li>
-	<li><b>M</b> - the mute button, allows to mute selected filters.</li>
-	<li><b>Freq</b> - the cutoff/resonance frequency of the filter.</li>
-	<li><b>Gain</b> - the gain of the filter, disabled for lo-pass/hi-pass/notch filters.</li>
-	<li><b>Q</b> - the quality factor of the filter.</li>
-	<li><b>Hue</b> - the color of the frequency chart of the filter on the graph.</li>
+	<li><b>Frequency</b> - the cutoff/resonance frequency of the filter or the middle frequency of the band.</li>
+	<li><b>Quality</b> - the quality factor of the filter.</li>
+	<li><b>Filter width</b> - the width of the bandpass/ladder filters in octaves.</li>
+	<li><b>Filter gain</b> - the gain of the filter, disabled for lo-pass/hi-pass/notch filters.</li>
 </ul>
