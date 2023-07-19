@@ -1,0 +1,313 @@
+<plugin resizable="true">
+
+	<grid rows="2" cols="4" spacing="4">
+		<!-- Spectrum graph -->
+		<vbox spacing="4" expand="true">
+
+			<!-- Graph -->
+			<group ui:inject="GraphGroup" ipadding="0" expand="true" fill="true" text="labels.graphs.spectrum">
+				<graph width.min="390" height.min="140" expand="true" fill="true">
+					<origin hpos="-1" vpos="-1" visible="false"/>
+					<!-- Gray grid -->
+					<ui:with ox="0" oy="1">
+						<ui:for id="f" first="20" last="90" step="10">
+							<marker v="${f}" color="graph_alt_1"/>
+						</ui:for>
+						<ui:for id="f" first="200" last="900" step="100">
+							<marker v="${f}" color="graph_alt_1"/>
+						</ui:for>
+						<ui:for id="f" first="2000" last="9000" step="1000">
+							<marker v="${f}" color="graph_alt_1"/>
+						</ui:for>
+						<marker value="20000" color="graph_alt_1"/>
+					</ui:with>
+
+					<ui:for id="g" first="-36" last="36" step="24">
+						<marker v="${g} db" ox="1" oy="0" color="graph_alt_1"/>
+					</ui:for>
+					<ui:for id="g" first="-18" last="18" step="12">
+						<marker v="${g} db" ox="1" oy="0" color="graph_alt_1" visibility=":zoom le -18 db"/>
+					</ui:for>
+					<ui:for id="g" first="-9" last="9" step="6">
+						<marker v="${g} db" ox="1" oy="0" color="graph_alt_1" visibility=":zoom le -33 db"/>
+					</ui:for>
+
+					<!-- Yellow grid -->
+					<ui:with ox="0" oy="1" color="graph_sec">
+						<marker v="100"/>
+						<marker v="1000"/>
+						<marker v="10000"/>
+					</ui:with>
+					<ui:with ox="1" oy="0" color="graph_sec">
+						<marker v="+24 db"/>
+						<marker v="0 db"/>
+						<marker v="-24 db"/>
+					</ui:with>
+
+					<!-- Meshes -->
+
+					<marker id="f" ox="0" oy="1" color="graph_marker_line" color.a="0.5" />
+					<marker id="g" ox="1" oy="0" color="graph_marker_line" color.a="0.5"  />
+
+					<ui:if test="ex :in_l">
+						<mesh id="fftg_l" width="2" color="left" color.a="0.3" visibility=":fftv_l"/>
+						<mesh id="fftg_r" width="2" color="right" color.a="0.3" visibility=":fftv_r"/>
+					</ui:if>
+					<ui:if test="!ex :in_l">
+						<mesh id="fftg" width="2" color.a="0.3" color="mono"/>
+					</ui:if>
+					<mesh id="ag" width="3" color="bright_cyan" smooth="true"/>
+
+					<dot
+						x.id="f"
+						x.astep="1"
+						y.id="g"
+						y.astep="1"
+						z.id="q"
+						pointer="drag"
+						color="graph_marker_line"
+						hover.color="graph_marker_line_hover"
+						bcolor="graph_marker_line"
+						hover.bcolor="graph_marker_line_hover"
+						x.editable="true"
+						y.editable="true"
+						z.editable="true"/>
+
+					<!-- Boundaries -->
+					<marker ox="2" oy="0" v="1" color="graph_prim" visibility="false"/>
+					<!-- +48 dB -->
+					<marker ox="0" oy="1" v="24000" color="graph_prim" visibility="false"/>
+
+					<!-- Axis -->
+					<axis min="10" max="24000" color="graph_prim" angle="0.0" log="true" visibility="false"/>
+					<axis min="-48 db / :zoom" max="48 db * :zoom" color="graph_prim" angle="0.5" log="true" visibility="false"/>
+					<!-- -48..+48 dB -->
+					<axis min="-1" max="1" visible="false" angle="0.5"/>
+
+					<!-- Text -->
+					<ui:with ox="0" oy="2" y="0" halign="1" valign="1">
+						<text x="10" text="graph.units.hz"/>
+						<text x="20" text="20"/>
+						<text x="30" text="30"/>
+						<text x="50" text="50"/>
+						<text x="100" text="100"/>
+						<text x="200" text="200"/>
+						<text x="300" text="300"/>
+						<text x="500" text="500"/>
+						<text x="1000" text="graph.values.x_k" text:value="1"/>
+						<text x="2000" text="graph.values.x_k" text:value="2"/>
+						<text x="3000" text="graph.values.x_k" text:value="3"/>
+						<text x="5000" text="graph.values.x_k" text:value="5"/>
+						<text x="10000" text="graph.values.x_k" text:value="10"/>
+						<text x="20000" text="graph.values.x_k" text:value="20"/>
+					</ui:with>
+
+					<ui:with x="10" halign="1">
+						<text y="36 db" text="+36" valign="-1"/>
+						<text y="24 db" text="+24" valign="-1"/>
+						<text y="12 db" text="+12" valign="-1"/>
+						<text y="-12 db" text="-12" valign="1"/>
+						<text y="-24 db" text="-24" valign="1"/>
+						<text y="-36 db" text="-36" valign="1"/>
+						<text y="1" ox="0" oy="2" text="graph.units.db" valign="-1"/>
+					</ui:with>
+					<ui:with x="10" halign="1" visibility=":zoom le -18 db">
+						<text y="18 db" text="+18" valign="-1"/>
+						<text y="6 db" text="+6" valign="-1"/>
+						<text y="-6 db" text="-6" valign="1"/>
+						<text y="-18 db" text="-18" valign="1"/>
+					</ui:with>
+					<ui:with x="10" halign="1" visibility=":zoom le -33 db">
+						<text y="9 db" text="+9" valign="-1"/>
+						<text y="3 db" text="+3" valign="-1"/>
+						<text y="-3 db" text="-3" valign="1"/>
+						<text y="-9 db" text="-9" valign="1"/>
+					</ui:with>
+
+						<text
+							ui:id="filter_note"
+							x=":f" halign="(:f lt 500) ? 1 : -1"
+							text.halign="(:f lt 500) ? -1 : 1"
+							ox="0"
+							oy="2"
+							y="1"
+							valign="-1"
+							pad.h="4"
+							font.bold="true"
+							color="graph_marker_line" />
+
+				</graph>
+			</group>
+
+			<hbox spacing="4" bg.color="bg_schema" pad.l="6" pad.r="6" pad.b="4" pad.t="4">
+				<void hexpand="true"/>
+				<label text="labels.mode"/>
+				<combo id="mode"/>
+				<ui:if test="ex :in_l">
+					<button id="fftv_l" height="22" width="45" text="labels.chan.left" ui:inject="Button_left" pad.l="6"/>
+					<button id="fftv_r" height="22" width="45" text="labels.chan.right" ui:inject="Button_right"/>
+				</ui:if>
+			</hbox>
+		</vbox>
+
+		<!-- Zoom Fader -->
+		<vbox bg.color="bg_schema" hreduce="true">
+			<label font.name="lsp-icons" font.size="12" font.antialias="true" text="E" color="text_icon" pad.b="4" pad.t="4"/>
+			<fader id="zoom" angle="1" vexpand="true" bg.inherit="true" flat="true"/>
+			<value id="zoom" width="40"/>
+		</vbox>
+
+		<group text="groups.analysis" hreduce="true" ipadding="0">
+			<vbox>
+				<label text="labels.fft.fft" pad.t="4" halign="0"/>
+				<combo id="fft" fill="true" pad.v="4" pad.h="6"/>
+				<hsep bg.color="bg" pad.v="2" vreduce="true"/>
+				<vbox vfill="false" pad.v="4" pad.h="6">
+					<label text="labels.metering.reactivity" halign="0"/>
+					<knob id="react" size="20" pad.v="4"/>
+					<value id="react" sline="true" halign="0"/>
+				</vbox>
+				<hsep bg.color="bg" pad.v="2" vreduce="true"/>
+				<vbox vfill="false" pad.v="4" pad.h="6">
+					<label text="labels.metering.shift" halign="0"/>
+					<knob id="shift" size="20" pad.v="4"/>
+					<value id="shift" sline="true" halign="0"/>
+				</vbox>
+				<void expand="true"/>
+			</vbox>
+		</group>
+
+		<cell rows="2">
+
+			<!-- Signal meters -->
+			<hbox spacing="4" bg.color="bg" hexpand="false" hreduce="true">
+				<ui:if test="ex :in_l">
+					<vbox vexpand="true" bg.color="bg_schema">
+						<label text="labels.chan.in" pad.b="3" pad.t="3"/>
+						<ledmeter vexpand="true" angle="1">
+							<ledchannel id="iml" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="left_in"/>
+							<ledchannel id="imr" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="right_in"/>
+						</ledmeter>
+					</vbox>
+					<vbox vexpand="true" bg.color="bg_schema">
+						<label text="labels.chan.out" pad.b="3" pad.t="3"/>
+						<ledmeter vexpand="true" angle="1">
+							<ledchannel id="sml" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="left"/>
+							<ledchannel id="smr" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="right"/>
+						</ledmeter>
+					</vbox>
+				</ui:if>
+
+				<ui:if test="ex :in">
+					<vbox vexpand="true" bg.color="bg_schema">
+						<label text="labels.chan.in" pad.b="3" pad.t="3"/>
+						<ledmeter vexpand="true" angle="1">
+							<ledchannel id="im" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="mono_in"/>
+						</ledmeter>
+					</vbox>
+					<vbox vexpand="true" bg.color="bg_schema">
+						<label text="labels.chan.out" pad.b="3" pad.t="3"/>
+						<ledmeter vexpand="true" angle="1">
+							<ledchannel id="sm" min="-36 db" max="+6 db" log="true" type="rms_peak" peak.visibility="true" value.color="mono"/>
+						</ledmeter>
+					</vbox>
+				</ui:if>
+
+				<group text="groups.signal" ipadding="0">
+					<vbox>
+						<vbox vfill="false" pad.v="4" pad.h="6">
+							<label text="labels.input" halign="0"/>
+							<knob id="g_in" size="20" pad.v="4"/>
+							<value id="g_in" width.min="50" sline="true" halign="0"/>
+						</vbox>
+						<hsep bg.color="bg" pad.v="2" vreduce="true"/>
+						<vbox vfill="false" pad.v="4" pad.h="6">
+							<label text="labels.output" halign="0"/>
+							<knob id="g_out" size="20" pad.v="4"/>
+							<value id="g_out" width.min="50" sline="true" halign="0"/>
+						</vbox>
+						<hsep bg.color="bg" pad.v="2" vreduce="true"/>
+						<ui:if test="ex :in_l">
+							<vbox vfill="false" pad.v="4" pad.h="6">
+							<label text="labels.balance" halign="0"/>
+							<knob id="bal" size="20" balance="0.5" scolor="balance" pad.v="4"/>
+							<value id="bal" width.min="50" sline="true" halign="0"/>
+						</vbox>
+						<hsep bg.color="bg" pad.v="2" vreduce="true"/>
+						</ui:if>
+						<void expand="true"/>
+					</vbox>
+				</group>
+			</hbox>
+		</cell>
+
+		<cell cols="3" bg.color="bg_schema">
+			<group text="labels.filter.controls" ipadding="0" hexpand="true">
+				<grid transpose="true" rows="3" cols="10" spacing="0">
+					<ui:with hexpand="false" hfill="false" hreduce="true" pad.l="6" halign="0" pad.b="4">
+						<label text="labels.filter" pad.t="4"/>
+						<label text="labels.mode"/>
+						<label text="labels.slope"/>
+					</ui:with>
+					<combo id="ft" fill="true" pad.h="6" pad.v="4"/>
+					<combo id="fm" fill="true" pad.h="6" pad.b="4"/>
+					<combo id="s" fill="true" pad.h="6" pad.b="4"/>
+					<cell rows="3">
+						<vsep bg.color="bg" pad.h="2" hreduce="true"/>
+					</cell>
+					<ui:set id="act_width" value="(((:ft ieq 5) and (:fm ine 6)) or (:ft ieq 8) or (:ft ieq 9))"/>
+					<ui:set id="act_gain" value="!((:ft ieq 0) or (:ft ieq 1) or (:ft ieq 5) or (:ft ieq 6))"/>
+					<ui:set id="act_qual" value="!(((:ft ieq 2) or (:ft ieq 3) or (:ft ieq 8) or (:ft ieq 9)) and ((:fm ieq 2) or (:fm ieq 3) or (:fm ieq 4) or (:fm ieq 5)))"/>
+
+					<cell rows="3">
+						<vbox vfill="false" pad.v="4" pad.h="6" width.min="85">
+							<label text="labels.frequency" halign="0"/>
+							<knob id="f" size="20" pad.v="4"/>
+							<value id="f" width.min="40" sline="true" precision="1" halign="0"/>
+						</vbox>
+					</cell>
+					<cell rows="3">
+						<vsep bg.color="bg" pad.h="2" hreduce="true"/>
+					</cell>
+
+					<cell rows="3">
+						<ui:with bg.bright="(${act_qual}) ? 1.0 : :const_bg_darken" bright="(${act_qual}) ? 1.0 : 0.75">
+							<vbox vfill="false" pad.v="4" pad.h="6" width.min="85">
+								<label text="labels.quality" halign="0"/>
+								<knob id="q" size="20" scolor="(${act_qual}) ? 'kscale' : 'cycle_inactive'" pad.v="4"/>
+								<value id="q" width.min="40" sline="true" halign="0"/>
+							</vbox>
+						</ui:with>
+					</cell>
+					<cell rows="3">
+						<vsep bg.color="bg" pad.h="2" hreduce="true"/>
+					</cell>
+
+					<cell rows="3">
+						<ui:with bg.bright="(${act_width}) ? 1.0 : :const_bg_darken" bright="(${act_width}) ? 1.0 : 0.75">
+							<vbox vfill="false" pad.v="4" pad.h="6" width.min="85">
+
+								<label text="labels.filter.width" halign="0"/>
+								<knob id="w" size="20" scolor="(${act_width}) ? 'kscale' : 'cycle_inactive'" pad.v="4"/>
+								<value id="w" width.min="40" sline="true" precision="1" halign="0"/>
+							</vbox>
+						</ui:with>
+					</cell>
+					<cell rows="3">
+						<vsep bg.color="bg" pad.h="2" hreduce="true"/>
+					</cell>
+
+					<cell rows="3">
+						<ui:with bg.bright="(${act_gain}) ? 1.0 : :const_bg_darken" bright="(${act_gain}) ? 1.0 : 0.75">
+							<vbox vfill="false" pad.v="4" pad.h="6" width.min="85">
+								<label text="labels.filter.gain" halign="0"/>
+								<knob id="g" size="20" scolor="(${act_gain}) ? 'kscale' : 'cycle_inactive'" pad.v="4"/>
+								<value id="g" width.min="40" sline="true" halign="0"/>
+							</vbox>
+						</ui:with>
+					</cell>
+				</grid>
+			</group>
+		</cell>
+	</grid>
+</plugin>
