@@ -163,7 +163,7 @@ namespace lsp
             "filter",
             "Filter",
             B_EQUALIZERS,
-            "", // TODO Insert youtube link
+            "BN0h4WnNnW8",
             "This plugin allows you to process a specific part of your audio's frequency spectrum."
         };
 
