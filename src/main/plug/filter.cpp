@@ -306,7 +306,7 @@ namespace lsp
             return arr[slope];
         }
 
-        bool filter::filter_have_width(size_t type)
+        bool filter::filter_has_width(size_t type)
         {
             switch (type)
             {
@@ -797,7 +797,7 @@ namespace lsp
                 fp->nSlope          = decode_slope(c->pSlope->value());
                 decode_filter(&fp->nType, &fp->nSlope, c->pMode->value());
 
-                if (filter_have_width(fp->nType))
+                if (filter_has_width(fp->nType))
                 {
                     float center = c->pFreq->value();
                     float k = powf(2, (c->pWidth->value()*0.5f));
