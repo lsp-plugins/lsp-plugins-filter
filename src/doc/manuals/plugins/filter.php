@@ -172,6 +172,7 @@ of so-called poles and zeros:<p>
 		<li><b>Resonance</b> - Resonance filter wih sharp peak/recess.</li>
 		<li><b>Ladder-pass</b> - The filter that makes some ladder-passing in the spectrum domain.</li>
 		<li><b>Ladder-rej</b> - The filter that makes some ladder-rejection in the spectrum domain.</li>
+		<li><b>Allpass</b> - All-pass filter which only affects the phase of the audio signal at the specified frequency.</li>
 	</ul>
 	<li><b>Mode</b> - sets up the class of the filter:</li>
 	<ul>

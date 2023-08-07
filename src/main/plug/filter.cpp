@@ -277,6 +277,22 @@ namespace lsp
                     break;
                 }
 
+                case EQF(ALLPASS):
+                {
+                    switch (mode)
+                    {
+                        EQS(RLC_BT, FLT_BT_RLC_ALLPASS, 1)
+                        EQS(RLC_MT, FLT_BT_RLC_ALLPASS, 1)
+                        EQS(BWC_BT, FLT_BT_BWC_ALLPASS, 2)
+                        EQS(BWC_MT, FLT_BT_BWC_ALLPASS, 2)
+                        EQS(LRX_BT, FLT_BT_LRX_ALLPASS, 1)
+                        EQS(LRX_MT, FLT_BT_LRX_ALLPASS, 1)
+                        EQS(APO_DR, FLT_DR_APO_ALLPASS, 1)
+                        EQDFL
+                    }
+                    break;
+                }
+
                 EQDFL;
             }
             #undef EQDFL
@@ -343,6 +359,14 @@ namespace lsp
                 case dspu::FLT_BT_LRX_HIPASS:
                 case dspu::FLT_MT_LRX_HIPASS:
 
+                case dspu::FLT_BT_RLC_ALLPASS:
+                case dspu::FLT_MT_RLC_ALLPASS:
+                case dspu::FLT_BT_BWC_ALLPASS:
+                case dspu::FLT_MT_BWC_ALLPASS:
+                case dspu::FLT_BT_LRX_ALLPASS:
+                case dspu::FLT_MT_LRX_ALLPASS:
+                case dspu::FLT_DR_APO_ALLPASS:
+
                 // Disable gain adjust for several APO filters, too
                 case dspu::FLT_DR_APO_NOTCH:
                 case dspu::FLT_DR_APO_LOPASS:
@@ -382,6 +406,13 @@ namespace lsp
                 case dspu::FLT_MT_LRX_LADDERPASS:
                 case dspu::FLT_BT_LRX_LADDERREJ:
                 case dspu::FLT_MT_LRX_LADDERREJ:
+                case dspu::FLT_BT_RLC_ALLPASS:
+                case dspu::FLT_MT_RLC_ALLPASS:
+                case dspu::FLT_BT_BWC_ALLPASS:
+                case dspu::FLT_MT_BWC_ALLPASS:
+                case dspu::FLT_BT_LRX_ALLPASS:
+                case dspu::FLT_MT_LRX_ALLPASS:
+                case dspu::FLT_DR_APO_ALLPASS:
                     return 0.0f;
 
                 case dspu::FLT_BT_RLC_BELL:

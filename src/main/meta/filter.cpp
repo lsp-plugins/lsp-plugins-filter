@@ -78,6 +78,7 @@ namespace lsp
             { "Resonance",      "filter.flt.resonance" },
             { "Ladder-pass",    "filter.flt.ladpass" },
             { "Ladder-rej",     "filter.flt.ladrej" },
+            { "Allpass",        "filter.flt.allpass" },
             { NULL, NULL }
         };
 

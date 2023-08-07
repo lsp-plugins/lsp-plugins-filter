@@ -124,18 +124,17 @@
 						<text y="-9 db" text="-9" valign="1"/>
 					</ui:with>
 
-						<text
-							ui:id="filter_note"
-							x=":f" halign="(:f lt 500) ? 1 : -1"
-							text.halign="(:f lt 500) ? -1 : 1"
-							ox="0"
-							oy="2"
-							y="1"
-							valign="-1"
-							pad.h="4"
-							font.bold="true"
-							color="graph_marker_line" />
-
+					<text
+						ui:id="filter_note"
+						x=":f" halign="(:f lt 500) ? 1 : -1"
+						text.halign="(:f lt 500) ? -1 : 1"
+						ox="0"
+						oy="2"
+						y="1"
+						valign="-1"
+						pad.h="4"
+						font.bold="true"
+						color="graph_marker_line" />
 				</graph>
 			</group>
 
@@ -256,8 +255,8 @@
 						<vsep bg.color="bg" pad.h="2" hreduce="true"/>
 					</cell>
 					<ui:set id="act_width" value="(((:ft ieq 5) and (:fm ine 6)) or (:ft ieq 8) or (:ft ieq 9))"/>
-					<ui:set id="act_gain" value="!((:ft ieq 0) or (:ft ieq 1) or (:ft ieq 5) or (:ft ieq 6))"/>
-					<ui:set id="act_qual" value="!(((:ft ieq 2) or (:ft ieq 3) or (:ft ieq 8) or (:ft ieq 9)) and ((:fm ieq 2) or (:fm ieq 3) or (:fm ieq 4) or (:fm ieq 5)))"/>
+					<ui:set id="act_gain" value="!((:ft ieq 0) or (:ft ieq 1) or (:ft ieq 5) or (:ft ieq 6) or (:ft ieq 10))"/>
+					<ui:set id="act_qual" value="!(((:ft ieq 2) or (:ft ieq 3) or (:ft ieq 8) or (:ft ieq 9)) and ((:fm ieq 2) or (:fm ieq 3) or (:fm ieq 4) or (:fm ieq 5))) and (:ft ine 10)"/>
 
 					<cell rows="3">
 						<vbox vfill="false" pad.v="4" pad.h="6" width.min="85">
