@@ -2,5 +2,10 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.1 ===
+* Added Allpass filter.
+* Updated build scripts and dependencies.
+
 === 1.0.0 ===
 * Initial release.
+

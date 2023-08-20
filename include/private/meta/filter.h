@@ -79,7 +79,8 @@ namespace lsp
                 EQF_NOTCH,
                 EQF_RESONANCE,
                 EQF_LADDERPASS,
-                EQF_LADDERREJ
+                EQF_LADDERREJ,
+                EQF_ALLPASS
             };
 
             enum eq_filter_mode_t

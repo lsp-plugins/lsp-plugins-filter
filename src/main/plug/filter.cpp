@@ -277,6 +277,22 @@ namespace lsp
                     break;
                 }
 
+                case EQF(ALLPASS):
+                {
+                    switch (mode)
+                    {
+                        EQS(RLC_BT, FLT_BT_RLC_ALLPASS, 1)
+                        EQS(RLC_MT, FLT_BT_RLC_ALLPASS, 1)
+                        EQS(BWC_BT, FLT_BT_BWC_ALLPASS, 2)
+                        EQS(BWC_MT, FLT_BT_BWC_ALLPASS, 2)
+                        EQS(LRX_BT, FLT_BT_LRX_ALLPASS, 1)
+                        EQS(LRX_MT, FLT_BT_LRX_ALLPASS, 1)
+                        EQS(APO_DR, FLT_DR_APO_ALLPASS, 1)
+                        EQDFL
+                    }
+                    break;
+                }
+
                 EQDFL;
             }
             #undef EQDFL
@@ -290,7 +306,7 @@ namespace lsp
             return arr[slope];
         }
 
-        bool filter::filter_have_width(size_t type)
+        bool filter::filter_has_width(size_t type)
         {
             switch (type)
             {
@@ -343,6 +359,14 @@ namespace lsp
                 case dspu::FLT_BT_LRX_HIPASS:
                 case dspu::FLT_MT_LRX_HIPASS:
 
+                case dspu::FLT_BT_RLC_ALLPASS:
+                case dspu::FLT_MT_RLC_ALLPASS:
+                case dspu::FLT_BT_BWC_ALLPASS:
+                case dspu::FLT_MT_BWC_ALLPASS:
+                case dspu::FLT_BT_LRX_ALLPASS:
+                case dspu::FLT_MT_LRX_ALLPASS:
+                case dspu::FLT_DR_APO_ALLPASS:
+
                 // Disable gain adjust for several APO filters, too
                 case dspu::FLT_DR_APO_NOTCH:
                 case dspu::FLT_DR_APO_LOPASS:
@@ -382,6 +406,13 @@ namespace lsp
                 case dspu::FLT_MT_LRX_LADDERPASS:
                 case dspu::FLT_BT_LRX_LADDERREJ:
                 case dspu::FLT_MT_LRX_LADDERREJ:
+                case dspu::FLT_BT_RLC_ALLPASS:
+                case dspu::FLT_MT_RLC_ALLPASS:
+                case dspu::FLT_BT_BWC_ALLPASS:
+                case dspu::FLT_MT_BWC_ALLPASS:
+                case dspu::FLT_BT_LRX_ALLPASS:
+                case dspu::FLT_MT_LRX_ALLPASS:
+                case dspu::FLT_DR_APO_ALLPASS:
                     return 0.0f;
 
                 case dspu::FLT_BT_RLC_BELL:
@@ -766,7 +797,7 @@ namespace lsp
                 fp->nSlope          = decode_slope(c->pSlope->value());
                 decode_filter(&fp->nType, &fp->nSlope, c->pMode->value());
 
-                if (filter_have_width(fp->nType))
+                if (filter_has_width(fp->nType))
                 {
                     float center = c->pFreq->value();
                     float k = powf(2, (c->pWidth->value()*0.5f));
