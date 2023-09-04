@@ -129,7 +129,7 @@ namespace lsp
                 static float        calc_qfactor(float q, size_t type, size_t slope);
 
             protected:
-                void                destroy_state();
+                void                do_destroy();
                 void                process_channel(eq_channel_t *c, size_t start, size_t samples);
 
                 void                dump_channel(dspu::IStateDumper *v, const eq_channel_t *c) const;
