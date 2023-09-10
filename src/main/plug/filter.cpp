@@ -100,7 +100,7 @@ namespace lsp
 
         filter::~filter()
         {
-            destroy_state();
+            do_destroy();
         }
 
         inline void filter::decode_filter(size_t *ftype, size_t *slope, size_t mode)
@@ -672,10 +672,11 @@ namespace lsp
 
         void filter::destroy()
         {
-            destroy_state();
+            Module::destroy();
+            do_destroy();
         }
 
-        void filter::destroy_state()
+        void filter::do_destroy()
         {
             // Delete channels
             if (vChannels != NULL)
