@@ -23,6 +23,7 @@
 #include <lsp-plug.in/dsp-units/units.h>
 #include <lsp-plug.in/fmt/RoomEQWizard.h>
 #include <lsp-plug.in/plug-fw/meta/func.h>
+#include <lsp-plug.in/stdlib/locale.h>
 #include <lsp-plug.in/stdlib/string.h>
 #include <lsp-plug.in/tk/tk.h>
 #include <private/meta/filter.h>
@@ -106,6 +107,7 @@ namespace lsp
                 tk::prop::String lc_string;
                 LSPString text;
                 lc_string.bind(wNote->style(), pDisplay->dictionary());
+                SET_LOCALE_SCOPED(LC_NUMERIC, "C");
 
                 // Frequency
                 text.fmt_ascii("%.2f", freq);
