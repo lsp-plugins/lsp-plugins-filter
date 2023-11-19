@@ -25,6 +25,7 @@
 #include <lsp-plug.in/dsp-units/units.h>
 #include <lsp-plug.in/stdlib/math.h>
 
+#include <lsp-plug.in/shared/debug.h>
 #include <lsp-plug.in/shared/id_colors.h>
 
 #include <private/plugins/filter.h>
@@ -34,12 +35,6 @@
 
 namespace lsp
 {
-    static plug::IPort *TRACE_PORT(plug::IPort *p)
-    {
-        lsp_trace("  port id=%s", (p)->metadata()->id);
-        return p;
-    }
-
     namespace plugins
     {
         //-------------------------------------------------------------------------
@@ -577,34 +572,34 @@ namespace lsp
             // Bind audio ports
             lsp_trace("Binding audio ports");
             for (size_t i=0; i<channels; ++i)
-                vChannels[i].pIn        =   TRACE_PORT(ports[port_id++]);
+                vChannels[i].pIn        =   trace_port(ports[port_id++]);
             for (size_t i=0; i<channels; ++i)
-                vChannels[i].pOut       =   TRACE_PORT(ports[port_id++]);
+                vChannels[i].pOut       =   trace_port(ports[port_id++]);
 
             // Bind common ports
             lsp_trace("Binding common ports");
-            pBypass                 = TRACE_PORT(ports[port_id++]);
-            pGainIn                 = TRACE_PORT(ports[port_id++]);
-            pGainOut                = TRACE_PORT(ports[port_id++]);
-            pEqMode                 = TRACE_PORT(ports[port_id++]);
-            pReactivity             = TRACE_PORT(ports[port_id++]);
-            pShiftGain              = TRACE_PORT(ports[port_id++]);
-            pZoom                   = TRACE_PORT(ports[port_id++]);
+            pBypass                 = trace_port(ports[port_id++]);
+            pGainIn                 = trace_port(ports[port_id++]);
+            pGainOut                = trace_port(ports[port_id++]);
+            pEqMode                 = trace_port(ports[port_id++]);
+            pReactivity             = trace_port(ports[port_id++]);
+            pShiftGain              = trace_port(ports[port_id++]);
+            pZoom                   = trace_port(ports[port_id++]);
 
             // Meters
             for (size_t i=0; i<channels; ++i)
             {
                eq_channel_t *c     = &vChannels[i];
 
-               c->pFftInSwitch         = TRACE_PORT(ports[port_id++]);
-               c->pFftOutSwitch        = TRACE_PORT(ports[port_id++]);
-               c->pFftInMesh           = TRACE_PORT(ports[port_id++]);
-               c->pFftOutMesh          = TRACE_PORT(ports[port_id++]);
+               c->pFftInSwitch         = trace_port(ports[port_id++]);
+               c->pFftOutSwitch        = trace_port(ports[port_id++]);
+               c->pFftInMesh           = trace_port(ports[port_id++]);
+               c->pFftOutMesh          = trace_port(ports[port_id++]);
             }
 
             // Balance
             if (channels > 1)
-                pBalance                = TRACE_PORT(ports[port_id++]);
+                pBalance                = trace_port(ports[port_id++]);
 
             for (size_t i=0; i<channels; ++i)
             {
@@ -614,10 +609,10 @@ namespace lsp
                 }
                 else
                 {
-                    vChannels[i].pTrAmp     = TRACE_PORT(ports[port_id++]);
+                    vChannels[i].pTrAmp     = trace_port(ports[port_id++]);
                 }
-                vChannels[i].pInMeter   =   TRACE_PORT(ports[port_id++]);
-                vChannels[i].pOutMeter  =   TRACE_PORT(ports[port_id++]);
+                vChannels[i].pInMeter   =   trace_port(ports[port_id++]);
+                vChannels[i].pOutMeter  =   trace_port(ports[port_id++]);
             }
 
             // Bind filters
@@ -642,13 +637,13 @@ namespace lsp
                 else
                 {
                     // 1 port controls 1 filter
-                    c->pType        = TRACE_PORT(ports[port_id++]);
-                    c->pMode        = TRACE_PORT(ports[port_id++]);
-                    c->pSlope       = TRACE_PORT(ports[port_id++]);
-                    c->pFreq        = TRACE_PORT(ports[port_id++]);
-                    c->pWidth       = TRACE_PORT(ports[port_id++]);
-                    c->pGain        = TRACE_PORT(ports[port_id++]);
-                    c->pQuality     = TRACE_PORT(ports[port_id++]);
+                    c->pType        = trace_port(ports[port_id++]);
+                    c->pMode        = trace_port(ports[port_id++]);
+                    c->pSlope       = trace_port(ports[port_id++]);
+                    c->pFreq        = trace_port(ports[port_id++]);
+                    c->pWidth       = trace_port(ports[port_id++]);
+                    c->pGain        = trace_port(ports[port_id++]);
+                    c->pQuality     = trace_port(ports[port_id++]);
                 }
             }
         }
