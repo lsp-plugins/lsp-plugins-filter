@@ -19,6 +19,7 @@
  * along with lsp-plugins-filter. If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <lsp-plug.in/common/alloc.h>
 #include <lsp-plug.in/common/debug.h>
 #include <lsp-plug.in/dsp/dsp.h>
 #include <lsp-plug.in/dsp-units/units.h>
@@ -495,13 +496,13 @@ namespace lsp
             float *abuf         = new float[allocate];
             if (abuf == NULL)
                 return;
+            lsp_guard_assert(float *save   = abuf);
 
             // Clear all floating-point buffers
             dsp::fill_zero(abuf, allocate);
 
             // Frequency list buffer
-            vFreqs              = abuf;
-            abuf               += meta::filter_metadata::MESH_POINTS;
+            vFreqs              = advance_ptr<float>(abuf, meta::filter_metadata::MESH_POINTS);
 
             // Initialize each channel
             for (size_t i=0; i<channels; ++i)
@@ -531,18 +532,13 @@ namespace lsp
                 c->nLatency         = 0;
                 c->fInGain          = 1.0f;
                 c->fOutGain         = 1.0f;
-                c->vDryBuf          = abuf;
-                abuf               += EQ_BUFFER_SIZE;
-                c->vBuffer          = abuf;
+                c->vDryBuf          = advance_ptr<float>(abuf, EQ_BUFFER_SIZE);
+                c->vBuffer          = advance_ptr<float>(abuf, EQ_BUFFER_SIZE);
                 c->vIn              = NULL;
                 c->vOut             = NULL;
-                abuf               += EQ_BUFFER_SIZE;
-                c->vAnalyzer        = abuf;
-                abuf               += EQ_BUFFER_SIZE;
-                c->vTr              = abuf;
-                abuf               += meta::filter_metadata::MESH_POINTS * 2;
-                c->vTrMem           = abuf;
-                abuf               += meta::filter_metadata::MESH_POINTS;
+                c->vAnalyzer        = advance_ptr<float>(abuf, EQ_BUFFER_SIZE);
+                c->vTr              = advance_ptr<float>(abuf, meta::filter_metadata::MESH_POINTS * 2);
+                c->vTrMem           = advance_ptr<float>(abuf, meta::filter_metadata::MESH_POINTS);
                 c->nSync            = CS_UPDATE;
 
                 // Ports
@@ -564,6 +560,8 @@ namespace lsp
                 c->pInMeter         = NULL;
                 c->pOutMeter        = NULL;
             }
+
+            lsp_assert(abuf <= &save[allocate]);
 
             // Initialize latency compensation delay
             for (size_t i=0; i<channels; ++i)
@@ -1245,6 +1243,7 @@ namespace lsp
                 v->write("vBuffer", c->vBuffer);
                 v->write("vIn", c->vIn);
                 v->write("vOut", c->vOut);
+                v->write("vAnalyzer", c->vAnalyzer);
                 v->write("vTr", c->vTr);
                 v->write("vTrMem", c->vTrMem);
                 v->write("nSync", c->nSync);
