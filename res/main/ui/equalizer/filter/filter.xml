@@ -132,27 +132,30 @@
 				</graph>
 			</group>
 
-			<hbox spacing="4" bg.color="bg_schema" pad.h="6" pad.v="4">
-				<label text="labels.mode"/>
-				<combo id="mode"/>
+			<hbox ipadding="0" bg.color="bg_schema" pad.h="6">
+				<label text="labels.mode" pad.r="4"/>
+				<combo id="mode" pad.v="4"/>
 				<void hexpand="true"/>
 				<ui:if test="ex :in_l">
-					<label text="labels.fft.fft_in"/>
-					<hbox spacing="4" pad.l="6" pad.r="12" hfill="false">
-						<button id="ife_l" text="labels.chan.L_eft" size="19" width="30" ui:inject="Button_left_8"/>
-						<button id="ife_r" text="labels.chan.R_ight" size="19" width="30" ui:inject="Button_right_8"/>
+					<vsep bg.color="bg" pad.h="2" hreduce="true"/>
+					<label text="labels.fft.fft_in" pad.l="6" pad.r="6"/>
+					<hbox spacing="4" hfill="false" pad.v="4" pad.r="6">
+						<button id="ife_l" text="labels.chan.L_eft" size="22" ui:inject="Button_left_8"/>
+						<button id="ife_r" text="labels.chan.R_ight" size="22" ui:inject="Button_right_8"/>
 					</hbox>
-					<label text="labels.fft.fft_out"/>
-					<hbox spacing="4" pad.l="6" hfill="false">
-						<button id="ofe_l" text="labels.chan.L_eft" size="19" width="30" ui:inject="Button_left_8"/>
-						<button id="ofe_r" text="labels.chan.R_ight" size="19" width="30" ui:inject="Button_right_8"/>
+					<vsep bg.color="bg" pad.h="2" hreduce="true"/>
+					<label text="labels.fft.fft_out" pad.l="6" pad.r="6"/>
+					<hbox spacing="4" hfill="false" pad.v="4">
+						<button id="ofe_l" text="labels.chan.L_eft" size="22" ui:inject="Button_left_8"/>
+						<button id="ofe_r" text="labels.chan.R_ight" size="22" ui:inject="Button_right_8"/>
 					</hbox>
 				</ui:if>
 				<ui:if test="!ex :in_l">
-					<label text="labels.fft.fft"/>
-					<hbox spacing="4" pad.l="6" hfill="false">
-						<button id="ife" text="labels.chan.in" height="19" width="30" ui:inject="Button_mono_8"/>
-						<button id="ofe" text="labels.chan.out" height="19" width="30" ui:inject="Button_mono_8"/>
+					<vsep bg.color="bg" pad.h="2" hreduce="true"/>
+					<label text="labels.fft.fft" pad.l="6" pad.r="6"/>
+					<hbox spacing="4" hfill="false" pad.v="4">
+						<button id="ife" text="labels.chan.in" height="22" width="30" ui:inject="Button_mono_8"/>
+						<button id="ofe" text="labels.chan.out" height="22" width="30" ui:inject="Button_mono_8"/>
 					</hbox>
 				</ui:if>
 			</hbox>
