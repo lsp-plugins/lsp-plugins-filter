@@ -168,6 +168,7 @@ namespace lsp
         {
             "Filter Mono",
             "Filter Mono",
+            "Filter Mono",
             "FLTM",
             &developers::v_sadovnikov,
             "filter_mono",
@@ -190,6 +191,7 @@ namespace lsp
 
         const meta::plugin_t filter_stereo =
         {
+            "Filter Stereo",
             "Filter Stereo",
             "Filter Stereo",
             "FLTS",
