@@ -5,6 +5,7 @@
 === 1.0.5 ===
 * Implemented separate input and output signal spectrum analysis.
 * Implemented automatic scale of spectrum graph switch.
+* Updated zoom fader.
 
 === 1.0.4 ===
 * Updated build scripts and dependencies.

@@ -57,9 +57,9 @@ namespace lsp
             static constexpr float          REACT_TIME_DFL      = 0.200;
             static constexpr float          REACT_TIME_STEP     = 0.001;
 
-            static constexpr float          ZOOM_MIN            = GAIN_AMP_M_36_DB;
+            static constexpr float          ZOOM_MIN            = GAIN_AMP_M_42_DB;
             static constexpr float          ZOOM_MAX            = GAIN_AMP_0_DB;
-            static constexpr float          ZOOM_DFL            = GAIN_AMP_0_DB;
+            static constexpr float          ZOOM_DFL            = GAIN_AMP_M_36_DB;
             static constexpr float          ZOOM_STEP           = 0.025f;
 
             static constexpr float          IN_GAIN_DFL         = 1.0f;
