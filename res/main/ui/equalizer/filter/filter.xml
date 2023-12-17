@@ -76,6 +76,8 @@
 						hover.color="graph_marker_line_hover"
 						bcolor="graph_marker_line"
 						hover.bcolor="graph_marker_line_hover"
+						size="1 + 2*:_ui_filter_point_thickness"
+						hover.size="1 + 2*:_ui_filter_point_thickness"
 						x.editable="true"
 						y.editable="true"
 						z.editable="true"/>
