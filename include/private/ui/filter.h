@@ -35,6 +35,7 @@ namespace lsp
             protected:
                 ui::IPort          *pType;
                 ui::IPort          *pFreq;
+                ui::IPort          *pGain;
 
                 tk::GraphText      *wNote;          // Text with note and frequency
 
