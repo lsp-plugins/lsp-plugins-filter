@@ -8,6 +8,7 @@
 * Added gain level display for filter info.
 * Added support of variable size of filter dots.
 * Updated zoom fader.
+* Updated build scripts and dependencies.
 
 === 1.0.4 ===
 * Updated build scripts and dependencies.
