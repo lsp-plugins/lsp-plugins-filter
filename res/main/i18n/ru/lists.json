@@ -1,0 +1,8 @@
+{
+	"filter": {
+		"display": {
+			"full_single": "{@filter_type}\n{@frequency%.2f} Гц\n{@note}{@octave}{@cents}\n{@gain%.2f} дБ",
+			"unknown_single": "{@filter_type}\n{@frequency%.2f} Гц\n{@gain%.2f} дБ"
+		}
+	}
+}

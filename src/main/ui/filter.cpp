@@ -23,6 +23,7 @@
 #include <lsp-plug.in/dsp-units/units.h>
 #include <lsp-plug.in/fmt/RoomEQWizard.h>
 #include <lsp-plug.in/plug-fw/meta/func.h>
+#include <lsp-plug.in/stdlib/locale.h>
 #include <lsp-plug.in/stdlib/string.h>
 #include <lsp-plug.in/tk/tk.h>
 #include <private/meta/filter.h>
@@ -70,6 +71,7 @@ namespace lsp
         {
             pType       = NULL;
             pFreq       = NULL;
+            pGain       = NULL;
             wNote       = NULL;
         }
 
@@ -87,10 +89,12 @@ namespace lsp
             // Get the frequency
             float freq = (pFreq != NULL) ? pFreq->value() : -1.0f;
             if (freq < 0.0f)
-            {
-               // wNote->visibility()->set(false);
                 return;
-            }
+
+            // Get the gain
+            float gain = (pGain != NULL) ? pGain->value() : -1.0f;
+            if (gain < 0.0f)
+                return;
 
             // Check that filter is enabled
             ssize_t type = (pType != NULL) ? ssize_t(pType->value()) : -1;
@@ -106,10 +110,11 @@ namespace lsp
                 tk::prop::String lc_string;
                 LSPString text;
                 lc_string.bind(wNote->style(), pDisplay->dictionary());
+                SET_LOCALE_SCOPED(LC_NUMERIC, "C");
 
-                // Frequency
-                text.fmt_ascii("%.2f", freq);
-                params.set_string("frequency", &text);
+                // Frequency and gain
+                params.set_float("frequency", freq);
+                params.set_float("gain", dspu::gain_to_db(gain));
 
                 // Process filter type
                 text.fmt_ascii("lists.%s", pType->metadata()->items[type].lc_key);
@@ -143,10 +148,10 @@ namespace lsp
                         text.fmt_ascii(" + %02d", note_cents);
                     params.set_string("cents", &text);
 
-                    wNote->text()->set("lists.notes.display.full_single", &params);
+                    wNote->text()->set("lists.filter.display.full_single", &params);
                 }
                 else
-                    wNote->text()->set("lists.notes.display.unknown_single", &params);
+                    wNote->text()->set("lists.filter.display.unknown_single", &params);
             }
         }
 
@@ -156,9 +161,10 @@ namespace lsp
             if (res != STATUS_OK)
                 return res;
 
-            wNote         = filter_widget<tk::GraphText>("filter_note");
-            pType         = find_port("ft");
-            pFreq         = find_port("f");
+            wNote           = filter_widget<tk::GraphText>("filter_note");
+            pType           = find_port("ft");
+            pFreq           = find_port("f");
+            pGain           = find_port("g");
 
             if (pType != NULL)
                 pType->bind(this);
@@ -169,7 +175,6 @@ namespace lsp
 
             return STATUS_OK;
         }
-
 
         void filter_ui::notify(ui::IPort *port, size_t flags)
         {

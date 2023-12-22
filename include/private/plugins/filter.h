@@ -77,6 +77,7 @@ namespace lsp
                     float              *vBuffer;        // Buffer for temporary data
                     float              *vIn;            // Input buffer
                     float              *vOut;           // Output buffer
+                    float              *vAnalyzer;      // Buffer for analyzer
                     float              *vTr;            // Transfer function (real part)
                     float              *vTrMem;         // Transfer function (stored output)
                     size_t              nSync;          // Chart state
@@ -93,7 +94,10 @@ namespace lsp
                     plug::IPort        *pOut;           // Output port
                     plug::IPort        *pInGain;        // Input gain
                     plug::IPort        *pTrAmp;         // Amplitude chart
-                    plug::IPort        *pFft;           // FFT chart
+                    plug::IPort        *pFftInSwitch;   // FFT input switch
+                    plug::IPort        *pFftOutSwitch;  // FFT output switch
+                    plug::IPort        *pFftInMesh;     // FFT input mesh
+                    plug::IPort        *pFftOutMesh;    // FFT output mesh
                     plug::IPort        *pInMeter;       // Output level meter
                     plug::IPort        *pOutMeter;      // Output level meter
                 } eq_channel_t;
@@ -107,13 +111,11 @@ namespace lsp
                 float               fGainIn;                // Input gain
                 float               fZoom;                  // Zoom gain
                 bool                bSmoothMode;            // Smooth mode for the equalizer
-                fft_position_t      nFftPosition;           // FFT position
                 core::IDBuffer     *pIDisplay;              // Inline display buffer
 
                 plug::IPort        *pBypass;                // Bypass port
                 plug::IPort        *pGainIn;                // Input gain port
                 plug::IPort        *pGainOut;               // Output gain port
-                plug::IPort        *pFftMode;               // FFT mode
                 plug::IPort        *pReactivity;            // FFT reactivity
                 plug::IPort        *pShiftGain;             // Shift gain
                 plug::IPort        *pZoom;                  // Graph zoom
@@ -130,6 +132,7 @@ namespace lsp
 
             protected:
                 void                do_destroy();
+                void                perform_analysis(size_t samples);
                 void                process_channel(eq_channel_t *c, size_t start, size_t samples);
 
                 void                dump_channel(dspu::IStateDumper *v, const eq_channel_t *c) const;
