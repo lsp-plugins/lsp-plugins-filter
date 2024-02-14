@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-filter
  * Created on: 16 июн. 2023 г.
@@ -175,6 +175,8 @@ namespace lsp
             LSP_LV2_URI("filter_mono"),
             LSP_LV2UI_URI("filter_mono"),
             "fltm",
+            LSP_VST3_UID("fltm    fltm"),
+            LSP_VST3UI_UID("fltm    fltm"),
             LSP_LADSPA_FILTER_BASE + 0,
             LSP_LADSPA_URI("filter_mono"),
             LSP_CLAP_URI("filter_mono"),
@@ -200,6 +202,8 @@ namespace lsp
             LSP_LV2_URI("filter_stereo"),
             LSP_LV2UI_URI("filter_stereo"),
             "flts",
+            LSP_VST3_UID("flts    flts"),
+            LSP_VST3UI_UID("flts    flts"),
             LSP_LADSPA_FILTER_BASE + 1,
             LSP_LADSPA_URI("filter_stereo"),
             LSP_CLAP_URI("filter_stereo"),
