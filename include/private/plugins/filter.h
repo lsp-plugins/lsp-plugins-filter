@@ -134,7 +134,7 @@ namespace lsp
             protected:
                 void                do_destroy();
                 void                perform_analysis(size_t samples);
-                void                process_channel(eq_channel_t *c, size_t start, size_t samples);
+                void                process_channel(eq_channel_t *c, size_t start, size_t samples, size_t total_samples);
 
                 void                dump_channel(dspu::IStateDumper *v, const eq_channel_t *c) const;
                 static void         dump_filter_params(dspu::IStateDumper *v, const char *id, const dspu::filter_params_t *fp);

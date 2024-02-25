@@ -30,13 +30,14 @@
 
 #include <private/plugins/filter.h>
 
-#define EQ_BUFFER_SIZE          0x400U
-#define EQ_RANK                 12
-
 namespace lsp
 {
     namespace plugins
     {
+        constexpr static size_t EQ_BUFFER_SIZE      = 0x400U;
+        constexpr static size_t EQ_RANK             = 12;
+        constexpr static size_t EQ_SMOOTH_STEP      = 32;
+
         //-------------------------------------------------------------------------
         // Plugin factory
         typedef struct plugin_settings_t
@@ -910,32 +911,33 @@ namespace lsp
             sAnalyzer.process(bufs, samples);
         }
 
-        void filter::process_channel(eq_channel_t *c, size_t start, size_t samples)
+        void filter::process_channel(eq_channel_t *c, size_t start, size_t samples, size_t total_samples)
         {
             // Process the signal by the equalizer
             if (bSmoothMode)
             {
-                float den   = 1.0f / samples;
+                dspu::filter_params_t fp;
+                const float den   = 1.0f / total_samples;
 
                 // In smooth mode, we need to update filter parameters for each sample
-                for (size_t offset=0; offset<samples; ++offset)
+                for (size_t offset=0; offset<samples; )
                 {
-                    // Tune the filters
-                    float k                     = float(start + offset) * den;
+                    const size_t count          = lsp_min(samples - offset, EQ_SMOOTH_STEP);
+                    const float k               = float(start + offset) * den;
 
-                    dspu::filter_params_t fp;
-
+                    // Tune the filter
                     fp.nType                    = c->sFP.nType;
-                    fp.fFreq                    = c->sOldFP.fFreq * expf(logf(c->sFP.fFreq/c->sOldFP.fFreq)*k);
-                    fp.fFreq2                   = c->sOldFP.fFreq2 * expf(logf(c->sFP.fFreq2/c->sOldFP.fFreq2)*k);
+                    fp.fFreq                    = c->sOldFP.fFreq * expf(logf(c->sFP.fFreq / c->sOldFP.fFreq)*k);
+                    fp.fFreq2                   = c->sOldFP.fFreq2 * expf(logf(c->sFP.fFreq2 / c->sOldFP.fFreq2)*k);
                     fp.nSlope                   = c->sFP.nSlope;
-                    fp.fGain                    = c->sOldFP.fGain * expf(logf(c->sFP.fGain/c->sOldFP.fGain)*k);
+                    fp.fGain                    = c->sOldFP.fGain * expf(logf(c->sFP.fGain / c->sOldFP.fGain)*k);
                     fp.fQuality                 = c->sOldFP.fQuality + (c->sFP.fQuality - c->sOldFP.fQuality)*k;
 
                     c->sEqualizer.set_params(0, &fp);
 
                     // Apply processing
-                    c->sEqualizer.process(&c->vOutBuffer[offset], &c->vInPtr[offset], 1);
+                    c->sEqualizer.process(&c->vOutBuffer[offset], &c->vInPtr[offset], count);
+                    offset                     += count;
                 }
             }
             else
@@ -1004,7 +1006,7 @@ namespace lsp
 
                 // Process each channel individually
                 for (size_t i=0; i<channels; ++i)
-                    process_channel(&vChannels[i], offset, to_process);
+                    process_channel(&vChannels[i], offset, to_process, samples);
 
                 // Call analyzer
                 perform_analysis(to_process);
