@@ -70,17 +70,18 @@ namespace lsp
                     dspu::filter_params_t sOldFP;       // Old filter parameters
                     dspu::filter_params_t sFP;          // Filter parameters
 
-                    size_t              nLatency;       // Latency of the channel
+                    uint32_t            nLatency;       // Latency of the channel
                     float               fInGain;        // Input gain
                     float               fOutGain;       // Output gain
                     float              *vDryBuf;        // Dry buffer
-                    float              *vBuffer;        // Buffer for temporary data
+                    float              *vInBuffer;      // Input buffer (input signal passed to analyzer)
+                    float              *vOutBuffer;     // Output buffer
                     float              *vIn;            // Input buffer
                     float              *vOut;           // Output buffer
-                    float              *vAnalyzer;      // Buffer for analyzer
+                    float              *vInPtr;         // Actual pointer to input data (for eliminatioon of unnecessary memory copies)
                     float              *vTr;            // Transfer function (real part)
                     float              *vTrMem;         // Transfer function (stored output)
-                    size_t              nSync;          // Chart state
+                    uint32_t            nSync;          // Chart state
 
                     plug::IPort        *pType;          // Filter type
                     plug::IPort        *pMode;          // Filter mode
@@ -104,7 +105,7 @@ namespace lsp
 
             protected:
                 dspu::Analyzer      sAnalyzer;              // Analyzer
-                size_t              nMode;                  // Operating mode
+                uint32_t            nMode;                  // Operating mode
                 eq_channel_t       *vChannels;              // List of channels
                 float              *vFreqs;                 // Frequency list
                 uint32_t           *vIndexes;               // FFT indexes
@@ -124,7 +125,7 @@ namespace lsp
 
             protected:
                 static inline dspu::equalizer_mode_t get_eq_mode(ssize_t mode);
-                static inline void  decode_filter(size_t *ftype, size_t *slope, size_t mode);
+                static inline void  decode_filter(uint32_t *ftype, uint32_t *slope, size_t mode);
                 static size_t       decode_slope(size_t slope);
                 static bool         filter_has_width(size_t type);
                 static inline bool  adjust_gain(size_t filter_type);
@@ -133,7 +134,7 @@ namespace lsp
             protected:
                 void                do_destroy();
                 void                perform_analysis(size_t samples);
-                void                process_channel(eq_channel_t *c, size_t start, size_t samples);
+                void                process_channel(eq_channel_t *c, size_t start, size_t samples, size_t total_samples);
 
                 void                dump_channel(dspu::IStateDumper *v, const eq_channel_t *c) const;
                 static void         dump_filter_params(dspu::IStateDumper *v, const char *id, const dspu::filter_params_t *fp);

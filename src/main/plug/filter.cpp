@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-filter
 * Created on: 16 июн. 2023 г.
@@ -30,13 +30,14 @@
 
 #include <private/plugins/filter.h>
 
-#define EQ_BUFFER_SIZE          0x400U
-#define EQ_RANK                 12
-
 namespace lsp
 {
     namespace plugins
     {
+        constexpr static size_t EQ_BUFFER_SIZE      = 0x400U;
+        constexpr static size_t EQ_RANK             = 12;
+        constexpr static size_t EQ_SMOOTH_STEP      = 32;
+
         //-------------------------------------------------------------------------
         // Plugin factory
         typedef struct plugin_settings_t
@@ -97,7 +98,7 @@ namespace lsp
             do_destroy();
         }
 
-        inline void filter::decode_filter(size_t *ftype, size_t *slope, size_t mode)
+        inline void filter::decode_filter(uint32_t *ftype, uint32_t *slope, size_t mode)
         {
             #define EQF(x) meta::filter_metadata::EQF_ ## x
             #define EQS(k, t, ks) case meta::filter_metadata::EFM_ ## k:    \
@@ -528,10 +529,11 @@ namespace lsp
                 c->fInGain          = 1.0f;
                 c->fOutGain         = 1.0f;
                 c->vDryBuf          = advance_ptr<float>(abuf, EQ_BUFFER_SIZE);
-                c->vBuffer          = advance_ptr<float>(abuf, EQ_BUFFER_SIZE);
+                c->vInBuffer        = advance_ptr<float>(abuf, EQ_BUFFER_SIZE);
+                c->vOutBuffer       = advance_ptr<float>(abuf, EQ_BUFFER_SIZE);
                 c->vIn              = NULL;
                 c->vOut             = NULL;
-                c->vAnalyzer        = advance_ptr<float>(abuf, EQ_BUFFER_SIZE);
+                c->vInPtr           = NULL;
                 c->vTr              = advance_ptr<float>(abuf, meta::filter_metadata::MESH_POINTS * 2);
                 c->vTrMem           = advance_ptr<float>(abuf, meta::filter_metadata::MESH_POINTS);
                 c->nSync            = CS_UPDATE;
@@ -890,6 +892,10 @@ namespace lsp
 
         void filter::perform_analysis(size_t samples)
         {
+            // Do not do anything if analyzer is inactive
+            if (!sAnalyzer.activity())
+                return;
+
             // Prepare processing
             size_t channels     = (nMode == EQ_MONO) ? 1 : 2;
 
@@ -897,47 +903,48 @@ namespace lsp
             for (size_t i=0; i<channels; ++i)
             {
                 eq_channel_t *c         = &vChannels[i];
-                bufs[i*2]               = c->vAnalyzer;
-                bufs[i*2+1]             = c->vBuffer;
+                bufs[i*2]               = c->vInPtr;
+                bufs[i*2+1]             = c->vOutBuffer;
             }
 
             // Perform FFT analysis
             sAnalyzer.process(bufs, samples);
         }
 
-        void filter::process_channel(eq_channel_t *c, size_t start, size_t samples)
+        void filter::process_channel(eq_channel_t *c, size_t start, size_t samples, size_t total_samples)
         {
             // Process the signal by the equalizer
             if (bSmoothMode)
             {
-                float den   = 1.0f / samples;
+                dspu::filter_params_t fp;
+                const float den   = 1.0f / total_samples;
 
                 // In smooth mode, we need to update filter parameters for each sample
-                for (size_t offset=0; offset<samples; ++offset)
+                for (size_t offset=0; offset<samples; )
                 {
-                    // Tune the filters
-                    float k                     = float(start + offset) * den;
+                    const size_t count          = lsp_min(samples - offset, EQ_SMOOTH_STEP);
+                    const float k               = float(start + offset) * den;
 
-                    dspu::filter_params_t fp;
-
+                    // Tune the filter
                     fp.nType                    = c->sFP.nType;
-                    fp.fFreq                    = c->sOldFP.fFreq * expf(logf(c->sFP.fFreq/c->sOldFP.fFreq)*k);
-                    fp.fFreq2                   = c->sOldFP.fFreq2 * expf(logf(c->sFP.fFreq2/c->sOldFP.fFreq2)*k);
+                    fp.fFreq                    = c->sOldFP.fFreq * expf(logf(c->sFP.fFreq / c->sOldFP.fFreq)*k);
+                    fp.fFreq2                   = c->sOldFP.fFreq2 * expf(logf(c->sFP.fFreq2 / c->sOldFP.fFreq2)*k);
                     fp.nSlope                   = c->sFP.nSlope;
-                    fp.fGain                    = c->sOldFP.fGain * expf(logf(c->sFP.fGain/c->sOldFP.fGain)*k);
+                    fp.fGain                    = c->sOldFP.fGain * expf(logf(c->sFP.fGain / c->sOldFP.fGain)*k);
                     fp.fQuality                 = c->sOldFP.fQuality + (c->sFP.fQuality - c->sOldFP.fQuality)*k;
 
                     c->sEqualizer.set_params(0, &fp);
 
                     // Apply processing
-                    c->sEqualizer.process(&c->vBuffer[offset], &c->vBuffer[offset], 1);
+                    c->sEqualizer.process(&c->vOutBuffer[offset], &c->vInPtr[offset], count);
+                    offset                     += count;
                 }
             }
             else
-                c->sEqualizer.process(c->vBuffer, c->vBuffer, samples);
+                c->sEqualizer.process(c->vOutBuffer, c->vInPtr, samples);
 
             if (c->fInGain != 1.0f)
-                dsp::mul_k2(c->vBuffer, c->fInGain, samples);
+                dsp::mul_k2(c->vOutBuffer, c->fInGain, samples);
         }
 
         void filter::process(size_t samples)
@@ -966,39 +973,40 @@ namespace lsp
 
                 if (nMode == EQ_MONO)
                 {
-                    vChannels[0].pInMeter->set_value(dsp::abs_max(vChannels[0].vIn, to_process));
+                    eq_channel_t *c = &vChannels[0];
                     if (fGainIn != 1.0f)
-                        dsp::mul_k3(vChannels[0].vBuffer, vChannels[0].vIn, fGainIn, to_process);
+                    {
+                        dsp::mul_k3(c->vInBuffer, c->vIn, fGainIn, to_process);
+                        c->vInPtr = c->vInBuffer;
+                    }
                     else
-                        dsp::copy(vChannels[0].vBuffer, vChannels[0].vIn, to_process);
+                        c->vInPtr = c->vIn;
+
+                    c->pInMeter->set_value(dsp::abs_max(c->vInPtr, to_process));
                 }
                 else
                 {
-                    vChannels[0].pInMeter->set_value(dsp::abs_max(vChannels[0].vIn, to_process));
-                    vChannels[1].pInMeter->set_value(dsp::abs_max(vChannels[1].vIn, to_process));
+                    eq_channel_t *l = &vChannels[0], *r = &vChannels[1];
                     if (fGainIn != 1.0f)
                     {
-                        dsp::mul_k3(vChannels[0].vBuffer, vChannels[0].vIn, fGainIn, to_process);
-                        dsp::mul_k3(vChannels[1].vBuffer, vChannels[1].vIn, fGainIn, to_process);
+                        dsp::mul_k3(l->vInBuffer, l->vIn, fGainIn, to_process);
+                        dsp::mul_k3(r->vInBuffer, r->vIn, fGainIn, to_process);
+                        l->vInPtr   = l->vInBuffer;
+                        r->vInPtr   = r->vInBuffer;
                     }
                     else
                     {
-                        dsp::copy(vChannels[0].vBuffer, vChannels[0].vIn, to_process);
-                        dsp::copy(vChannels[1].vBuffer, vChannels[1].vIn, to_process);
+                        l->vInPtr   = l->vIn;
+                        r->vInPtr   = r->vIn;
                     }
-                }
 
-                // Store data for analysis
-                for (size_t i=0; i<channels; ++i)
-                {
-                    eq_channel_t *c     = &vChannels[i];
-                    if (sAnalyzer.channel_active(i*2))
-                        dsp::copy(c->vAnalyzer, c->vBuffer, to_process);
+                    l->pInMeter->set_value(dsp::abs_max(l->vInPtr, to_process));
+                    r->pInMeter->set_value(dsp::abs_max(r->vInPtr, to_process));
                 }
 
                 // Process each channel individually
                 for (size_t i=0; i<channels; ++i)
-                    process_channel(&vChannels[i], offset, to_process);
+                    process_channel(&vChannels[i], offset, to_process, samples);
 
                 // Call analyzer
                 perform_analysis(to_process);
@@ -1008,16 +1016,15 @@ namespace lsp
                 {
                     eq_channel_t *c     = &vChannels[i];
 
-                    // Apply output gain
-                    if (c->fOutGain != 1.0f)
-                        dsp::mul_k2(c->vBuffer, c->fOutGain, to_process);
-
                     // Do output metering
                     if (c->pOutMeter != NULL)
-                        c->pOutMeter->set_value(dsp::abs_max(c->vBuffer, to_process));
+                        c->pOutMeter->set_value(dsp::abs_max(c->vOutBuffer, to_process) * c->fOutGain);
 
                     // Process via bypass
-                    c->sBypass.process(c->vOut, c->vDryBuf, c->vBuffer, to_process);
+                    if (c->fOutGain != 1.0f)
+                        c->sBypass.process_wet(c->vOut, c->vDryBuf, c->vOutBuffer, c->fOutGain, to_process);
+                    else
+                        c->sBypass.process(c->vOut, c->vDryBuf, c->vOutBuffer, to_process);
 
                     c->vIn             += to_process;
                     c->vOut            += to_process;
@@ -1235,10 +1242,11 @@ namespace lsp
                 v->write("fInGain", c->fInGain);
                 v->write("fOutGain", c->fOutGain);
                 v->write("vDryBuf", c->vDryBuf);
-                v->write("vBuffer", c->vBuffer);
+                v->write("vInBuffer", c->vInBuffer);
+                v->write("vOutBuffer", c->vOutBuffer);
                 v->write("vIn", c->vIn);
                 v->write("vOut", c->vOut);
-                v->write("vAnalyzer", c->vAnalyzer);
+                v->write("vInPtr", c->vInPtr);
                 v->write("vTr", c->vTr);
                 v->write("vTrMem", c->vTrMem);
                 v->write("nSync", c->nSync);
