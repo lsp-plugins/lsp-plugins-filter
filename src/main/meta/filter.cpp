@@ -25,7 +25,7 @@
 
 #define LSP_PLUGINS_FILTER_VERSION_MAJOR         1
 #define LSP_PLUGINS_FILTER_VERSION_MINOR         0
-#define LSP_PLUGINS_FILTER_VERSION_MICRO         8
+#define LSP_PLUGINS_FILTER_VERSION_MICRO         9
 
 #define LSP_PLUGINS_FILTER_VERSION  \
     LSP_MODULE_VERSION( \
@@ -172,14 +172,17 @@ namespace lsp
             "FLTM",
             &developers::v_sadovnikov,
             "filter_mono",
-            LSP_LV2_URI("filter_mono"),
-            LSP_LV2UI_URI("filter_mono"),
-            "fltm",
-            LSP_VST3_UID("fltm    fltm"),
-            LSP_VST3UI_UID("fltm    fltm"),
-            LSP_LADSPA_FILTER_BASE + 0,
-            LSP_LADSPA_URI("filter_mono"),
-            LSP_CLAP_URI("filter_mono"),
+            {
+                LSP_LV2_URI("filter_mono"),
+                LSP_LV2UI_URI("filter_mono"),
+                "fltm",
+                LSP_VST3_UID("fltm    fltm"),
+                LSP_VST3UI_UID("fltm    fltm"),
+                LSP_LADSPA_FILTER_BASE + 0,
+                LSP_LADSPA_URI("filter_mono"),
+                LSP_CLAP_URI("filter_mono"),
+                LSP_GST_UID("filter_mono"),
+            },
             LSP_PLUGINS_FILTER_VERSION,
             plugin_classes,
             clap_features_mono,
@@ -199,14 +202,17 @@ namespace lsp
             "FLTS",
             &developers::v_sadovnikov,
             "filter_stereo",
-            LSP_LV2_URI("filter_stereo"),
-            LSP_LV2UI_URI("filter_stereo"),
-            "flts",
-            LSP_VST3_UID("flts    flts"),
-            LSP_VST3UI_UID("flts    flts"),
-            LSP_LADSPA_FILTER_BASE + 1,
-            LSP_LADSPA_URI("filter_stereo"),
-            LSP_CLAP_URI("filter_stereo"),
+            {
+                LSP_LV2_URI("filter_stereo"),
+                LSP_LV2UI_URI("filter_stereo"),
+                "flts",
+                LSP_VST3_UID("flts    flts"),
+                LSP_VST3UI_UID("flts    flts"),
+                LSP_LADSPA_FILTER_BASE + 1,
+                LSP_LADSPA_URI("filter_stereo"),
+                LSP_CLAP_URI("filter_stereo"),
+                LSP_GST_UID("filter_stereo"),
+            },
             LSP_PLUGINS_FILTER_VERSION,
             plugin_classes,
             clap_features_stereo,
