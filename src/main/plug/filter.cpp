@@ -40,36 +40,39 @@ namespace lsp
 
         //-------------------------------------------------------------------------
         // Plugin factory
-        typedef struct plugin_settings_t
+        inline namespace
         {
-            const meta::plugin_t   *metadata;
-            uint8_t                 channels;
-            uint8_t                 mode;
-        } plugin_settings_t;
+            typedef struct plugin_settings_t
+            {
+                const meta::plugin_t   *metadata;
+                uint8_t                 channels;
+                uint8_t                 mode;
+            } plugin_settings_t;
 
-        static const meta::plugin_t *plugins[] =
-        {
-            &meta::filter_mono,
-            &meta::filter_stereo
-        };
+            static const meta::plugin_t *plugins[] =
+            {
+                &meta::filter_mono,
+                &meta::filter_stereo
+            };
 
-        static const plugin_settings_t plugin_settings[] =
-        {
-            { &meta::filter_mono,   1, filter::EQ_MONO         },
-            { &meta::filter_stereo, 1, filter::EQ_STEREO       },
+            static const plugin_settings_t plugin_settings[] =
+            {
+                { &meta::filter_mono,   1, filter::EQ_MONO         },
+                { &meta::filter_stereo, 1, filter::EQ_STEREO       },
 
-            { NULL, 0, false }
-        };
+                { NULL, 0, false }
+            };
 
-        static plug::Module *plugin_factory(const meta::plugin_t *meta)
-        {
-            for (const plugin_settings_t *s = plugin_settings; s->metadata != NULL; ++s)
-                if (s->metadata == meta)
-                    return new filter(s->metadata, s->mode);
-            return NULL;
-        }
+            static plug::Module *plugin_factory(const meta::plugin_t *meta)
+            {
+                for (const plugin_settings_t *s = plugin_settings; s->metadata != NULL; ++s)
+                    if (s->metadata == meta)
+                        return new filter(s->metadata, s->mode);
+                return NULL;
+            }
 
-        static plug::Factory factory(plugin_factory, plugins, 2);
+            static plug::Factory factory(plugin_factory, plugins, 2);
+        } /* inline namespace */
 
         //-------------------------------------------------------------------------
         filter::filter(const meta::plugin_t *metadata, size_t mode): plug::Module(metadata)
