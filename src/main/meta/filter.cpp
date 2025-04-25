@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-filter
  * Created on: 16 июн. 2023 г.
@@ -100,8 +100,8 @@ namespace lsp
                 COMBO("s", "Filter slope", 0, filter_slopes), \
                 LOG_CONTROL("f", "Frequency", U_HZ, filter_metadata::FREQ), \
                 CONTROL("w", "Filter Width", U_OCTAVES, filter_metadata::WIDTH), \
-                { "g", "Gain", U_GAIN_AMP, R_CONTROL, F_LOG | F_UPPER | F_LOWER | F_STEP, GAIN_AMP_M_36_DB, GAIN_AMP_P_36_DB, GAIN_AMP_0_DB, 0.01, NULL, NULL }, \
-                { "q", "Quality factor", U_NONE, R_CONTROL, F_UPPER | F_LOWER | F_STEP, 0.0f, 100.0f, 0.0f, 0.025f, NULL        }
+                LOG_CONTROL_ALL("g", "Gain", U_GAIN_AMP, GAIN_AMP_M_36_DB, GAIN_AMP_P_36_DB, GAIN_AMP_0_DB, 0.01), \
+                CONTROL_ALL("q", "Quality factor", U_NONE, 0.0f, 100.0f, 0.0f, 0.025f)
 
         #define EQ_COMMON \
                 BYPASS, \
