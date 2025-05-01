@@ -100,7 +100,7 @@ namespace lsp
                 COMBO("s", "Filter slope", 0, filter_slopes), \
                 LOG_CONTROL("f", "Frequency", U_HZ, filter_metadata::FREQ), \
                 CONTROL("w", "Filter Width", U_OCTAVES, filter_metadata::WIDTH), \
-                LOG_CONTROL_ALL("g", "Gain", U_GAIN_AMP, GAIN_AMP_M_36_DB, GAIN_AMP_P_36_DB, GAIN_AMP_0_DB, 0.01), \
+                LOG_CONTROL_ALL("g", "Gain", "Gain", U_GAIN_AMP, GAIN_AMP_M_36_DB, GAIN_AMP_P_36_DB, GAIN_AMP_0_DB, 0.01), \
                 CONTROL_ALL("q", "Quality factor", U_NONE, 0.0f, 100.0f, 0.0f, 0.025f)
 
         #define EQ_COMMON \
