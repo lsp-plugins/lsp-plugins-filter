@@ -98,7 +98,7 @@ namespace lsp
                 COMBO("ft", "Filter type", 0, filter_types), \
                 COMBO("fm", "Filter mode", 0, filter_modes), \
                 COMBO("s", "Filter slope", 0, filter_slopes), \
-                LOG_CONTROL("f", "Frequency", U_HZ, filter_metadata::FREQ), \
+                LOG_CONTROL("f", "Frequency", "Frequency", U_HZ, filter_metadata::FREQ), \
                 CONTROL("w", "Filter Width", U_OCTAVES, filter_metadata::WIDTH), \
                 LOG_CONTROL_ALL("g", "Gain", "Gain", U_GAIN_AMP, GAIN_AMP_M_36_DB, GAIN_AMP_P_36_DB, GAIN_AMP_0_DB, 0.01), \
                 CONTROL_ALL("q", "Quality factor", U_NONE, 0.0f, 100.0f, 0.0f, 0.025f)
@@ -108,9 +108,9 @@ namespace lsp
                 AMP_GAIN("g_in", "Input gain", filter_metadata::IN_GAIN_DFL, 10.0f), \
                 AMP_GAIN("g_out", "Output gain", filter_metadata::OUT_GAIN_DFL, 10.0f), \
                 COMBO("mode", "Equalizer mode", 0, equalizer_eq_modes), \
-                LOG_CONTROL("react", "FFT reactivity", U_MSEC, filter_metadata::REACT_TIME), \
+                LOG_CONTROL("react", "FFT reactivity", "Reactivity", U_MSEC, filter_metadata::REACT_TIME), \
                 AMP_GAIN("shift", "Shift gain", 1.0f, 100.0f), \
-                LOG_CONTROL("zoom", "Graph zoom", U_GAIN_AMP, filter_metadata::ZOOM)
+                LOG_CONTROL("zoom", "Graph zoom", "Zoom", U_GAIN_AMP, filter_metadata::ZOOM)
 
         #define EQ_MONO_PORTS \
                 MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS), \
