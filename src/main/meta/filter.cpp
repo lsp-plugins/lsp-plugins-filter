@@ -105,11 +105,11 @@ namespace lsp
 
         #define EQ_COMMON \
                 BYPASS, \
-                AMP_GAIN("g_in", "Input gain", filter_metadata::IN_GAIN_DFL, 10.0f), \
-                AMP_GAIN("g_out", "Output gain", filter_metadata::OUT_GAIN_DFL, 10.0f), \
+                AMP_GAIN("g_in", "Input gain", "Input gain", filter_metadata::IN_GAIN_DFL, 10.0f), \
+                AMP_GAIN("g_out", "Output gain", "Output gain", filter_metadata::OUT_GAIN_DFL, 10.0f), \
                 COMBO("mode", "Equalizer mode", "Filter mode", 0, filter_eq_modes), \
                 LOG_CONTROL("react", "FFT reactivity", "Reactivity", U_MSEC, filter_metadata::REACT_TIME), \
-                AMP_GAIN("shift", "Shift gain", 1.0f, 100.0f), \
+                AMP_GAIN("shift", "Shift gain", "Shift", 1.0f, 100.0f), \
                 LOG_CONTROL("zoom", "Graph zoom", "Zoom", U_GAIN_AMP, filter_metadata::ZOOM)
 
         #define EQ_MONO_PORTS \
@@ -118,7 +118,7 @@ namespace lsp
                 METER_GAIN("sm", "Output signal meter", GAIN_AMP_P_12_DB)
 
         #define EQ_STEREO_PORTS \
-                PAN_CTL("bal", "Output balance", 0.0f), \
+                PAN_CTL("bal", "Output balance", "Out balance", 0.0f), \
                 MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS), \
                 METER_GAIN("iml", "Input signal meter Left", GAIN_AMP_P_12_DB), \
                 METER_GAIN("sml", "Output signal meter Left", GAIN_AMP_P_12_DB), \
