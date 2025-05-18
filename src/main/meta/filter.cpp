@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2024 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2024 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-filter
  * Created on: 16 июн. 2023 г.
@@ -25,7 +25,7 @@
 
 #define LSP_PLUGINS_FILTER_VERSION_MAJOR         1
 #define LSP_PLUGINS_FILTER_VERSION_MINOR         0
-#define LSP_PLUGINS_FILTER_VERSION_MICRO         13
+#define LSP_PLUGINS_FILTER_VERSION_MICRO         14
 
 #define LSP_PLUGINS_FILTER_VERSION  \
     LSP_MODULE_VERSION( \
@@ -57,7 +57,7 @@ namespace lsp
             { NULL, NULL }
         };
 
-        static const port_item_t equalizer_eq_modes[] =
+        static const port_item_t filter_eq_modes[] =
         {
             { "IIR",            "filter.type.iir" },
             { "FIR",            "filter.type.fir" },
@@ -95,22 +95,22 @@ namespace lsp
         };
 
         #define EQ_FILTER \
-                COMBO("ft", "Filter type", 0, filter_types), \
-                COMBO("fm", "Filter mode", 0, filter_modes), \
-                COMBO("s", "Filter slope", 0, filter_slopes), \
-                LOG_CONTROL("f", "Frequency", U_HZ, filter_metadata::FREQ), \
-                CONTROL("w", "Filter Width", U_OCTAVES, filter_metadata::WIDTH), \
-                { "g", "Gain", U_GAIN_AMP, R_CONTROL, F_LOG | F_UPPER | F_LOWER | F_STEP, GAIN_AMP_M_36_DB, GAIN_AMP_P_36_DB, GAIN_AMP_0_DB, 0.01, NULL, NULL }, \
-                { "q", "Quality factor", U_NONE, R_CONTROL, F_UPPER | F_LOWER | F_STEP, 0.0f, 100.0f, 0.0f, 0.025f, NULL        }
+                COMBO("ft", "Filter type", "Type", 0, filter_types), \
+                COMBO("fm", "Filter mode", "Mode", 0, filter_modes), \
+                COMBO("s", "Filter slope", "Slope", 0, filter_slopes), \
+                LOG_CONTROL("f", "Frequency", "Frequency", U_HZ, filter_metadata::FREQ), \
+                CONTROL("w", "Filter Width", "Width", U_OCTAVES, filter_metadata::WIDTH), \
+                LOG_CONTROL_ALL("g", "Gain", "Gain", U_GAIN_AMP, GAIN_AMP_M_36_DB, GAIN_AMP_P_36_DB, GAIN_AMP_0_DB, 0.01), \
+                CONTROL_ALL("q", "Quality factor", "Q", U_NONE, 0.0f, 100.0f, 0.0f, 0.025f)
 
         #define EQ_COMMON \
                 BYPASS, \
-                AMP_GAIN("g_in", "Input gain", filter_metadata::IN_GAIN_DFL, 10.0f), \
-                AMP_GAIN("g_out", "Output gain", filter_metadata::OUT_GAIN_DFL, 10.0f), \
-                COMBO("mode", "Equalizer mode", 0, equalizer_eq_modes), \
-                LOG_CONTROL("react", "FFT reactivity", U_MSEC, filter_metadata::REACT_TIME), \
-                AMP_GAIN("shift", "Shift gain", 1.0f, 100.0f), \
-                LOG_CONTROL("zoom", "Graph zoom", U_GAIN_AMP, filter_metadata::ZOOM)
+                AMP_GAIN("g_in", "Input gain", "Input gain", filter_metadata::IN_GAIN_DFL, 10.0f), \
+                AMP_GAIN("g_out", "Output gain", "Output gain", filter_metadata::OUT_GAIN_DFL, 10.0f), \
+                COMBO("mode", "Equalizer mode", "Filter mode", 0, filter_eq_modes), \
+                LOG_CONTROL("react", "FFT reactivity", "Reactivity", U_MSEC, filter_metadata::REACT_TIME), \
+                AMP_GAIN("shift", "Shift gain", "Shift", 1.0f, 100.0f), \
+                LOG_CONTROL("zoom", "Graph zoom", "Zoom", U_GAIN_AMP, filter_metadata::ZOOM)
 
         #define EQ_MONO_PORTS \
                 MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS), \
@@ -118,16 +118,16 @@ namespace lsp
                 METER_GAIN("sm", "Output signal meter", GAIN_AMP_P_12_DB)
 
         #define EQ_STEREO_PORTS \
-                PAN_CTL("bal", "Output balance", 0.0f), \
+                PAN_CTL("bal", "Output balance", "Out balance", 0.0f), \
                 MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS), \
                 METER_GAIN("iml", "Input signal meter Left", GAIN_AMP_P_12_DB), \
                 METER_GAIN("sml", "Output signal meter Left", GAIN_AMP_P_12_DB), \
                 METER_GAIN("imr", "Input signal meter Right", GAIN_AMP_P_12_DB), \
                 METER_GAIN("smr", "Output signal meter Right", GAIN_AMP_P_12_DB)
 
-        #define CHANNEL_ANALYSIS(id, label) \
-                SWITCH("ife" id, "Input FFT graph enable" label, 1.0f), \
-                SWITCH("ofe" id, "Output FFT graph enable" label, 1.0f), \
+        #define CHANNEL_ANALYSIS(id, label, alias) \
+                SWITCH("ife" id, "Input FFT graph enable" label, "Show FFT In" alias, 1.0f), \
+                SWITCH("ofe" id, "Output FFT graph enable" label, "Show FFT Out" alias, 1.0f), \
                 MESH("ifg" id, "Input FFT graph" label, 2, filter_metadata::MESH_POINTS + 2), \
                 MESH("ofg" id, "Output FFT graph" label, 2, filter_metadata::MESH_POINTS)
 
@@ -136,7 +136,7 @@ namespace lsp
         {
             PORTS_MONO_PLUGIN,
             EQ_COMMON,
-            CHANNEL_ANALYSIS("", " "),
+            CHANNEL_ANALYSIS("", " ", ""),
             EQ_MONO_PORTS,
             EQ_FILTER,
 
@@ -147,8 +147,8 @@ namespace lsp
         {
             PORTS_STEREO_PLUGIN,
             EQ_COMMON,
-            CHANNEL_ANALYSIS("_l", " Left"),
-            CHANNEL_ANALYSIS("_r", " Right"),
+            CHANNEL_ANALYSIS("_l", " Left", " L"),
+            CHANNEL_ANALYSIS("_r", " Right", " R"),
             EQ_STEREO_PORTS,
             EQ_FILTER,
 
