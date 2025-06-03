@@ -18,7 +18,7 @@
 	</li>
 	<li><b>Matched Z Transform (MT) filters</b> are probably the best choice when cutting out individual short range of frequencies.</li>
 	<li><b>Bilinear Transform (BT) filters</b> are good when cutting-out high frequencies because they have -INF dB amplification at the Nyquist frequency.</li>
-    <li><b>Direct Design (DR) filters</b> add alterantive implementations for the various supperted filter types, and may be chosen whenever their frequency response is best suited.</li>
+    <li><b>Direct Design (DR) filters</b> add alternative implementations for the various supperted filter types, and may be chosen whenever their frequency response is best suited.</li>
 </ul>
 <p>
 	This plugin introduces a single filter.
@@ -169,7 +169,7 @@ of so-called poles and zeros:<p>
 		<li><b>Bell</b> - Bell filter with smooth peak/recess.</li>
 		<li><b>Bandpass</b> - Bandpass filter.</li>
 		<li><b>Notch</b> - Notch filter with full rejection of selected frequency.</li>
-		<li><b>Resonance</b> - Resonance filter wih sharp peak/recess.</li>
+		<li><b>Resonance</b> - Resonance filter with sharp peak/recess.</li>
 		<li><b>Ladder-pass</b> - The filter that makes some ladder-passing in the spectrum domain.</li>
 		<li><b>Ladder-rej</b> - The filter that makes some ladder-rejection in the spectrum domain.</li>
 		<li><b>Allpass</b> - All-pass filter which only affects the phase of the audio signal at the specified frequency.</li>
