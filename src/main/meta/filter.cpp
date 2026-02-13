@@ -189,7 +189,7 @@ namespace lsp
             clap_features_mono,
             E_INLINE_DISPLAY | E_DUMP_STATE,
             filter_mono_ports,
-            "equalizer/filter/filter.xml",
+            "plugins/equalizer/filter/filter.xml",
             NULL,
             mono_plugin_port_groups,
             &filter_bundle
@@ -220,7 +220,7 @@ namespace lsp
             clap_features_stereo,
             E_INLINE_DISPLAY | E_DUMP_STATE,
             filter_stereo_ports,
-            "equalizer/filter/filter.xml",
+            "plugins/equalizer/filter/filter.xml",
             NULL,
             stereo_plugin_port_groups,
             &filter_bundle
