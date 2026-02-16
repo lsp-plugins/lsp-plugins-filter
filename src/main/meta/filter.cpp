@@ -192,7 +192,8 @@ namespace lsp
             "plugins/equalizer/filter/filter.xml",
             NULL,
             mono_plugin_port_groups,
-            &filter_bundle
+            &filter_bundle,
+            2
         };
         LSP_REGISTER_METADATA(filter_mono);
 
@@ -223,7 +224,8 @@ namespace lsp
             "plugins/equalizer/filter/filter.xml",
             NULL,
             stereo_plugin_port_groups,
-            &filter_bundle
+            &filter_bundle,
+            1
         };
         LSP_REGISTER_METADATA(filter_stereo);
 
