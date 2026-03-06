@@ -150,6 +150,8 @@
 			<hbox ipadding="0" bg.color="bg_schema" pad.h="6">
 				<label text="labels.mode" pad.r="4"/>
 				<combo id="mode" pad.v="4"/>
+				<label text="labels.decramp" pad.l="6" pad.r="4" />
+				<combo id="decramp" pad.v="4"/>
 				<void hexpand="true"/>
 				<ui:if test="ex :in_l">
 					<vsep bg.color="bg" pad.h="2" hreduce="true"/>

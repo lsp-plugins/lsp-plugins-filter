@@ -39,6 +39,10 @@ namespace lsp
 {
     namespace meta
     {
+        // Different revisions
+        #define REV_0           0
+        #define REV_1           1
+
         //-------------------------------------------------------------------------
         // Parametric Equalizer
         static const int plugin_classes[]           = { C_PARA_EQ, -1 };
@@ -95,6 +99,17 @@ namespace lsp
             { NULL, NULL }
         };
 
+        static const port_item_t filter_decramping[] =
+        {
+            { "Off",            "eq.decramp.off"    },
+            { "x2",             "eq.decramp.x2"     },
+            { "x3",             "eq.decramp.x3"     },
+            { "x4",             "eq.decramp.x4"     },
+            { "x6",             "eq.decramp.x6"     },
+            { "x8",             "eq.decramp.x8"     },
+            { NULL, NULL }
+        };
+
         #define EQ_FILTER \
                 COMBO("ft", "Filter type", "Type", 0, filter_types), \
                 COMBO("fm", "Filter mode", "Mode", 0, filter_modes), \
@@ -108,7 +123,8 @@ namespace lsp
                 BYPASS, \
                 AMP_GAIN("g_in", "Input gain", "Input gain", filter_metadata::IN_GAIN_DFL, 10.0f), \
                 AMP_GAIN("g_out", "Output gain", "Output gain", filter_metadata::OUT_GAIN_DFL, 10.0f), \
-                COMBO("mode", "Equalizer mode", "Filter mode", 0, filter_eq_modes), \
+                COMBO("mode", "Filter mode", "Filter mode", 0, filter_eq_modes), \
+                ADDON_COMBO(REV_1, "decramp", "Equalizer decramping", "Decramping", 0, filter_decramping), \
                 LOG_CONTROL("react", "FFT reactivity", "Reactivity", U_MSEC, filter_metadata::REACT_TIME), \
                 AMP_GAIN("shift", "Shift gain", "Shift", 1.0f, 100.0f), \
                 LOG_CONTROL("zoom", "Graph zoom", "Zoom", U_GAIN_AMP, filter_metadata::ZOOM)
