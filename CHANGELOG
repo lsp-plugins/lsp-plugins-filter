@@ -4,6 +4,7 @@
 
 === 1.0.19 ===
 * Added support of bilinear transform filters decramping.
+* Fixed artifacts at the edges of the equalization curve.
 
 === 1.0.18 ===
 * Updated build scripts and dependencies.

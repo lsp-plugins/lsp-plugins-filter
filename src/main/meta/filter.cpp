@@ -130,13 +130,13 @@ namespace lsp
                 LOG_CONTROL("zoom", "Graph zoom", "Zoom", U_GAIN_AMP, filter_metadata::ZOOM)
 
         #define EQ_MONO_PORTS \
-                MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS), \
+                MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS + 4), \
                 METER_GAIN("im", "Input signal meter", GAIN_AMP_P_12_DB), \
                 METER_GAIN("sm", "Output signal meter", GAIN_AMP_P_12_DB)
 
         #define EQ_STEREO_PORTS \
                 PAN_CTL("bal", "Output balance", "Out balance", 0.0f), \
-                MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS), \
+                MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS + 4), \
                 METER_GAIN("iml", "Input signal meter Left", GAIN_AMP_P_12_DB), \
                 METER_GAIN("sml", "Output signal meter Left", GAIN_AMP_P_12_DB), \
                 METER_GAIN("imr", "Input signal meter Right", GAIN_AMP_P_12_DB), \

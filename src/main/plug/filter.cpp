@@ -1228,9 +1228,26 @@ namespace lsp
                     plug::mesh_t *mesh  = c->pTrAmp->buffer<plug::mesh_t>();
                     if ((mesh != NULL) && (mesh->isEmpty()))
                     {
-                        dsp::copy(mesh->pvData[0], vFreqs, meta::filter_metadata::MESH_POINTS);
-                        dsp::copy(mesh->pvData[1], c->vTrMem, meta::filter_metadata::MESH_POINTS);
-                        mesh->data(2, meta::filter_metadata::MESH_POINTS);
+                        // Frequency
+                        float *dst          = mesh->pvData[0];
+                        dsp::copy(&dst[2], vFreqs, meta::filter_metadata::MESH_POINTS);
+                        dst[0]              = SPEC_FREQ_MIN * 0.5f;
+                        dst[1]              = SPEC_FREQ_MIN * 0.5f;
+                        dst                += meta::filter_metadata::MESH_POINTS + 2;
+                        dst[0]              = SPEC_FREQ_MAX * 2.0f;
+                        dst[1]              = SPEC_FREQ_MAX * 2.0f;
+
+                        // Amplitude
+                        dst                 = mesh->pvData[1];
+                        dsp::copy(&dst[2], c->vTrMem, meta::filter_metadata::MESH_POINTS);
+                        dst[0]              = GAIN_AMP_0_DB;
+                        dst[1]              = dst[2];
+                        dst                += meta::filter_metadata::MESH_POINTS + 2;
+                        dst[0]              = dst[-1];
+                        dst[1]              = GAIN_AMP_0_DB;
+
+                        // Report data presence
+                        mesh->data(2, meta::filter_metadata::MESH_POINTS + 4);
 
                         c->nSync           &= ~CS_SYNC_AMP;
                     }
