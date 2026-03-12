@@ -2,6 +2,9 @@
 * RECENT CHANGES
 *******************************************************************************
 
+=== 1.0.20 ===
+
+
 === 1.0.19 ===
 * Added support of bilinear transform filters decramping.
 * Fixed artifacts at the edges of the equalization curve.
