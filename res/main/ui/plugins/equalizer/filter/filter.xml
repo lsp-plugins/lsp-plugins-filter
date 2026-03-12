@@ -75,7 +75,7 @@
 						<mesh id="ifg" oy=":_ui_zoomable_spectrum_graph ? 1 : 3" width="0" color="mono_in" color.a="0.8" fcolor.a="0.8" fill="true" fcolor="mono_in" visibility=":ife"/>
 						<mesh id="ofg" oy=":_ui_zoomable_spectrum_graph ? 1 : 3" width="2" color="mono" visibility=":ofe"/>
 					</ui:if>
-					<mesh id="ag" width="3" color="bright_cyan" smooth="true"/>
+					<mesh id="ag" width="3" color="bright_cyan" fill="true" fcolor="bright_cyan" fcolor.a="0.8" smooth="true"/>
 
 					<dot
 						x.id="f"
@@ -150,6 +150,8 @@
 			<hbox ipadding="0" bg.color="bg_schema" pad.h="6">
 				<label text="labels.mode" pad.r="4"/>
 				<combo id="mode" pad.v="4"/>
+				<label text="labels.decramp" pad.l="12" pad.r="4" />
+				<combo id="decramp" pad.v="4"/>
 				<void hexpand="true"/>
 				<ui:if test="ex :in_l">
 					<vsep bg.color="bg" pad.h="2" hreduce="true"/>

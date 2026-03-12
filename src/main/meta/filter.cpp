@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2025 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2025 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2026 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2026 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-filter
  * Created on: 16 июн. 2023 г.
@@ -20,12 +20,13 @@
  */
 
 #include <lsp-plug.in/plug-fw/meta/ports.h>
+#include <lsp-plug.in/plug-fw/meta/registry.h>
 #include <lsp-plug.in/shared/meta/developers.h>
 #include <private/meta/filter.h>
 
 #define LSP_PLUGINS_FILTER_VERSION_MAJOR         1
 #define LSP_PLUGINS_FILTER_VERSION_MINOR         0
-#define LSP_PLUGINS_FILTER_VERSION_MICRO         18
+#define LSP_PLUGINS_FILTER_VERSION_MICRO         19
 
 #define LSP_PLUGINS_FILTER_VERSION  \
     LSP_MODULE_VERSION( \
@@ -38,6 +39,10 @@ namespace lsp
 {
     namespace meta
     {
+        // Different revisions
+        #define REV_0           0
+        #define REV_1           1
+
         //-------------------------------------------------------------------------
         // Parametric Equalizer
         static const int plugin_classes[]           = { C_PARA_EQ, -1 };
@@ -94,6 +99,17 @@ namespace lsp
             { NULL, NULL }
         };
 
+        static const port_item_t filter_decramping[] =
+        {
+            { "Off",            "eq.decramp.off"    },
+            { "x2",             "eq.decramp.x2"     },
+            { "x3",             "eq.decramp.x3"     },
+            { "x4",             "eq.decramp.x4"     },
+            { "x6",             "eq.decramp.x6"     },
+            { "x8",             "eq.decramp.x8"     },
+            { NULL, NULL }
+        };
+
         #define EQ_FILTER \
                 COMBO("ft", "Filter type", "Type", 0, filter_types), \
                 COMBO("fm", "Filter mode", "Mode", 0, filter_modes), \
@@ -107,19 +123,20 @@ namespace lsp
                 BYPASS, \
                 AMP_GAIN("g_in", "Input gain", "Input gain", filter_metadata::IN_GAIN_DFL, 10.0f), \
                 AMP_GAIN("g_out", "Output gain", "Output gain", filter_metadata::OUT_GAIN_DFL, 10.0f), \
-                COMBO("mode", "Equalizer mode", "Filter mode", 0, filter_eq_modes), \
+                COMBO("mode", "Filter mode", "Filter mode", 0, filter_eq_modes), \
+                ADDON_COMBO(REV_1, "decramp", "Equalizer decramping", "Decramping", 0, filter_decramping), \
                 LOG_CONTROL("react", "FFT reactivity", "Reactivity", U_MSEC, filter_metadata::REACT_TIME), \
                 AMP_GAIN("shift", "Shift gain", "Shift", 1.0f, 100.0f), \
                 LOG_CONTROL("zoom", "Graph zoom", "Zoom", U_GAIN_AMP, filter_metadata::ZOOM)
 
         #define EQ_MONO_PORTS \
-                MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS), \
+                MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS + 4), \
                 METER_GAIN("im", "Input signal meter", GAIN_AMP_P_12_DB), \
                 METER_GAIN("sm", "Output signal meter", GAIN_AMP_P_12_DB)
 
         #define EQ_STEREO_PORTS \
                 PAN_CTL("bal", "Output balance", "Out balance", 0.0f), \
-                MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS), \
+                MESH("ag", "Amplitude graph", 2, filter_metadata::MESH_POINTS + 4), \
                 METER_GAIN("iml", "Input signal meter Left", GAIN_AMP_P_12_DB), \
                 METER_GAIN("sml", "Output signal meter Left", GAIN_AMP_P_12_DB), \
                 METER_GAIN("imr", "Input signal meter Right", GAIN_AMP_P_12_DB), \
@@ -188,11 +205,13 @@ namespace lsp
             clap_features_mono,
             E_INLINE_DISPLAY | E_DUMP_STATE,
             filter_mono_ports,
-            "equalizer/filter/filter.xml",
+            "plugins/equalizer/filter/filter.xml",
             NULL,
             mono_plugin_port_groups,
-            &filter_bundle
+            &filter_bundle,
+            2
         };
+        LSP_REGISTER_METADATA(filter_mono);
 
         const meta::plugin_t filter_stereo =
         {
@@ -218,11 +237,13 @@ namespace lsp
             clap_features_stereo,
             E_INLINE_DISPLAY | E_DUMP_STATE,
             filter_stereo_ports,
-            "equalizer/filter/filter.xml",
+            "plugins/equalizer/filter/filter.xml",
             NULL,
             stereo_plugin_port_groups,
-            &filter_bundle
+            &filter_bundle,
+            1
         };
+        LSP_REGISTER_METADATA(filter_stereo);
 
     } /* namespace meta */
 } /* namespace lsp */

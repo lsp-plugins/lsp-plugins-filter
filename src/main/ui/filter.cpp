@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2026 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2026 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-filter
  * Created on: 16 июн. 2023 г.
@@ -109,7 +109,7 @@ namespace lsp
                 expr::Parameters params;
                 tk::prop::String lc_string;
                 LSPString text;
-                lc_string.bind(wNote->style(), pDisplay->dictionary());
+                lc_string.bind(wNote->style(), display()->dictionary());
                 SET_LOCALE_SCOPED(LC_NUMERIC, "C");
 
                 // Frequency and gain

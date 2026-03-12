@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2026 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2026 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-filter
  * Created on: 16 июн. 2023 г.
@@ -50,7 +50,12 @@ namespace lsp
 
             public:
                 explicit filter_ui(const meta::plugin_t *meta);
+                filter_ui(const filter_ui &) = delete;
+                filter_ui(filter_ui &&) = delete;
                 virtual ~filter_ui() override;
+
+                filter_ui & operator = (const filter_ui &) = delete;
+                filter_ui & operator = (filter_ui &&) = delete;
 
                 virtual status_t    post_init() override;
 

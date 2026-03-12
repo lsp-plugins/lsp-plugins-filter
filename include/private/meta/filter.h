@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2023 Linux Studio Plugins Project <https://lsp-plug.in/>
- *           (C) 2023 Vladimir Sadovnikov <sadko4u@gmail.com>
+ * Copyright (C) 2026 Linux Studio Plugins Project <https://lsp-plug.in/>
+ *           (C) 2026 Vladimir Sadovnikov <sadko4u@gmail.com>
  *
  * This file is part of lsp-plugins-filter
  * Created on: 16 июн. 2023 г.
@@ -48,7 +48,6 @@ namespace lsp
             static constexpr size_t         FFT_RANK            = 13;
             static constexpr size_t         FFT_ITEMS           = 1 << FFT_RANK;
             static constexpr size_t         MESH_POINTS         = 640;
-            static constexpr size_t         FILTER_MESH_POINTS  = MESH_POINTS + 2;
             static constexpr size_t         FFT_WINDOW          = lsp::dspu::windows::HANN;
             static constexpr size_t         FFT_ENVELOPE        = lsp::dspu::envelope::PINK_NOISE;
 
