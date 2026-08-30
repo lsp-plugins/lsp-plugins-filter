@@ -663,15 +663,18 @@ namespace lsp
 
         void filter::ui_activated()
         {
-            size_t channels     = ((nMode == EQ_MONO) || (nMode == EQ_STEREO)) ? 1 : 2;
+            sAnalyzer.set_activity(true);
+
+            const size_t channels   = ((nMode == EQ_MONO) || (nMode == EQ_STEREO)) ? 1 : 2;
             for (size_t i=0; i<channels; ++i)
-                vChannels[i].nSync = CS_UPDATE;
+                vChannels[i].nSync      = CS_UPDATE;
 
             pWrapper->request_settings_update();
         }
 
         void filter::ui_deactivated()
         {
+            sAnalyzer.set_activity(false);
             pWrapper->request_settings_update();
         }
 
@@ -812,23 +815,17 @@ namespace lsp
             size_t channels     = (nMode == EQ_MONO) ? 1 : 2;
 
             // Configure analyzer
-            size_t n_an_channels = 0;
             for (size_t i=0; i<channels; ++i)
             {
-                eq_channel_t *c     = &vChannels[i];
-                bool in_fft         = c->pFftInSwitch->value() >= 0.5f;
-                bool out_fft        = c->pFftOutSwitch->value() >= 0.5f;
+                eq_channel_t * const c     = &vChannels[i];
 
                 // channel:        0     1     2      3
                 // designation: in_l out_l  in_r  out_r
-                sAnalyzer.enable_channel(i*2, in_fft);
-                sAnalyzer.enable_channel(i*2+1, out_fft);
-                if ((in_fft) || (out_fft))
-                    ++n_an_channels;
+                sAnalyzer.enable_channel(i*2, c->pFftInSwitch->value() >= 0.5f);
+                sAnalyzer.enable_channel(i*2+1, c->pFftOutSwitch->value() >= 0.5f);
             }
 
             // Update reactivity
-            sAnalyzer.set_activity(n_an_channels > 0);
             sAnalyzer.set_reactivity(pReactivity->value());
 
             // Update shift gain

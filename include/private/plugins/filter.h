@@ -148,7 +148,12 @@ namespace lsp
 
             public:
                 explicit filter(const meta::plugin_t *metadata, size_t mode);
+                filter(const filter &) = delete;
+                filter(filter &&) = delete;
                 virtual ~filter() override;
+
+                filter & operator = (const filter &) = delete;
+                filter & operator = (filter &&) = delete;
 
             public:
                 virtual void        init(plug::IWrapper *wrapper, plug::IPort **ports) override;
