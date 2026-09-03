@@ -95,10 +95,12 @@ namespace lsp
 
             enum para_eq_mode_t
             {
-                PEM_IIR,
-                PEM_FIR,
-                PEM_FFT,
-                PEM_SPM
+                FEM_IIR,
+                FEM_FIR,
+                FEM_FFT_LP,
+                FEM_SPM_LP,
+                FEM_FFT_MP,
+                FEM_SPM_MP,
             };
         };
 

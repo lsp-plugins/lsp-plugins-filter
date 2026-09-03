@@ -453,10 +453,12 @@ namespace lsp
         {
             switch (mode)
             {
-                case meta::filter_metadata::PEM_IIR: return dspu::EQM_IIR;
-                case meta::filter_metadata::PEM_FIR: return dspu::EQM_FIR;
-                case meta::filter_metadata::PEM_FFT: return dspu::EQM_FFT;
-                case meta::filter_metadata::PEM_SPM: return dspu::EQM_SPM;
+                case meta::filter_metadata::FEM_IIR: return dspu::EQM_IIR;
+                case meta::filter_metadata::FEM_FIR: return dspu::EQM_FIR;
+                case meta::filter_metadata::FEM_FFT_LP: return dspu::EQM_FFT_LP;
+                case meta::filter_metadata::FEM_SPM_LP: return dspu::EQM_SPM_LP;
+                case meta::filter_metadata::FEM_FFT_MP: return dspu::EQM_FFT_MP;
+                case meta::filter_metadata::FEM_SPM_MP: return dspu::EQM_SPM_MP;
                 default:
                     break;
             }
