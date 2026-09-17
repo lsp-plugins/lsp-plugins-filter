@@ -454,9 +454,10 @@ namespace lsp
             switch (mode)
             {
                 case meta::filter_metadata::FEM_IIR: return dspu::EQM_IIR;
-                case meta::filter_metadata::FEM_FIR: return dspu::EQM_FIR;
+                case meta::filter_metadata::FEM_FIR_LP: return dspu::EQM_FIR_LP;
                 case meta::filter_metadata::FEM_FFT_LP: return dspu::EQM_FFT_LP;
                 case meta::filter_metadata::FEM_SPM_LP: return dspu::EQM_SPM_LP;
+                case meta::filter_metadata::FEM_FIR_MP: return dspu::EQM_FIR_MP;
                 case meta::filter_metadata::FEM_FFT_MP: return dspu::EQM_FFT_MP;
                 case meta::filter_metadata::FEM_SPM_MP: return dspu::EQM_SPM_MP;
                 default:
@@ -521,7 +522,7 @@ namespace lsp
                 c->sOversampler.set_filtering(false);
 
                 // Initialize equalizer
-                c->sEqualizer.init(1, EQ_RANK);
+                c->sEqualizer.init(1, EQ_RANK, &c->sConvolver);
                 c->sEqualizer.set_smooth(true);
                 max_latency         = lsp_max(max_latency, c->sEqualizer.max_latency() + c->sOversampler.max_latency());
 
@@ -764,7 +765,9 @@ namespace lsp
 
         dspu::over_mode_t filter::calc_oversampler_mode(dspu::equalizer_mode_t eq_mode, size_t decramp)
         {
-            if ((eq_mode != dspu::EQM_IIR) && (eq_mode != dspu::EQM_FIR))
+            if ((eq_mode != dspu::EQM_IIR) &&
+                (eq_mode != dspu::EQM_FIR_LP) &&
+                (eq_mode != dspu::EQM_FIR_MP))
                 return dspu::over_mode_t::OM_NONE;
 
             switch (decramp)
@@ -1374,6 +1377,7 @@ namespace lsp
             {
                 v->write_object("sOversampler", &c->sOversampler);
                 v->write_object("sEqualizer", &c->sEqualizer);
+                v->write_object("sConvolver", &c->sConvolver);
                 v->write_object("sBypass", &c->sBypass);
                 v->write_object("sDryDelay", &c->sDryDelay);
 
