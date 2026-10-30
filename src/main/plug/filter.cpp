@@ -282,8 +282,8 @@ namespace lsp
                 {
                     switch (mode)
                     {
-                        EQS(RLC_BT, FLT_BT_RLC_ALLPASS, 1)
-                        EQS(RLC_MT, FLT_BT_RLC_ALLPASS, 1)
+                        EQS(RLC_BT, FLT_BT_RLC_ALLPASS, 2)
+                        EQS(RLC_MT, FLT_BT_RLC_ALLPASS, 2)
                         EQS(BWC_BT, FLT_BT_BWC_ALLPASS, 2)
                         EQS(BWC_MT, FLT_BT_BWC_ALLPASS, 2)
                         EQS(LRX_BT, FLT_BT_LRX_ALLPASS, 1)
@@ -453,10 +453,13 @@ namespace lsp
         {
             switch (mode)
             {
-                case meta::filter_metadata::PEM_IIR: return dspu::EQM_IIR;
-                case meta::filter_metadata::PEM_FIR: return dspu::EQM_FIR;
-                case meta::filter_metadata::PEM_FFT: return dspu::EQM_FFT;
-                case meta::filter_metadata::PEM_SPM: return dspu::EQM_SPM;
+                case meta::filter_metadata::FEM_IIR: return dspu::EQM_IIR;
+                case meta::filter_metadata::FEM_FIR_LP: return dspu::EQM_FIR_LP;
+                case meta::filter_metadata::FEM_FFT_LP: return dspu::EQM_FFT_LP;
+                case meta::filter_metadata::FEM_SPM_LP: return dspu::EQM_SPM_LP;
+                case meta::filter_metadata::FEM_FIR_MP: return dspu::EQM_FIR_MP;
+                case meta::filter_metadata::FEM_FFT_MP: return dspu::EQM_FFT_MP;
+                case meta::filter_metadata::FEM_SPM_MP: return dspu::EQM_SPM_MP;
                 default:
                     break;
             }
@@ -519,7 +522,7 @@ namespace lsp
                 c->sOversampler.set_filtering(false);
 
                 // Initialize equalizer
-                c->sEqualizer.init(1, EQ_RANK);
+                c->sEqualizer.init(1, EQ_RANK, &c->sConvolver);
                 c->sEqualizer.set_smooth(true);
                 max_latency         = lsp_max(max_latency, c->sEqualizer.max_latency() + c->sOversampler.max_latency());
 
@@ -663,15 +666,18 @@ namespace lsp
 
         void filter::ui_activated()
         {
-            size_t channels     = ((nMode == EQ_MONO) || (nMode == EQ_STEREO)) ? 1 : 2;
+            sAnalyzer.set_activity(true);
+
+            const size_t channels   = ((nMode == EQ_MONO) || (nMode == EQ_STEREO)) ? 1 : 2;
             for (size_t i=0; i<channels; ++i)
-                vChannels[i].nSync = CS_UPDATE;
+                vChannels[i].nSync      = CS_UPDATE;
 
             pWrapper->request_settings_update();
         }
 
         void filter::ui_deactivated()
         {
+            sAnalyzer.set_activity(false);
             pWrapper->request_settings_update();
         }
 
@@ -759,7 +765,9 @@ namespace lsp
 
         dspu::over_mode_t filter::calc_oversampler_mode(dspu::equalizer_mode_t eq_mode, size_t decramp)
         {
-            if ((eq_mode != dspu::EQM_IIR) && (eq_mode != dspu::EQM_FIR))
+            if ((eq_mode != dspu::EQM_IIR) &&
+                (eq_mode != dspu::EQM_FIR_LP) &&
+                (eq_mode != dspu::EQM_FIR_MP))
                 return dspu::over_mode_t::OM_NONE;
 
             switch (decramp)
@@ -812,23 +820,17 @@ namespace lsp
             size_t channels     = (nMode == EQ_MONO) ? 1 : 2;
 
             // Configure analyzer
-            size_t n_an_channels = 0;
             for (size_t i=0; i<channels; ++i)
             {
-                eq_channel_t *c     = &vChannels[i];
-                bool in_fft         = c->pFftInSwitch->value() >= 0.5f;
-                bool out_fft        = c->pFftOutSwitch->value() >= 0.5f;
+                eq_channel_t * const c     = &vChannels[i];
 
                 // channel:        0     1     2      3
                 // designation: in_l out_l  in_r  out_r
-                sAnalyzer.enable_channel(i*2, in_fft);
-                sAnalyzer.enable_channel(i*2+1, out_fft);
-                if ((in_fft) || (out_fft))
-                    ++n_an_channels;
+                sAnalyzer.enable_channel(i*2, c->pFftInSwitch->value() >= 0.5f);
+                sAnalyzer.enable_channel(i*2+1, c->pFftOutSwitch->value() >= 0.5f);
             }
 
             // Update reactivity
-            sAnalyzer.set_activity(n_an_channels > 0);
             sAnalyzer.set_reactivity(pReactivity->value());
 
             // Update shift gain
@@ -1375,6 +1377,7 @@ namespace lsp
             {
                 v->write_object("sOversampler", &c->sOversampler);
                 v->write_object("sEqualizer", &c->sEqualizer);
+                v->write_object("sConvolver", &c->sConvolver);
                 v->write_object("sBypass", &c->sBypass);
                 v->write_object("sDryDelay", &c->sDryDelay);
 
